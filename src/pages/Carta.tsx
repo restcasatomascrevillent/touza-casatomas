@@ -318,11 +318,13 @@ const Carta = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCocktail, setSelectedCocktail] = useState<typeof cocktailsData[0] | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
   
   const contentSectionRef = useRef<HTMLElement>(null);
 
   const handleCategoryChange = (category: string) => {
     setActiveMainCategory(category);
+    setAnimationKey(prev => prev + 1);
     // Scroll suave a la sección de contenido
     setTimeout(() => {
       contentSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -503,7 +505,7 @@ const Carta = () => {
         <div className="container-custom">
           {/* CÓCTELES */}
           {activeMainCategory === "cocteles" && (
-            <>
+            <div key={animationKey}>
               {filteredCocktails.length === 0 ? (
                 <div className="text-center py-16">
                   <p className="text-muted-foreground text-lg">
@@ -523,11 +525,12 @@ const Carta = () => {
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredCocktails.map((cocktail) => (
+                  {filteredCocktails.map((cocktail, index) => (
                     <div
-                      key={cocktail.id}
+                      key={`${animationKey}-${cocktail.id}`}
                       onClick={() => setSelectedCocktail(cocktail)}
-                      className="group cursor-pointer bg-card border border-border/50 rounded-lg overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5"
+                      style={{ animationDelay: `${index * 50}ms`, opacity: 0 }}
+                      className="group cursor-pointer bg-card border border-border/50 rounded-lg overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 animate-stagger-fade-up"
                     >
                       <div className="aspect-[4/5] overflow-hidden relative">
                         <img
@@ -554,14 +557,14 @@ const Carta = () => {
                   ))}
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* CHAMPAGNE */}
           {activeMainCategory === "champagne" && (
-            <div className="space-y-8">
+            <div key={animationKey} className="space-y-8">
               {/* Header Image */}
-              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8">
+              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8 animate-scale-fade-in" style={{ opacity: 0 }}>
                 <img
                   src="https://images.unsplash.com/photo-1594372365401-3b5ff14eaaed?w=1200&h=400&fit=crop"
                   alt="Champagne"
@@ -574,11 +577,12 @@ const Carta = () => {
                 </div>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filterBySearch(champagneData).map((item) => (
+                {filterBySearch(champagneData).map((item, index) => (
                   <div
                     key={item.id}
+                    style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
                     className={cn(
-                      "bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30",
+                      "bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30 animate-stagger-fade-up",
                       item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5"
                     )}
                   >
@@ -605,9 +609,9 @@ const Carta = () => {
 
           {/* CAVAS */}
           {activeMainCategory === "cavas" && (
-            <div className="space-y-8">
+            <div key={animationKey} className="space-y-8">
               {/* Header Image */}
-              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8">
+              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8 animate-scale-fade-in" style={{ opacity: 0 }}>
                 <img
                   src="https://images.unsplash.com/photo-1578911373434-0cb395d2cbfb?w=1200&h=400&fit=crop"
                   alt="Cavas"
@@ -620,11 +624,12 @@ const Carta = () => {
                 </div>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filterBySearch(cavasData).map((item) => (
+                {filterBySearch(cavasData).map((item, index) => (
                   <div
                     key={item.id}
+                    style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
                     className={cn(
-                      "bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30",
+                      "bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30 animate-stagger-fade-up",
                       item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5"
                     )}
                   >
@@ -651,16 +656,17 @@ const Carta = () => {
 
           {/* CERVEZAS */}
           {activeMainCategory === "cervezas" && (
-            <div className="space-y-8">
-              <div className="text-center mb-8">
+            <div key={animationKey} className="space-y-8">
+              <div className="text-center mb-8 animate-scale-fade-in" style={{ opacity: 0 }}>
                 <h2 className="font-serif text-3xl font-bold text-foreground mb-2">Cervezas</h2>
                 <p className="text-muted-foreground">Selección nacional e internacional</p>
               </div>
               <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {filterBySearch(cervezasData).map((item) => (
+                {filterBySearch(cervezasData).map((item, index) => (
                   <div
                     key={item.id}
-                    className="bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30"
+                    style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
+                    className="bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30 animate-stagger-fade-up"
                   >
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1">
@@ -685,16 +691,17 @@ const Carta = () => {
 
           {/* COPAS DE VINO */}
           {activeMainCategory === "copas" && (
-            <div className="space-y-8">
-              <div className="text-center mb-8">
+            <div key={animationKey} className="space-y-8">
+              <div className="text-center mb-8 animate-scale-fade-in" style={{ opacity: 0 }}>
                 <h2 className="font-serif text-3xl font-bold text-foreground mb-2">Copas de Vino, Cava y Champagne</h2>
                 <p className="text-muted-foreground">Disfruta por copas de nuestra selección</p>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filterBySearch(copasData).map((item) => (
+                {filterBySearch(copasData).map((item, index) => (
                   <div
                     key={item.id}
-                    className="bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30"
+                    style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
+                    className="bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30 animate-stagger-fade-up"
                   >
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1">
@@ -717,9 +724,9 @@ const Carta = () => {
 
           {/* WHISKIES */}
           {activeMainCategory === "whiskies" && (
-            <div className="space-y-8">
+            <div key={animationKey} className="space-y-8">
               {/* Header Image */}
-              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8">
+              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8 animate-scale-fade-in" style={{ opacity: 0 }}>
                 <img
                   src="https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=1200&h=400&fit=crop"
                   alt="Whiskies"
@@ -732,11 +739,12 @@ const Carta = () => {
                 </div>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filterBySearch(whiskiesData).map((item) => (
+                {filterBySearch(whiskiesData).map((item, index) => (
                   <div
                     key={item.id}
+                    style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
                     className={cn(
-                      "bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30",
+                      "bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30 animate-stagger-fade-up",
                       item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5"
                     )}
                   >
