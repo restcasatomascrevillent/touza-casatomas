@@ -1,11 +1,12 @@
-import { useState, useRef } from "react";
-import { Search, Filter, Wine, Beer, Martini, GlassWater, Sparkles } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Search, Filter, Wine, Beer, Martini, GlassWater, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
+import { useAnimateOnScroll } from "@/hooks/useAnimateOnScroll";
 
 // Categorías principales de bebidas
 const mainCategories = [
@@ -319,8 +320,41 @@ const Carta = () => {
   const [selectedCocktail, setSelectedCocktail] = useState<typeof cocktailsData[0] | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
+  const [tabIndicatorStyle, setTabIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [isModalAnimating, setIsModalAnimating] = useState(false);
   
   const contentSectionRef = useRef<HTMLElement>(null);
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const { ref: heroRef, isVisible: heroVisible } = useAnimateOnScroll<HTMLDivElement>();
+
+  // Update tab indicator position
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeTab = tabsContainerRef.current?.querySelector('[data-state="active"]') as HTMLElement;
+      if (activeTab) {
+        const container = tabsContainerRef.current;
+        if (container) {
+          const containerRect = container.getBoundingClientRect();
+          const tabRect = activeTab.getBoundingClientRect();
+          setTabIndicatorStyle({
+            left: tabRect.left - containerRect.left,
+            width: tabRect.width,
+          });
+        }
+      }
+    };
+    
+    updateIndicator();
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [activeMainCategory]);
+
+  // Handle modal open with animation
+  const openCocktailModal = (cocktail: typeof cocktailsData[0]) => {
+    setIsModalAnimating(true);
+    setSelectedCocktail(cocktail);
+    setTimeout(() => setIsModalAnimating(false), 50);
+  };
 
   const handleCategoryChange = (category: string) => {
     setActiveMainCategory(category);
@@ -348,53 +382,77 @@ const Carta = () => {
 
   return (
     <Layout>
-      {/* Hero */}
+      {/* Hero with parallax */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1574096079513-d8259312b785?w=1920&h=600&fit=crop"
             alt="Cócteles"
-            className="w-full h-full object-cover opacity-30"
+            className="w-full h-full object-cover opacity-30 scale-110 transform-gpu"
+            style={{ willChange: 'transform' }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
         </div>
-        <div className="relative z-10 container-custom text-center">
-          <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block">
+        <div 
+          ref={heroRef}
+          className={cn(
+            "relative z-10 container-custom text-center transition-all duration-1000",
+            heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          )}
+        >
+          <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block animate-fade-in">
             Explora
           </span>
-          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6">
+          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
             Nuestra Carta
           </h1>
-          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '300ms' }}>
             Cada bebida es una experiencia única, elaborada con pasión 
             y los ingredientes más selectos.
           </p>
         </div>
       </section>
 
-      {/* Main Category Tabs */}
-      <section className="py-6 border-y border-border/30 bg-charcoal sticky top-[73px] z-40">
+      {/* Main Category Tabs with animated indicator */}
+      <section className="py-6 border-y border-border/30 bg-charcoal/95 backdrop-blur-md sticky top-[73px] z-40 transition-all duration-300">
         <div className="container-custom">
           <Tabs value={activeMainCategory} onValueChange={handleCategoryChange} className="w-full">
-            <TabsList className="w-full h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
-              {mainCategories.map((category) => {
-                const Icon = category.icon;
-                return (
-                  <TabsTrigger
-                    key={category.id}
-                    value={category.id}
-                    className={cn(
-                      "px-4 py-2.5 text-sm font-medium rounded-full transition-all duration-300 flex items-center gap-2",
-                      "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
-                      "data-[state=inactive]:bg-secondary data-[state=inactive]:text-foreground data-[state=inactive]:hover:bg-secondary/80"
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {category.name}
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
+            <div ref={tabsContainerRef} className="relative">
+              {/* Animated indicator */}
+              <div 
+                className="absolute bottom-0 h-0.5 bg-gradient-to-r from-primary via-gold to-primary rounded-full transition-all duration-500 ease-out"
+                style={{
+                  left: tabIndicatorStyle.left,
+                  width: tabIndicatorStyle.width,
+                  boxShadow: '0 0 10px hsl(var(--primary) / 0.5)',
+                }}
+              />
+              <TabsList className="w-full h-auto flex-wrap justify-start gap-2 bg-transparent p-0 pb-2">
+                {mainCategories.map((category) => {
+                  const Icon = category.icon;
+                  const isActive = activeMainCategory === category.id;
+                  return (
+                    <TabsTrigger
+                      key={category.id}
+                      value={category.id}
+                      className={cn(
+                        "relative px-4 py-2.5 text-sm font-medium rounded-full transition-all duration-300 flex items-center gap-2 overflow-hidden group",
+                        "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20",
+                        "data-[state=inactive]:bg-secondary/80 data-[state=inactive]:text-foreground data-[state=inactive]:hover:bg-secondary data-[state=inactive]:hover:scale-105"
+                      )}
+                    >
+                      {/* Ripple effect on hover */}
+                      <span className="absolute inset-0 bg-primary/20 scale-0 rounded-full transition-transform duration-500 group-hover:scale-150 opacity-0 group-hover:opacity-100" />
+                      <Icon className={cn(
+                        "w-4 h-4 relative z-10 transition-transform duration-300",
+                        isActive && "animate-bounce-subtle"
+                      )} />
+                      <span className="relative z-10">{category.name}</span>
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            </div>
           </Tabs>
         </div>
       </section>
@@ -528,28 +586,44 @@ const Carta = () => {
                   {filteredCocktails.map((cocktail, index) => (
                     <div
                       key={`${animationKey}-${cocktail.id}`}
-                      onClick={() => setSelectedCocktail(cocktail)}
+                      onClick={() => openCocktailModal(cocktail)}
                       style={{ animationDelay: `${index * 50}ms`, opacity: 0 }}
-                      className="group cursor-pointer bg-card border border-border/50 rounded-lg overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 animate-stagger-fade-up"
+                      className="group cursor-pointer bg-card border border-border/50 rounded-xl overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 animate-stagger-fade-up hover:-translate-y-2 card-hover-lift"
                     >
                       <div className="aspect-[4/5] overflow-hidden relative">
+                        {/* Image with zoom and overlay */}
                         <img
                           src={cocktail.image}
                           alt={cocktail.name}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-90"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+                        {/* Gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+                        {/* Animated gradient overlay on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-primary/0 to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        {/* Price badge with shimmer */}
                         <div className="absolute top-4 right-4">
-                          <span className="bg-primary text-primary-foreground text-sm font-semibold px-3 py-1 rounded-full">
-                            {cocktail.price}
+                          <span className="bg-primary text-primary-foreground text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg group-hover:shadow-primary/40 transition-all duration-300 group-hover:scale-105 inline-block">
+                            <span className="relative">
+                              {cocktail.price}
+                              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                            </span>
+                          </span>
+                        </div>
+                        {/* View indicator */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <span className="bg-background/90 backdrop-blur-sm text-foreground px-4 py-2 rounded-full text-sm font-medium transform scale-90 group-hover:scale-100 transition-transform duration-300 shadow-lg">
+                            Ver detalles
                           </span>
                         </div>
                       </div>
-                      <div className="p-5">
-                        <h3 className="font-serif text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                      <div className="p-5 relative overflow-hidden">
+                        {/* Subtle background glow on hover */}
+                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-primary/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <h3 className="font-serif text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-300 relative">
                           {cocktail.name}
                         </h3>
-                        <p className="text-muted-foreground text-sm line-clamp-2">
+                        <p className="text-muted-foreground text-sm line-clamp-2 relative">
                           {cocktail.description}
                         </p>
                       </div>
@@ -563,12 +637,12 @@ const Carta = () => {
           {/* CHAMPAGNE */}
           {activeMainCategory === "champagne" && (
             <div key={animationKey} className="space-y-8">
-              {/* Header Image */}
-              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8 animate-scale-fade-in" style={{ opacity: 0 }}>
+              {/* Header Image with parallax effect */}
+              <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden mb-8 animate-scale-fade-in group" style={{ opacity: 0 }}>
                 <img
                   src="https://images.unsplash.com/photo-1594372365401-3b5ff14eaaed?w=1200&h=400&fit=crop"
                   alt="Champagne"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
@@ -582,22 +656,22 @@ const Carta = () => {
                     key={item.id}
                     style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
                     className={cn(
-                      "bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30 animate-stagger-fade-up",
-                      item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5"
+                      "group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer",
+                      item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5 ring-1 ring-primary/20"
                     )}
                   >
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1">
-                        <h3 className="font-serif text-lg font-semibold text-foreground">
+                        <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
                           {item.name}
                         </h3>
                         {item.featured && (
-                          <span className="inline-block mt-1 text-xs text-primary font-medium">
-                            ✦ Premium
+                          <span className="inline-flex items-center gap-1 mt-1 text-xs text-primary font-medium animate-pulse">
+                            <span className="text-gold">✦</span> Premium
                           </span>
                         )}
                       </div>
-                      <span className="text-primary font-bold text-lg whitespace-nowrap">
+                      <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
                         {item.price}
                       </span>
                     </div>
@@ -610,12 +684,12 @@ const Carta = () => {
           {/* CAVAS */}
           {activeMainCategory === "cavas" && (
             <div key={animationKey} className="space-y-8">
-              {/* Header Image */}
-              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8 animate-scale-fade-in" style={{ opacity: 0 }}>
+              {/* Header Image with parallax effect */}
+              <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden mb-8 animate-scale-fade-in group" style={{ opacity: 0 }}>
                 <img
                   src="https://images.unsplash.com/photo-1578911373434-0cb395d2cbfb?w=1200&h=400&fit=crop"
                   alt="Cavas"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
@@ -629,22 +703,22 @@ const Carta = () => {
                     key={item.id}
                     style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
                     className={cn(
-                      "bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30 animate-stagger-fade-up",
-                      item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5"
+                      "group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer",
+                      item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5 ring-1 ring-primary/20"
                     )}
                   >
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1">
-                        <h3 className="font-serif text-lg font-semibold text-foreground">
+                        <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
                           {item.name}
                         </h3>
                         {item.featured && (
-                          <span className="inline-block mt-1 text-xs text-primary font-medium">
-                            ✦ Premium
+                          <span className="inline-flex items-center gap-1 mt-1 text-xs text-primary font-medium animate-pulse">
+                            <span className="text-gold">✦</span> Premium
                           </span>
                         )}
                       </div>
-                      <span className="text-primary font-bold text-lg whitespace-nowrap">
+                      <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
                         {item.price}
                       </span>
                     </div>
@@ -659,6 +733,7 @@ const Carta = () => {
             <div key={animationKey} className="space-y-8">
               <div className="text-center mb-8 animate-scale-fade-in" style={{ opacity: 0 }}>
                 <h2 className="font-serif text-3xl font-bold text-foreground mb-2">Cervezas</h2>
+                <div className="w-16 h-0.5 bg-gradient-to-r from-primary to-gold mx-auto mb-3" />
                 <p className="text-muted-foreground">Selección nacional e internacional</p>
               </div>
               <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -666,20 +741,20 @@ const Carta = () => {
                   <div
                     key={item.id}
                     style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
-                    className="bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30 animate-stagger-fade-up"
+                    className="group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer"
                   >
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1">
-                        <h3 className="font-serif text-lg font-semibold text-foreground">
+                        <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
                           {item.name}
                         </h3>
                         {item.tag && (
-                          <span className="inline-block mt-1 text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded">
+                          <span className="inline-block mt-1 text-xs text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-full">
                             {item.tag}
                           </span>
                         )}
                       </div>
-                      <span className="text-primary font-bold text-lg whitespace-nowrap">
+                      <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
                         {item.price}
                       </span>
                     </div>
@@ -694,6 +769,7 @@ const Carta = () => {
             <div key={animationKey} className="space-y-8">
               <div className="text-center mb-8 animate-scale-fade-in" style={{ opacity: 0 }}>
                 <h2 className="font-serif text-3xl font-bold text-foreground mb-2">Copas de Vino, Cava y Champagne</h2>
+                <div className="w-16 h-0.5 bg-gradient-to-r from-primary to-gold mx-auto mb-3" />
                 <p className="text-muted-foreground">Disfruta por copas de nuestra selección</p>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -701,18 +777,18 @@ const Carta = () => {
                   <div
                     key={item.id}
                     style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
-                    className="bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30 animate-stagger-fade-up"
+                    className="group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer"
                   >
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1">
-                        <h3 className="font-serif text-lg font-semibold text-foreground">
+                        <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
                           {item.name}
                         </h3>
-                        <span className="inline-block mt-1 text-xs text-muted-foreground">
+                        <span className="inline-block mt-1 text-xs text-primary/80">
                           {item.type}
                         </span>
                       </div>
-                      <span className="text-primary font-bold text-lg whitespace-nowrap">
+                      <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
                         {item.price}
                       </span>
                     </div>
@@ -725,12 +801,12 @@ const Carta = () => {
           {/* WHISKIES */}
           {activeMainCategory === "whiskies" && (
             <div key={animationKey} className="space-y-8">
-              {/* Header Image */}
-              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8 animate-scale-fade-in" style={{ opacity: 0 }}>
+              {/* Header Image with parallax effect */}
+              <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden mb-8 animate-scale-fade-in group" style={{ opacity: 0 }}>
                 <img
                   src="https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=1200&h=400&fit=crop"
                   alt="Whiskies"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
@@ -744,25 +820,25 @@ const Carta = () => {
                     key={item.id}
                     style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
                     className={cn(
-                      "bg-card border border-border/50 rounded-lg p-5 transition-all duration-300 hover:border-primary/30 animate-stagger-fade-up",
-                      item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5"
+                      "group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer",
+                      item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5 ring-1 ring-primary/20"
                     )}
                   >
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1">
-                        <h3 className="font-serif text-lg font-semibold text-foreground">
+                        <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
                           {item.name}
                         </h3>
                         <span className="inline-block mt-1 text-xs text-muted-foreground">
                           {item.type}
                         </span>
                         {item.featured && (
-                          <span className="inline-block ml-2 text-xs text-primary font-medium">
-                            ✦ Premium
+                          <span className="inline-flex items-center gap-1 ml-2 text-xs text-primary font-medium animate-pulse">
+                            <span className="text-gold">✦</span> Premium
                           </span>
                         )}
                       </div>
-                      <span className="text-primary font-bold text-lg whitespace-nowrap">
+                      <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
                         {item.price}
                       </span>
                     </div>
@@ -818,45 +894,79 @@ const Carta = () => {
         </div>
       </section>
 
-      {/* Cocktail Detail Modal */}
+      {/* Cocktail Detail Modal - Enhanced with animations */}
       <Dialog open={!!selectedCocktail} onOpenChange={() => setSelectedCocktail(null)}>
-        <DialogContent className="max-w-2xl bg-card border-border p-0 overflow-hidden">
+        <DialogContent className={cn(
+          "max-w-2xl bg-card border-border/50 p-0 overflow-hidden rounded-2xl shadow-2xl",
+          "data-[state=open]:animate-blur-in",
+          isModalAnimating && "scale-95 opacity-0"
+        )}>
           {selectedCocktail && (
             <div className="grid md:grid-cols-2">
-              <div className="aspect-square md:aspect-auto">
+              {/* Image with parallax-like effect */}
+              <div className="aspect-square md:aspect-auto relative overflow-hidden group">
                 <img
                   src={selectedCocktail.image}
                   alt={selectedCocktail.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover scale-105 transition-transform duration-700 group-hover:scale-110"
                 />
+                {/* Gradient overlays */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-card/50 md:block hidden" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent md:hidden" />
+                {/* Category badge */}
+                <div className="absolute top-4 left-4 animate-slide-down" style={{ animationDelay: '200ms' }}>
+                  <span className="bg-secondary/90 backdrop-blur-sm text-foreground text-xs font-medium px-3 py-1.5 rounded-full capitalize">
+                    {selectedCocktail.category === "autor" ? "De Autor" : 
+                     selectedCocktail.category === "clasicos" ? "Clásico" : "Sin Alcohol"}
+                  </span>
+                </div>
               </div>
-              <div className="p-8 flex flex-col">
-                <DialogHeader className="mb-4">
+              
+              {/* Content with staggered animations */}
+              <div className="p-8 flex flex-col relative">
+                {/* Decorative glow */}
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+                
+                <DialogHeader className="mb-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
                   <div className="flex items-center justify-between">
-                    <span className="text-primary text-2xl font-bold">
+                    <span className="text-primary text-3xl font-bold animate-scale-fade-in" style={{ animationDelay: '200ms' }}>
                       {selectedCocktail.price}
                     </span>
                   </div>
-                  <DialogTitle className="font-serif text-3xl font-bold text-foreground">
+                  <DialogTitle className="font-serif text-3xl font-bold text-foreground animate-slide-up" style={{ animationDelay: '150ms' }}>
                     {selectedCocktail.name}
                   </DialogTitle>
                 </DialogHeader>
-                <p className="text-muted-foreground mb-6">
+                
+                <p className="text-muted-foreground mb-6 animate-fade-in leading-relaxed" style={{ animationDelay: '250ms' }}>
                   {selectedCocktail.description}
                 </p>
-                <div>
-                  <h4 className="font-semibold text-foreground mb-3">Ingredientes</h4>
-                  <ul className="space-y-2">
+                
+                <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
+                  <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <span className="w-8 h-0.5 bg-gradient-to-r from-primary to-transparent rounded-full" />
+                    Ingredientes
+                  </h4>
+                  <ul className="space-y-3">
                     {selectedCocktail.ingredients.map((ingredient, index) => (
                       <li
                         key={index}
-                        className="flex items-center gap-2 text-muted-foreground"
+                        className="flex items-center gap-3 text-muted-foreground animate-slide-in-left"
+                        style={{ animationDelay: `${350 + index * 80}ms`, opacity: 0 }}
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                        {ingredient}
+                        <span className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-gold flex-shrink-0 animate-pulse" />
+                        <span className="transition-colors hover:text-foreground">{ingredient}</span>
                       </li>
                     ))}
                   </ul>
+                </div>
+
+                {/* Base indicator */}
+                <div className="mt-auto pt-6 animate-fade-in" style={{ animationDelay: '500ms' }}>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span className="text-primary">Base:</span>
+                    <span className="capitalize">{selectedCocktail.base === "all" ? "Sin alcohol" : selectedCocktail.base}</span>
+                  </div>
                 </div>
               </div>
             </div>
