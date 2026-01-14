@@ -893,25 +893,21 @@ const Carta = () => {
 
       {/* Cocktail Detail Modal - Enhanced with animations */}
       <Dialog open={!!selectedCocktail} onOpenChange={() => setSelectedCocktail(null)}>
-        <DialogContent className={cn(
-          "max-w-2xl bg-card border-border/50 p-0 overflow-hidden rounded-2xl shadow-2xl",
-          "data-[state=open]:animate-blur-in",
-          isModalAnimating && "scale-95 opacity-0"
-        )}>
+        <DialogContent className="max-w-2xl bg-card border-border/50 p-0 overflow-hidden rounded-2xl shadow-2xl">
           {selectedCocktail && (
             <div className="grid md:grid-cols-2">
-              {/* Image with parallax-like effect */}
-              <div className="aspect-square md:aspect-auto relative overflow-hidden group">
+              {/* Image */}
+              <div className="aspect-square md:aspect-auto relative overflow-hidden">
                 <img
                   src={selectedCocktail.image}
                   alt={selectedCocktail.name}
-                  className="w-full h-full object-cover scale-105 transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-full object-cover"
                 />
                 {/* Gradient overlays */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-card/50 md:block hidden" />
                 <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent md:hidden" />
                 {/* Category badge */}
-                <div className="absolute top-4 left-4 animate-slide-down" style={{ animationDelay: '200ms' }}>
+                <div className="absolute top-4 left-4">
                   <span className="bg-secondary/90 backdrop-blur-sm text-foreground text-xs font-medium px-3 py-1.5 rounded-full capitalize">
                     {selectedCocktail.category === "autor" ? "De Autor" : 
                      selectedCocktail.category === "clasicos" ? "Clásico" : "Sin Alcohol"}
@@ -919,27 +915,27 @@ const Carta = () => {
                 </div>
               </div>
               
-              {/* Content with staggered animations */}
+              {/* Content */}
               <div className="p-8 flex flex-col relative">
                 {/* Decorative glow */}
                 <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
                 
-                <DialogHeader className="mb-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
+                <DialogHeader className="mb-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-primary text-3xl font-bold animate-scale-fade-in" style={{ animationDelay: '200ms' }}>
+                    <span className="text-primary text-3xl font-bold">
                       {selectedCocktail.price}
                     </span>
                   </div>
-                  <DialogTitle className="font-serif text-3xl font-bold text-foreground animate-slide-up" style={{ animationDelay: '150ms' }}>
+                  <DialogTitle className="font-serif text-3xl font-bold text-foreground">
                     {selectedCocktail.name}
                   </DialogTitle>
                 </DialogHeader>
                 
-                <p className="text-muted-foreground mb-6 animate-fade-in leading-relaxed" style={{ animationDelay: '250ms' }}>
+                <p className="text-muted-foreground mb-6 leading-relaxed">
                   {selectedCocktail.description}
                 </p>
                 
-                <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
+                <div>
                   <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                     <span className="w-8 h-0.5 bg-gradient-to-r from-primary to-transparent rounded-full" />
                     Ingredientes
@@ -948,10 +944,9 @@ const Carta = () => {
                     {selectedCocktail.ingredients.map((ingredient, index) => (
                       <li
                         key={index}
-                        className="flex items-center gap-3 text-muted-foreground animate-slide-in-left"
-                        style={{ animationDelay: `${350 + index * 80}ms`, opacity: 0 }}
+                        className="flex items-center gap-3 text-muted-foreground"
                       >
-                        <span className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-gold flex-shrink-0 animate-pulse" />
+                        <span className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-gold flex-shrink-0" />
                         <span className="transition-colors hover:text-foreground">{ingredient}</span>
                       </li>
                     ))}
@@ -959,7 +954,7 @@ const Carta = () => {
                 </div>
 
                 {/* Base indicator */}
-                <div className="mt-auto pt-6 animate-fade-in" style={{ animationDelay: '500ms' }}>
+                <div className="mt-auto pt-6">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span className="text-primary">Base:</span>
                     <span className="capitalize">{selectedCocktail.base === "all" ? "Sin alcohol" : selectedCocktail.base}</span>
