@@ -550,9 +550,18 @@ const Carta = () => {
           {/* CHAMPAGNE */}
           {activeMainCategory === "champagne" && (
             <div className="space-y-8">
-              <div className="text-center mb-8">
-                <h2 className="font-serif text-3xl font-bold text-foreground mb-2">Champagne</h2>
-                <p className="text-muted-foreground">Las mejores burbujas de Francia</p>
+              {/* Header Image */}
+              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8">
+                <img
+                  src="https://images.unsplash.com/photo-1594372365401-3b5ff14eaaed?w=1200&h=400&fit=crop"
+                  alt="Champagne"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">Champagne</h2>
+                  <p className="text-muted-foreground text-sm md:text-base">Las mejores burbujas de Francia</p>
+                </div>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filterBySearch(champagneData).map((item) => (
@@ -587,9 +596,18 @@ const Carta = () => {
           {/* CAVAS */}
           {activeMainCategory === "cavas" && (
             <div className="space-y-8">
-              <div className="text-center mb-8">
-                <h2 className="font-serif text-3xl font-bold text-foreground mb-2">Cavas</h2>
-                <p className="text-muted-foreground">Espumosos españoles de primera calidad</p>
+              {/* Header Image */}
+              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8">
+                <img
+                  src="https://images.unsplash.com/photo-1578911373434-0cb395d2cbfb?w=1200&h=400&fit=crop"
+                  alt="Cavas"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">Cavas</h2>
+                  <p className="text-muted-foreground text-sm md:text-base">Espumosos españoles de primera calidad</p>
+                </div>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filterBySearch(cavasData).map((item) => (
@@ -690,9 +708,18 @@ const Carta = () => {
           {/* WHISKIES */}
           {activeMainCategory === "whiskies" && (
             <div className="space-y-8">
-              <div className="text-center mb-8">
-                <h2 className="font-serif text-3xl font-bold text-foreground mb-2">Whiskies</h2>
-                <p className="text-muted-foreground">Selección de los mejores whiskies del mundo</p>
+              {/* Header Image */}
+              <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8">
+                <img
+                  src="https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=1200&h=400&fit=crop"
+                  alt="Whiskies"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">Whiskies</h2>
+                  <p className="text-muted-foreground text-sm md:text-base">Selección de los mejores whiskies del mundo</p>
+                </div>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filterBySearch(whiskiesData).map((item) => (
