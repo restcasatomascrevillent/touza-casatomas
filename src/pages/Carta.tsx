@@ -443,10 +443,7 @@ const Carta = () => {
                     >
                       {/* Ripple effect on hover */}
                       <span className="absolute inset-0 bg-primary/20 scale-0 rounded-full transition-transform duration-500 group-hover:scale-150 opacity-0 group-hover:opacity-100" />
-                      <Icon className={cn(
-                        "w-4 h-4 relative z-10 transition-transform duration-300",
-                        isActive && "animate-bounce-subtle"
-                      )} />
+                      <Icon className="w-4 h-4 relative z-10" />
                       <span className="relative z-10">{category.name}</span>
                     </TabsTrigger>
                   );
