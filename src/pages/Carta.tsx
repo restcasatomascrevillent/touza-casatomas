@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Search, Filter, Wine, Beer, Martini, GlassWater, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -318,6 +318,16 @@ const Carta = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCocktail, setSelectedCocktail] = useState<typeof cocktailsData[0] | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  
+  const contentSectionRef = useRef<HTMLElement>(null);
+
+  const handleCategoryChange = (category: string) => {
+    setActiveMainCategory(category);
+    // Scroll suave a la sección de contenido
+    setTimeout(() => {
+      contentSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
 
   // Filtrar cócteles
   const filteredCocktails = cocktailsData.filter((cocktail) => {
@@ -363,7 +373,7 @@ const Carta = () => {
       {/* Main Category Tabs */}
       <section className="py-6 border-y border-border/30 bg-charcoal sticky top-[73px] z-40">
         <div className="container-custom">
-          <Tabs value={activeMainCategory} onValueChange={setActiveMainCategory} className="w-full">
+          <Tabs value={activeMainCategory} onValueChange={handleCategoryChange} className="w-full">
             <TabsList className="w-full h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
               {mainCategories.map((category) => {
                 const Icon = category.icon;
@@ -489,7 +499,7 @@ const Carta = () => {
       </section>
 
       {/* Content based on selected category */}
-      <section className="section-padding">
+      <section ref={contentSectionRef} className="section-padding scroll-mt-36">
         <div className="container-custom">
           {/* CÓCTELES */}
           {activeMainCategory === "cocteles" && (
