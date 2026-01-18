@@ -57,7 +57,7 @@ const Index = () => {
         {/* Background Image with Parallax */}
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=1920&h=1080&fit=crop"
+            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp"
             alt="Bar ambiente"
             className="w-full h-full object-cover scale-105"
           />
@@ -168,7 +168,7 @@ const Index = () => {
             <div className="order-1 lg:order-2 relative group">
               <div className="aspect-[4/5] rounded-lg overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=600&h=750&fit=crop"
+                  src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp"
                   alt="Interior Touza"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -262,7 +262,7 @@ const Index = () => {
       <section className="relative py-32 overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1525268323446-0505b6fe7778?w=1920&h=600&fit=crop"
+            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-10.webp"
             alt="Ambiente bar"
             className="w-full h-full object-cover"
           />
