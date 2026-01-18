@@ -31,9 +31,9 @@ const features = [
 ];
 
 const galleryImages = [
-  "https://images.unsplash.com/photo-1525268323446-0505b6fe7778?w=600&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?w=600&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&h=400&fit=crop",
+  "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-7-scaled.webp",
+  "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-8-1-scaled.webp",
+  "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp",
 ];
 
 const Reservado = () => {
@@ -81,7 +81,7 @@ const Reservado = () => {
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1525268323446-0505b6fe7778?w=1920&h=800&fit=crop"
+            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-8-scaled-e1699522690950.webp"
             alt="El Reservado"
             className="w-full h-full object-cover opacity-40"
           />
