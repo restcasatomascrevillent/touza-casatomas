@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
-import { useAnimateOnScroll } from "@/hooks/useAnimateOnScroll";
 
 const galleryCategories = [
   { id: "all", name: "Todo" },
@@ -30,18 +29,10 @@ const Galeria = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedImage, setSelectedImage] = useState<typeof galleryData[0] | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [animationKey, setAnimationKey] = useState(0);
-  
-  const gridSection = useAnimateOnScroll<HTMLDivElement>();
 
   const filteredImages = galleryData.filter(
     (item) => selectedCategory === "all" || item.category === selectedCategory
   );
-
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    setAnimationKey(prev => prev + 1);
-  };
 
   const openLightbox = (image: typeof galleryData[0]) => {
     setSelectedImage(image);
@@ -59,33 +50,42 @@ const Galeria = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
+      <section className="relative pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden">
         <div className="absolute inset-0">
-          <img src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp" alt="Galería" className="w-full h-full object-cover opacity-30" />
+          <img 
+            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp" 
+            alt="Galería" 
+            className="w-full h-full object-cover opacity-25"
+            loading="eager"
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
         </div>
         <div className="relative z-10 container-custom text-center">
-          <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block opacity-0 animate-fade-up">Descubre</span>
-          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 opacity-0 animate-fade-up animation-delay-100">Galería</h1>
-          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto opacity-0 animate-fade-up animation-delay-200">
+          <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block opacity-0 animate-fade-up">
+            Descubre
+          </span>
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 opacity-0 animate-fade-up animation-delay-100">
+            Galería
+          </h1>
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto opacity-0 animate-fade-up animation-delay-200">
             Un vistazo a la esencia de Touza: ambiente, cócteles y momentos inolvidables.
           </p>
         </div>
       </section>
 
       {/* Category Filter */}
-      <section className="py-8 border-y border-border/30 bg-charcoal sticky top-[73px] z-40">
+      <section className="py-4 md:py-6 border-y border-border/30 bg-charcoal sticky top-[60px] md:top-[73px] z-40">
         <div className="container-custom">
-          <div className="flex items-center justify-center gap-2 flex-wrap">
+          <div className="flex items-center justify-start md:justify-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 md:mx-0 md:px-0">
             {galleryCategories.map((category) => (
               <button
                 key={category.id}
-                onClick={() => handleCategoryChange(category.id)}
+                onClick={() => setSelectedCategory(category.id)}
                 className={cn(
-                  "px-5 py-2.5 text-sm font-medium rounded-full transition-all duration-300",
+                  "px-4 md:px-5 py-2.5 md:py-2.5 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap touch-target",
                   selectedCategory === category.id
-                    ? "bg-primary text-primary-foreground scale-105"
-                    : "bg-secondary text-foreground hover:bg-secondary/80 hover:scale-105"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-foreground/80 hover:bg-secondary/80 hover:text-foreground"
                 )}
               >
                 {category.name}
@@ -97,25 +97,32 @@ const Galeria = () => {
 
       {/* Gallery Grid */}
       <section className="section-padding">
-        <div ref={gridSection.ref} className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="container-custom">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {filteredImages.map((item, index) => (
               <div
-                key={`${animationKey}-${item.id}`}
+                key={item.id}
                 onClick={() => openLightbox(item)}
                 className={cn(
                   "group cursor-pointer relative overflow-hidden rounded-lg card-hover-lift",
-                  index % 5 === 0 && "md:col-span-2 md:row-span-2",
-                  index % 7 === 3 && "lg:col-span-2",
-                  "opacity-0 animate-scale-fade-in"
+                  index % 5 === 0 && "md:col-span-2 md:row-span-2"
                 )}
-                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className={cn("w-full overflow-hidden", index % 5 === 0 ? "aspect-square" : "aspect-[4/5]")}>
-                  <img src={item.image} alt={item.alt} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className={cn(
+                  "w-full overflow-hidden", 
+                  index % 5 === 0 ? "aspect-square" : "aspect-[4/5]"
+                )}>
+                  <img 
+                    src={item.image} 
+                    alt={item.alt} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
                 </div>
-                <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-all duration-300 flex items-center justify-center">
-                  <span className="text-foreground opacity-0 group-hover:opacity-100 transition-all duration-300 font-serif text-lg scale-90 group-hover:scale-100">Ver</span>
+                <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 transition-all duration-300 flex items-center justify-center">
+                  <span className="text-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-serif text-base md:text-lg">
+                    Ver
+                  </span>
                 </div>
               </div>
             ))}
@@ -125,13 +132,31 @@ const Galeria = () => {
 
       {/* Lightbox */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-5xl bg-background/95 backdrop-blur-xl border-border p-0 animate-scale-fade-in">
+        <DialogContent className="max-w-5xl bg-background/95 backdrop-blur-xl border-border p-2 md:p-4">
           {selectedImage && (
             <div className="relative">
-              <img src={selectedImage.image} alt={selectedImage.alt} className="w-full h-auto max-h-[80vh] object-contain" />
-              <button onClick={() => navigateLightbox("prev")} className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/80 flex items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110" aria-label="Anterior">←</button>
-              <button onClick={() => navigateLightbox("next")} className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/80 flex items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110" aria-label="Siguiente">→</button>
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 px-4 py-2 rounded-full text-sm text-foreground">{currentIndex + 1} / {filteredImages.length}</div>
+              <img 
+                src={selectedImage.image} 
+                alt={selectedImage.alt} 
+                className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
+              />
+              <button 
+                onClick={() => navigateLightbox("prev")} 
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-11 h-11 md:w-12 md:h-12 rounded-full bg-background/80 flex items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground transition-colors duration-200 touch-target" 
+                aria-label="Anterior"
+              >
+                ←
+              </button>
+              <button 
+                onClick={() => navigateLightbox("next")} 
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-11 h-11 md:w-12 md:h-12 rounded-full bg-background/80 flex items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground transition-colors duration-200 touch-target" 
+                aria-label="Siguiente"
+              >
+                →
+              </button>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 px-4 py-2 rounded-full text-sm text-foreground">
+                {currentIndex + 1} / {filteredImages.length}
+              </div>
             </div>
           )}
         </DialogContent>
