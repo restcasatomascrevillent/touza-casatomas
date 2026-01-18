@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
-import { cn } from "@/lib/utils";
 
 const contactInfo = [
   {
@@ -52,6 +51,7 @@ const Contacto = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
+    // Simular envío
     await new Promise((resolve) => setTimeout(resolve, 1500));
     
     toast({
@@ -71,24 +71,23 @@ const Contacto = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="relative pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden">
+      <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=1920&h=600&fit=crop"
             alt="Contacto"
-            className="w-full h-full object-cover opacity-25"
-            loading="eager"
+            className="w-full h-full object-cover opacity-30"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
         </div>
         <div className="relative z-10 container-custom text-center">
-          <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block opacity-0 animate-fade-up">
+          <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block">
             Hablemos
           </span>
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 opacity-0 animate-fade-up animation-delay-100">
+          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6">
             Contacto
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto opacity-0 animate-fade-up animation-delay-200">
+          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
             ¿Tienes alguna pregunta? Estamos aquí para ayudarte.
           </p>
         </div>
@@ -97,35 +96,35 @@ const Contacto = () => {
       {/* Contact Info + Form */}
       <section className="section-padding">
         <div className="container-custom">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
+          <div className="grid lg:grid-cols-2 gap-16">
             {/* Contact Info */}
             <div>
               <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block">
                 Información
               </span>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-8">
+              <h2 className="font-serif text-4xl font-bold text-foreground mb-8">
                 Encuéntranos
               </h2>
 
-              <div className="space-y-5 md:space-y-6 mb-10">
+              <div className="space-y-6 mb-10">
                 {contactInfo.map((item, index) => (
                   <div key={index} className="flex items-start gap-4">
-                    <div className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <item.icon className="w-5 h-5 text-primary" />
                     </div>
-                    <div className="pt-1">
-                      <h3 className="font-medium text-foreground mb-1">{item.title}</h3>
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
                       {item.link ? (
                         <a
                           href={item.link}
                           target={item.link.startsWith("http") ? "_blank" : undefined}
                           rel={item.link.startsWith("http") ? "noopener noreferrer" : undefined}
-                          className="text-muted-foreground hover:text-primary transition-colors duration-200 whitespace-pre-line text-sm md:text-base"
+                          className="text-muted-foreground hover:text-primary transition-colors whitespace-pre-line"
                         >
                           {item.content}
                         </a>
                       ) : (
-                        <p className="text-muted-foreground whitespace-pre-line text-sm md:text-base">{item.content}</p>
+                        <p className="text-muted-foreground whitespace-pre-line">{item.content}</p>
                       )}
                     </div>
                   </div>
@@ -133,20 +132,14 @@ const Contacto = () => {
               </div>
 
               {/* Social Links */}
-              <div className="mb-10">
-                <h3 className="font-medium text-foreground mb-4">Síguenos</h3>
-                <div className="flex gap-3">
+              <div>
+                <h3 className="font-semibold text-foreground mb-4">Síguenos</h3>
+                <div className="flex gap-4">
                   <a
                     href="https://www.instagram.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={cn(
-                      "w-11 h-11 md:w-12 md:h-12 rounded-full bg-secondary flex items-center justify-center",
-                      "text-foreground/80 transition-all duration-200",
-                      "hover:bg-primary hover:text-primary-foreground",
-                      "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background",
-                      "touch-target"
-                    )}
+                    className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                     aria-label="Instagram"
                   >
                     <Instagram className="w-5 h-5" />
@@ -155,13 +148,7 @@ const Contacto = () => {
                     href="https://www.facebook.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={cn(
-                      "w-11 h-11 md:w-12 md:h-12 rounded-full bg-secondary flex items-center justify-center",
-                      "text-foreground/80 transition-all duration-200",
-                      "hover:bg-primary hover:text-primary-foreground",
-                      "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background",
-                      "touch-target"
-                    )}
+                    className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                     aria-label="Facebook"
                   >
                     <Facebook className="w-5 h-5" />
@@ -169,32 +156,32 @@ const Contacto = () => {
                 </div>
               </div>
 
-              {/* Map */}
-              <div className="rounded-lg overflow-hidden border border-border/30">
+              {/* Map Placeholder */}
+              <div className="mt-10 rounded-lg overflow-hidden border border-border/30">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3127.8967799847837!2d-0.8111399!3d38.2493699!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd63b5c3d9d4e0cf%3A0x4a1234567890abcd!2sC.%20San%20Vicente%2C%2014%2C%2003330%20Crevillent%2C%20Alicante!5e0!3m2!1ses!2ses!4v1234567890123"
                   width="100%"
-                  height="250"
+                  height="300"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   title="Ubicación Touza"
-                  className="grayscale opacity-75 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                  className="grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
                 />
               </div>
             </div>
 
             {/* Contact Form */}
-            <div className="bg-card border border-border/30 rounded-lg p-6 md:p-8 lg:p-10">
+            <div className="bg-card border border-border/30 rounded-lg p-8 lg:p-10">
               <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block">
                 Escríbenos
               </span>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-6 md:mb-8">
+              <h2 className="font-serif text-4xl font-bold text-foreground mb-8">
                 Envía un mensaje
               </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-2">
                     Nombre *
@@ -206,7 +193,7 @@ const Contacto = () => {
                     required
                     value={formData.nombre}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="bg-secondary border-border"
                     placeholder="Tu nombre"
                   />
                 </div>
@@ -222,7 +209,7 @@ const Contacto = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="bg-secondary border-border"
                     placeholder="tu@email.com"
                   />
                 </div>
@@ -237,7 +224,7 @@ const Contacto = () => {
                     type="text"
                     value={formData.asunto}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="bg-secondary border-border"
                     placeholder="¿En qué podemos ayudarte?"
                   />
                 </div>
@@ -253,7 +240,7 @@ const Contacto = () => {
                     required
                     value={formData.mensaje}
                     onChange={handleChange}
-                    className="bg-secondary/50 border-border/60 resize-none focus-glow"
+                    className="bg-secondary border-border resize-none"
                     placeholder="Escribe tu mensaje aquí..."
                   />
                 </div>
@@ -262,7 +249,7 @@ const Contacto = () => {
                   type="submit"
                   size="lg"
                   disabled={isSubmitting}
-                  className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                  className="w-full btn-elegant bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {isSubmitting ? (
                     <>Enviando...</>

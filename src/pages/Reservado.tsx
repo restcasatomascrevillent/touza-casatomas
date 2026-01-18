@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, Wine, Music, Star, Send } from "lucide-react";
+import { Users, Wine, Music, Star, Send, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,22 +11,22 @@ const features = [
   {
     icon: Users,
     title: "Capacidad",
-    description: "Hasta 20 personas en un ambiente íntimo",
+    description: "Hasta 20 personas en un ambiente íntimo y exclusivo",
   },
   {
     icon: Wine,
     title: "Servicio Premium",
-    description: "Carta personalizada y atención dedicada",
+    description: "Carta de cócteles personalizada y atención dedicada",
   },
   {
     icon: Music,
     title: "Ambiente Privado",
-    description: "Tu música y decoración a medida",
+    description: "Tu propia música y decoración según la ocasión",
   },
   {
     icon: Star,
     title: "Eventos Especiales",
-    description: "Cumpleaños, cenas y reuniones",
+    description: "Cumpleaños, cenas íntimas, reuniones de empresa",
   },
 ];
 
@@ -56,6 +56,7 @@ const Reservado = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
+    // Simular envío
     await new Promise((resolve) => setTimeout(resolve, 1500));
     
     toast({
@@ -77,24 +78,23 @@ const Reservado = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="relative pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden">
+      <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0">
           <img
             src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-8-scaled-e1699522690950.webp"
             alt="El Reservado"
-            className="w-full h-full object-cover opacity-35"
-            loading="eager"
+            className="w-full h-full object-cover opacity-40"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
         </div>
         <div className="relative z-10 container-custom text-center">
-          <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block opacity-0 animate-fade-up">
+          <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block">
             Espacio exclusivo
           </span>
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 opacity-0 animate-fade-up animation-delay-100">
+          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6">
             El Reservado
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto opacity-0 animate-fade-up animation-delay-200">
+          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
             Un rincón privado donde crear momentos únicos. 
             Perfecto para celebraciones íntimas y eventos especiales.
           </p>
@@ -104,19 +104,19 @@ const Reservado = () => {
       {/* Features */}
       <section className="section-padding bg-charcoal">
         <div className="container-custom">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="text-center p-5 md:p-6 rounded-lg bg-card border border-border/30 hover:border-primary/30 transition-colors duration-200"
+                className="text-center p-6 rounded-lg bg-card border border-border/30 hover:border-primary/30 transition-all duration-300"
               >
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3 md:mb-4">
-                  <feature.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <feature.icon className="w-7 h-7 text-primary" />
                 </div>
-                <h3 className="font-serif text-lg md:text-xl font-semibold text-foreground mb-1 md:mb-2">
+                <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-muted-foreground text-xs md:text-sm">{feature.description}</p>
+                <p className="text-muted-foreground text-sm">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -126,16 +126,16 @@ const Reservado = () => {
       {/* Gallery */}
       <section className="section-padding">
         <div className="container-custom">
-          <div className="text-center mb-10 md:mb-12">
+          <div className="text-center mb-12">
             <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block">
               Descubre el espacio
             </span>
-            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+            <h2 className="font-serif text-4xl md:text-5xl font-bold text-foreground">
               Un ambiente único
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {galleryImages.map((image, index) => (
               <div
                 key={index}
@@ -144,20 +144,15 @@ const Reservado = () => {
                 <img
                   src={image}
                   alt={`El Reservado ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
               </div>
             ))}
           </div>
 
           <div className="text-center mt-8">
-            <Button 
-              asChild 
-              variant="outline" 
-              className="h-12 px-6 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-            >
+            <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
               <Link to="/galeria">Ver galería completa</Link>
             </Button>
           </div>
@@ -167,21 +162,22 @@ const Reservado = () => {
       {/* Contact Form */}
       <section className="section-padding bg-charcoal">
         <div className="container-custom">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-10 md:mb-12">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-12">
               <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block">
                 Reserva tu espacio
               </span>
-              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              <h2 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">
                 Solicita información
               </h2>
-              <p className="text-muted-foreground text-base md:text-lg">
-                Cuéntanos sobre tu evento y diseñaremos una experiencia a medida.
+              <p className="text-muted-foreground text-lg">
+                Cuéntanos sobre tu evento y nos pondremos en contacto para 
+                diseñar una experiencia a medida.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
-              <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-2">
                     Nombre completo *
@@ -193,7 +189,7 @@ const Reservado = () => {
                     required
                     value={formData.nombre}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="bg-secondary border-border"
                     placeholder="Tu nombre"
                   />
                 </div>
@@ -208,13 +204,13 @@ const Reservado = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="bg-secondary border-border"
                     placeholder="tu@email.com"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 md:gap-6">
+              <div className="grid sm:grid-cols-3 gap-6">
                 <div>
                   <label htmlFor="telefono" className="block text-sm font-medium text-foreground mb-2">
                     Teléfono *
@@ -226,13 +222,13 @@ const Reservado = () => {
                     required
                     value={formData.telefono}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
-                    placeholder="600..."
+                    className="bg-secondary border-border"
+                    placeholder="600 000 000"
                   />
                 </div>
                 <div>
                   <label htmlFor="fecha" className="block text-sm font-medium text-foreground mb-2">
-                    Fecha
+                    Fecha deseada
                   </label>
                   <Input
                     id="fecha"
@@ -240,12 +236,12 @@ const Reservado = () => {
                     type="date"
                     value={formData.fecha}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="bg-secondary border-border"
                   />
                 </div>
                 <div>
                   <label htmlFor="personas" className="block text-sm font-medium text-foreground mb-2">
-                    Personas
+                    Nº de personas
                   </label>
                   <Input
                     id="personas"
@@ -255,7 +251,7 @@ const Reservado = () => {
                     max="20"
                     value={formData.personas}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="bg-secondary border-border"
                     placeholder="10"
                   />
                 </div>
@@ -271,17 +267,17 @@ const Reservado = () => {
                   rows={4}
                   value={formData.mensaje}
                   onChange={handleChange}
-                  className="bg-secondary/50 border-border/60 resize-none focus-glow"
+                  className="bg-secondary border-border resize-none"
                   placeholder="Tipo de evento, preferencias especiales, horario..."
                 />
               </div>
 
-              <div className="text-center pt-2">
+              <div className="text-center">
                 <Button
                   type="submit"
                   size="lg"
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                  className="btn-elegant bg-primary hover:bg-primary/90 text-primary-foreground px-10"
                 >
                   {isSubmitting ? (
                     <>Enviando...</>
