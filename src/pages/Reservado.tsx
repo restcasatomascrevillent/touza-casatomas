@@ -180,8 +180,9 @@ const Reservado = () => {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
-              <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+              {/* Name & Email - Stack on mobile */}
+              <div className="grid gap-4 md:grid-cols-2 md:gap-6">
                 <div>
                   <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-2">
                     Nombre completo *
@@ -191,9 +192,10 @@ const Reservado = () => {
                     name="nombre"
                     type="text"
                     required
+                    autoComplete="name"
                     value={formData.nombre}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="h-14 bg-secondary/50 border-border/60 focus-glow rounded-xl text-base"
                     placeholder="Tu nombre"
                   />
                 </div>
@@ -206,15 +208,18 @@ const Reservado = () => {
                     name="email"
                     type="email"
                     required
+                    autoComplete="email"
+                    inputMode="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="h-14 bg-secondary/50 border-border/60 focus-glow rounded-xl text-base"
                     placeholder="tu@email.com"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 md:gap-6">
+              {/* Phone, Date, People - Stack on small mobile, 3 cols on larger */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
                 <div>
                   <label htmlFor="telefono" className="block text-sm font-medium text-foreground mb-2">
                     Teléfono *
@@ -224,10 +229,12 @@ const Reservado = () => {
                     name="telefono"
                     type="tel"
                     required
+                    autoComplete="tel"
+                    inputMode="tel"
                     value={formData.telefono}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
-                    placeholder="600..."
+                    className="h-14 bg-secondary/50 border-border/60 focus-glow rounded-xl text-base"
+                    placeholder="600 000 000"
                   />
                 </div>
                 <div>
@@ -240,7 +247,7 @@ const Reservado = () => {
                     type="date"
                     value={formData.fecha}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="h-14 bg-secondary/50 border-border/60 focus-glow rounded-xl text-base"
                   />
                 </div>
                 <div>
@@ -253,9 +260,10 @@ const Reservado = () => {
                     type="number"
                     min="1"
                     max="20"
+                    inputMode="numeric"
                     value={formData.personas}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="h-14 bg-secondary/50 border-border/60 focus-glow rounded-xl text-base"
                     placeholder="10"
                   />
                 </div>
@@ -276,19 +284,19 @@ const Reservado = () => {
                 />
               </div>
 
-              <div className="text-center pt-2">
+              <div className="pt-2">
                 <Button
                   type="submit"
                   size="lg"
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto h-14 px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                  className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl text-base tap-highlight"
                 >
                   {isSubmitting ? (
                     <>Enviando...</>
                   ) : (
                     <>
                       Enviar solicitud
-                      <Send className="ml-2 w-4 h-4" />
+                      <Send className="ml-2 w-5 h-5" />
                     </>
                   )}
                 </Button>

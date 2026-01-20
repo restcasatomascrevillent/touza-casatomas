@@ -234,11 +234,51 @@
     @apply min-h-[48px] min-w-[48px];
   }
 
+  /* Large touch target for primary actions */
+  .touch-target-lg {
+    @apply min-h-[56px] min-w-[56px];
+  }
+
   /* Premium input styling */
   .input-premium {
     @apply h-14 bg-secondary/50 border-border/60 rounded-lg px-4;
     @apply focus:border-primary focus:ring-2 focus:ring-primary/20;
     @apply transition-all duration-200;
+  }
+
+  /* Scroll snap for horizontal scrolling */
+  .scroll-snap-x {
+    @apply overflow-x-auto scrollbar-hide;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scroll-snap-x > * {
+    scroll-snap-align: start;
+  }
+
+  /* Scroll fade indicators */
+  .scroll-fade-right::after {
+    content: '';
+    @apply absolute right-0 top-0 bottom-0 w-8 pointer-events-none;
+    background: linear-gradient(to right, transparent, hsl(var(--background)));
+  }
+
+  .scroll-fade-left::before {
+    content: '';
+    @apply absolute left-0 top-0 bottom-0 w-8 pointer-events-none z-10;
+    background: linear-gradient(to left, transparent, hsl(var(--background)));
+  }
+
+  /* Tap highlight effect */
+  .tap-highlight {
+    @apply transition-all duration-150 active:scale-[0.98] active:opacity-80;
+  }
+
+  /* Mobile card styling */
+  .mobile-card {
+    @apply bg-card border border-border/50 rounded-xl overflow-hidden;
+    @apply transition-all duration-200 active:scale-[0.98];
   }
 
   /* Stagger animation for children */
