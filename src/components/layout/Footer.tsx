@@ -14,12 +14,12 @@ const Footer = () => {
 
   return (
     <footer className="bg-charcoal border-t border-border/30">
-      <div className="container-custom py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+      <div className="container-custom py-10 md:py-12 lg:py-16 px-5 md:px-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-8">
           {/* Logo y descripción */}
-          <div className="lg:col-span-1">
+          <div className="col-span-2 md:col-span-1 lg:col-span-1">
             <Link to="/" className="inline-block group">
-              <span className="font-serif text-2xl font-bold tracking-wider text-primary transition-colors duration-200 group-hover:text-gold-light">
+              <span className="font-serif text-xl md:text-2xl font-bold tracking-wider text-primary transition-colors duration-200 group-hover:text-gold-light">
                 TOUZA
               </span>
               <span className="block text-[9px] tracking-[0.25em] text-muted-foreground uppercase transition-colors duration-200 group-hover:text-primary/60">

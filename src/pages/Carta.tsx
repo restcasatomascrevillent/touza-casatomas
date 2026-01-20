@@ -413,21 +413,21 @@ const Carta = () => {
         </div>
       </section>
 
-      {/* Main Category Tabs with animated indicator */}
-      <section className="py-6 border-y border-border/30 bg-charcoal/95 backdrop-blur-md sticky top-[73px] z-40 transition-all duration-300">
+      {/* Main Category Tabs - Optimized for mobile */}
+      <section className="py-3 md:py-6 border-y border-border/30 bg-charcoal/95 backdrop-blur-md sticky top-[52px] md:top-[73px] z-40 transition-all duration-300">
         <div className="container-custom">
           <Tabs value={activeMainCategory} onValueChange={handleCategoryChange} className="w-full">
             <div ref={tabsContainerRef} className="relative">
-              {/* Animated indicator */}
+              {/* Animated indicator - Hidden on mobile for cleaner look */}
               <div 
-                className="absolute bottom-0 h-0.5 bg-gradient-to-r from-primary via-gold to-primary rounded-full transition-all duration-500 ease-out"
+                className="hidden md:block absolute bottom-0 h-0.5 bg-gradient-to-r from-primary via-gold to-primary rounded-full transition-all duration-500 ease-out"
                 style={{
                   left: tabIndicatorStyle.left,
                   width: tabIndicatorStyle.width,
                   boxShadow: '0 0 10px hsl(var(--primary) / 0.5)',
                 }}
               />
-              <TabsList className="w-full h-auto flex-wrap justify-start gap-2 bg-transparent p-0 pb-2">
+              <TabsList className="w-full h-auto flex flex-nowrap justify-start gap-2 bg-transparent p-0 pb-1 overflow-x-auto scrollbar-hide scroll-snap-x -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap md:justify-center md:pb-2">
                 {mainCategories.map((category) => {
                   const Icon = category.icon;
                   const isActive = activeMainCategory === category.id;
@@ -436,15 +436,13 @@ const Carta = () => {
                       key={category.id}
                       value={category.id}
                       className={cn(
-                        "relative px-4 py-2.5 text-sm font-medium rounded-full transition-all duration-300 flex items-center gap-2 overflow-hidden group",
+                        "relative px-4 py-3 md:py-2.5 text-sm font-medium rounded-full transition-all duration-200 flex items-center gap-2 flex-shrink-0 touch-target tap-highlight",
                         "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20",
-                        "data-[state=inactive]:bg-secondary/80 data-[state=inactive]:text-foreground data-[state=inactive]:hover:bg-secondary data-[state=inactive]:hover:scale-105"
+                        "data-[state=inactive]:bg-secondary/80 data-[state=inactive]:text-foreground/80 data-[state=inactive]:active:bg-secondary"
                       )}
                     >
-                      {/* Ripple effect on hover */}
-                      <span className="absolute inset-0 bg-primary/20 scale-0 rounded-full transition-transform duration-500 group-hover:scale-150 opacity-0 group-hover:opacity-100" />
-                      <Icon className="w-4 h-4 relative z-10" />
-                      <span className="relative z-10">{category.name}</span>
+                      <Icon className="w-4 h-4 md:w-4 md:h-4" />
+                      <span className="whitespace-nowrap">{category.name}</span>
                     </TabsTrigger>
                   );
                 })}
@@ -454,19 +452,19 @@ const Carta = () => {
         </div>
       </section>
 
-      {/* Search Bar - Common for all categories */}
-      <section className="py-6 bg-background border-b border-border/30">
-        <div className="container-custom">
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+      {/* Search Bar - Optimized for mobile */}
+      <section className="py-4 md:py-6 bg-background border-b border-border/30">
+        <div className="container-custom px-4">
+          <div className="flex flex-col lg:flex-row gap-3 md:gap-4 items-stretch lg:items-center justify-between">
             {/* Search */}
             <div className="relative w-full lg:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Buscar..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-secondary border-border"
+                className="pl-12 h-12 md:h-11 bg-secondary border-border rounded-xl text-base"
               />
             </div>
 
@@ -480,7 +478,7 @@ const Carta = () => {
                       key={category.id}
                       onClick={() => setSelectedCategory(category.id)}
                       className={cn(
-                        "px-4 py-2 text-sm font-medium rounded-full transition-all duration-300",
+                        "px-4 py-2 text-sm font-medium rounded-full transition-all duration-200",
                         selectedCategory === category.id
                           ? "bg-primary text-primary-foreground"
                           : "bg-secondary text-foreground hover:bg-secondary/80"
@@ -510,65 +508,77 @@ const Carta = () => {
                 {/* Mobile Filter Button */}
                 <Button
                   variant="outline"
-                  className="lg:hidden border-border"
+                  className="lg:hidden h-12 border-border rounded-xl tap-highlight"
                   onClick={() => setShowFilters(!showFilters)}
                 >
-                  <Filter className="w-4 h-4 mr-2" />
+                  <Filter className="w-5 h-5 mr-2" />
                   Filtros
+                  {(selectedCategory !== "all" || selectedBase !== "all") && (
+                    <span className="ml-2 w-2 h-2 rounded-full bg-primary" />
+                  )}
                 </Button>
               </>
             )}
           </div>
 
-          {/* Mobile Filters for Cocktails */}
+          {/* Mobile Filters for Cocktails - Enhanced */}
           {activeMainCategory === "cocteles" && showFilters && (
-            <div className="lg:hidden mt-6 pt-6 border-t border-border/30">
-              <div className="flex flex-wrap gap-2 mb-4">
-                {cocktailCategories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={cn(
-                      "px-3 py-1.5 text-xs font-medium rounded-full transition-all",
-                      selectedCategory === category.id
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-foreground"
-                    )}
-                  >
-                    {category.name}
-                  </button>
-                ))}
+            <div className="lg:hidden mt-4 pt-4 border-t border-border/30 space-y-4">
+              {/* Category filter */}
+              <div>
+                <label className="text-sm text-muted-foreground mb-2 block">Tipo:</label>
+                <div className="flex flex-wrap gap-2">
+                  {cocktailCategories.map((category) => (
+                    <button
+                      key={category.id}
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={cn(
+                        "px-4 py-2.5 text-sm font-medium rounded-full transition-all duration-200 tap-highlight",
+                        selectedCategory === category.id
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-foreground active:bg-secondary/80"
+                      )}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <select
-                value={selectedBase}
-                onChange={(e) => setSelectedBase(e.target.value)}
-                className="w-full bg-secondary border border-border rounded-lg px-4 py-2 text-sm text-foreground"
-              >
-                {bases.map((base) => (
-                  <option key={base.id} value={base.id}>
-                    Base: {base.name}
-                  </option>
-                ))}
-              </select>
+              
+              {/* Base filter */}
+              <div>
+                <label className="text-sm text-muted-foreground mb-2 block">Base:</label>
+                <select
+                  value={selectedBase}
+                  onChange={(e) => setSelectedBase(e.target.value)}
+                  className="w-full h-12 bg-secondary border border-border rounded-xl px-4 text-base text-foreground"
+                >
+                  {bases.map((base) => (
+                    <option key={base.id} value={base.id}>
+                      {base.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           )}
         </div>
       </section>
 
       {/* Content based on selected category */}
-      <section ref={contentSectionRef} className="section-padding scroll-mt-36">
-        <div className="container-custom">
+      <section ref={contentSectionRef} className="py-6 md:section-padding scroll-mt-36">
+        <div className="container-custom px-3 md:px-4">
           {/* CÓCTELES */}
           {activeMainCategory === "cocteles" && (
             <div key={animationKey}>
               {filteredCocktails.length === 0 ? (
-                <div className="text-center py-16">
-                  <p className="text-muted-foreground text-lg">
+                <div className="text-center py-12 md:py-16">
+                  <p className="text-muted-foreground text-base md:text-lg">
                     No se encontraron cócteles con esos criterios.
                   </p>
                   <Button
                     variant="outline"
-                    className="mt-4"
+                    className="mt-4 h-12 rounded-xl tap-highlight"
                     onClick={() => {
                       setSelectedCategory("all");
                       setSelectedBase("all");
@@ -579,48 +589,36 @@ const Carta = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                   {filteredCocktails.map((cocktail, index) => (
                     <div
                       key={`${animationKey}-${cocktail.id}`}
                       onClick={() => openCocktailModal(cocktail)}
-                      style={{ animationDelay: `${index * 50}ms`, opacity: 0 }}
-                      className="group cursor-pointer bg-card border border-border/50 rounded-xl overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 animate-stagger-fade-up hover:-translate-y-2 card-hover-lift"
+                      style={{ animationDelay: `${index * 40}ms`, opacity: 0 }}
+                      className="group cursor-pointer mobile-card animate-stagger-fade-up tap-highlight"
                     >
-                      <div className="aspect-[4/5] overflow-hidden relative">
-                        {/* Image with zoom and overlay */}
+                      <div className="aspect-[3/4] md:aspect-[4/5] overflow-hidden relative">
+                        {/* Image */}
                         <img
                           src={cocktail.image}
                           alt={cocktail.name}
-                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-90"
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
                         />
                         {/* Gradient overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-                        {/* Animated gradient overlay on hover */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-primary/0 to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        {/* Price badge with shimmer */}
-                        <div className="absolute top-4 right-4">
-                          <span className="bg-primary text-primary-foreground text-sm font-semibold px-3 py-1.5 rounded-full shadow-lg group-hover:shadow-primary/40 transition-all duration-300 group-hover:scale-105 inline-block">
-                            <span className="relative">
-                              {cocktail.price}
-                              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                            </span>
-                          </span>
-                        </div>
-                        {/* View indicator */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                          <span className="bg-background/90 backdrop-blur-sm text-foreground px-4 py-2 rounded-full text-sm font-medium transform scale-90 group-hover:scale-100 transition-transform duration-300 shadow-lg">
-                            Ver detalles
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                        {/* Price badge */}
+                        <div className="absolute top-2 right-2 md:top-4 md:right-4">
+                          <span className="bg-primary text-primary-foreground text-xs md:text-sm font-semibold px-2.5 py-1 md:px-3 md:py-1.5 rounded-full shadow-lg">
+                            {cocktail.price}
                           </span>
                         </div>
                       </div>
-                      <div className="p-5 relative overflow-hidden">
-                        {/* Subtle background glow on hover */}
-                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-primary/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <h3 className="font-serif text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-300 relative">
+                      <div className="p-3 md:p-5">
+                        <h3 className="font-serif text-base md:text-xl font-semibold text-foreground mb-1 md:mb-2 line-clamp-1 group-hover:text-primary transition-colors duration-200">
                           {cocktail.name}
                         </h3>
-                        <p className="text-muted-foreground text-sm line-clamp-2 relative">
+                        <p className="text-muted-foreground text-xs md:text-sm line-clamp-2">
                           {cocktail.description}
                         </p>
                       </div>
@@ -847,43 +845,44 @@ const Carta = () => {
         </div>
       </section>
 
-      {/* Tapea con tu cóctel */}
-      <section className="section-padding bg-charcoal">
-        <div className="container-custom">
-          <div className="text-center mb-12">
-            <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block">
+      {/* Tapea con tu cóctel - Mobile optimized */}
+      <section className="py-10 md:section-padding bg-charcoal">
+        <div className="container-custom px-3 md:px-4">
+          <div className="text-center mb-8 md:mb-12">
+            <span className="text-primary text-xs md:text-sm tracking-[0.2em] uppercase mb-3 md:mb-4 block">
               Maridaje perfecto
             </span>
-            <h2 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 md:mb-4">
               Tapea con tu Cóctel
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Acompaña tu bebida favorita con nuestras deliciosas tapas, 
-              inspiradas en la gastronomía gallega y mediterránea.
+            <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto">
+              Acompaña tu bebida favorita con nuestras deliciosas tapas.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          {/* Mobile: horizontal scroll, Desktop: grid */}
+          <div className="flex overflow-x-auto gap-4 pb-4 -mx-3 px-3 md:mx-0 md:px-0 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible scroll-snap-x scrollbar-hide">
             {tapasData.map((tapa) => (
               <div
                 key={tapa.id}
-                className="group bg-card border border-border/50 rounded-lg overflow-hidden hover:border-primary/30 transition-all duration-300"
+                className="group bg-card border border-border/50 rounded-xl overflow-hidden flex-shrink-0 w-[260px] md:w-auto tap-highlight"
               >
                 <div className="aspect-video overflow-hidden">
                   <img
                     src={tapa.image}
                     alt={tapa.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
                   />
                 </div>
-                <div className="p-6">
+                <div className="p-4 md:p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-serif text-xl font-semibold text-foreground">
+                    <h3 className="font-serif text-lg md:text-xl font-semibold text-foreground">
                       {tapa.name}
                     </h3>
                     <span className="text-primary font-semibold">{tapa.price}</span>
                   </div>
-                  <p className="text-muted-foreground text-sm">{tapa.description}</p>
+                  <p className="text-muted-foreground text-xs md:text-sm line-clamp-2">{tapa.description}</p>
                 </div>
               </div>
             ))}
@@ -891,13 +890,13 @@ const Carta = () => {
         </div>
       </section>
 
-      {/* Cocktail Detail Modal - Enhanced with animations */}
+      {/* Cocktail Detail Modal - Mobile fullscreen sheet */}
       <Dialog open={!!selectedCocktail} onOpenChange={() => setSelectedCocktail(null)}>
-        <DialogContent className="max-w-2xl bg-card border-border/50 p-0 overflow-hidden rounded-2xl shadow-2xl">
+        <DialogContent className="max-w-2xl w-[95vw] md:w-auto bg-card border-border/50 p-0 overflow-hidden rounded-t-3xl md:rounded-2xl shadow-2xl max-h-[90vh] md:max-h-none overflow-y-auto">
           {selectedCocktail && (
-            <div className="grid md:grid-cols-2">
-              {/* Image */}
-              <div className="aspect-square md:aspect-auto relative overflow-hidden">
+            <div className="flex flex-col md:grid md:grid-cols-2">
+              {/* Image - Full width on mobile */}
+              <div className="aspect-[4/3] md:aspect-auto relative overflow-hidden flex-shrink-0">
                 <img
                   src={selectedCocktail.image}
                   alt={selectedCocktail.name}
@@ -905,7 +904,7 @@ const Carta = () => {
                 />
                 {/* Gradient overlays */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-card/50 md:block hidden" />
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent md:hidden" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
                 {/* Category badge */}
                 <div className="absolute top-4 left-4">
                   <span className="bg-secondary/90 backdrop-blur-sm text-foreground text-xs font-medium px-3 py-1.5 rounded-full capitalize">
@@ -916,45 +915,42 @@ const Carta = () => {
               </div>
               
               {/* Content */}
-              <div className="p-8 flex flex-col relative">
-                {/* Decorative glow */}
-                <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-                
-                <DialogHeader className="mb-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-primary text-3xl font-bold">
+              <div className="p-5 md:p-8 flex flex-col relative">
+                <DialogHeader className="mb-3 md:mb-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-primary text-2xl md:text-3xl font-bold">
                       {selectedCocktail.price}
                     </span>
                   </div>
-                  <DialogTitle className="font-serif text-3xl font-bold text-foreground">
+                  <DialogTitle className="font-serif text-2xl md:text-3xl font-bold text-foreground">
                     {selectedCocktail.name}
                   </DialogTitle>
                 </DialogHeader>
                 
-                <p className="text-muted-foreground mb-6 leading-relaxed">
+                <p className="text-muted-foreground text-sm md:text-base mb-5 md:mb-6 leading-relaxed">
                   {selectedCocktail.description}
                 </p>
                 
                 <div>
-                  <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <span className="w-8 h-0.5 bg-gradient-to-r from-primary to-transparent rounded-full" />
+                  <h4 className="font-semibold text-foreground mb-3 md:mb-4 flex items-center gap-2 text-sm md:text-base">
+                    <span className="w-6 md:w-8 h-0.5 bg-gradient-to-r from-primary to-transparent rounded-full" />
                     Ingredientes
                   </h4>
-                  <ul className="space-y-3">
+                  <ul className="space-y-2 md:space-y-3">
                     {selectedCocktail.ingredients.map((ingredient, index) => (
                       <li
                         key={index}
-                        className="flex items-center gap-3 text-muted-foreground"
+                        className="flex items-center gap-3 text-muted-foreground text-sm md:text-base"
                       >
-                        <span className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-gold flex-shrink-0" />
-                        <span className="transition-colors hover:text-foreground">{ingredient}</span>
+                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-gradient-to-r from-primary to-gold flex-shrink-0" />
+                        <span>{ingredient}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
                 {/* Base indicator */}
-                <div className="mt-auto pt-6">
+                <div className="mt-auto pt-5 md:pt-6">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span className="text-primary">Base:</span>
                     <span className="capitalize">{selectedCocktail.base === "all" ? "Sin alcohol" : selectedCocktail.base}</span>

@@ -194,7 +194,7 @@ const Contacto = () => {
                 Envía un mensaje
               </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                 <div>
                   <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-2">
                     Nombre *
@@ -204,9 +204,10 @@ const Contacto = () => {
                     name="nombre"
                     type="text"
                     required
+                    autoComplete="name"
                     value={formData.nombre}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="h-14 bg-secondary/50 border-border/60 focus-glow rounded-xl text-base"
                     placeholder="Tu nombre"
                   />
                 </div>
@@ -220,9 +221,11 @@ const Contacto = () => {
                     name="email"
                     type="email"
                     required
+                    autoComplete="email"
+                    inputMode="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="h-14 bg-secondary/50 border-border/60 focus-glow rounded-xl text-base"
                     placeholder="tu@email.com"
                   />
                 </div>
@@ -237,7 +240,7 @@ const Contacto = () => {
                     type="text"
                     value={formData.asunto}
                     onChange={handleChange}
-                    className="h-12 md:h-14 bg-secondary/50 border-border/60 focus-glow"
+                    className="h-14 bg-secondary/50 border-border/60 focus-glow rounded-xl text-base"
                     placeholder="¿En qué podemos ayudarte?"
                   />
                 </div>
@@ -253,7 +256,7 @@ const Contacto = () => {
                     required
                     value={formData.mensaje}
                     onChange={handleChange}
-                    className="bg-secondary/50 border-border/60 resize-none focus-glow"
+                    className="bg-secondary/50 border-border/60 resize-none focus-glow rounded-xl text-base min-h-[120px]"
                     placeholder="Escribe tu mensaje aquí..."
                   />
                 </div>
@@ -262,14 +265,14 @@ const Contacto = () => {
                   type="submit"
                   size="lg"
                   disabled={isSubmitting}
-                  className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                  className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl text-base tap-highlight"
                 >
                   {isSubmitting ? (
                     <>Enviando...</>
                   ) : (
                     <>
                       Enviar mensaje
-                      <Send className="ml-2 w-4 h-4" />
+                      <Send className="ml-2 w-5 h-5" />
                     </>
                   )}
                 </Button>

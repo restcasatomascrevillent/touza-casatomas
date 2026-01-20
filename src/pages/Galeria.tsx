@@ -73,19 +73,19 @@ const Galeria = () => {
         </div>
       </section>
 
-      {/* Category Filter */}
-      <section className="py-4 md:py-6 border-y border-border/30 bg-charcoal sticky top-[60px] md:top-[73px] z-40">
+      {/* Category Filter - Enhanced for mobile */}
+      <section className="py-3 md:py-6 border-y border-border/30 bg-charcoal/95 backdrop-blur-md sticky top-[52px] md:top-[73px] z-40">
         <div className="container-custom">
-          <div className="flex items-center justify-start md:justify-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 md:mx-0 md:px-0">
+          <div className="flex items-center justify-start md:justify-center gap-2 overflow-x-auto scrollbar-hide scroll-snap-x -mx-4 px-4 md:mx-0 md:px-0">
             {galleryCategories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
                 className={cn(
-                  "px-4 md:px-5 py-2.5 md:py-2.5 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap touch-target",
+                  "px-5 py-3 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap touch-target tap-highlight",
                   selectedCategory === category.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-foreground/80 hover:bg-secondary/80 hover:text-foreground"
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                    : "bg-secondary text-foreground/80 hover:bg-secondary/80 hover:text-foreground active:bg-secondary"
                 )}
               >
                 {category.name}
@@ -95,32 +95,37 @@ const Galeria = () => {
         </div>
       </section>
 
-      {/* Gallery Grid */}
-      <section className="section-padding">
-        <div className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+      {/* Gallery Grid - Uniform on mobile */}
+      <section className="py-6 md:section-padding">
+        <div className="container-custom px-3 md:px-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
             {filteredImages.map((item, index) => (
               <div
                 key={item.id}
                 onClick={() => openLightbox(item)}
                 className={cn(
-                  "group cursor-pointer relative overflow-hidden rounded-lg card-hover-lift",
+                  "group cursor-pointer relative overflow-hidden rounded-lg tap-highlight",
+                  // Only apply special sizing on tablet+
                   index % 5 === 0 && "md:col-span-2 md:row-span-2"
                 )}
               >
                 <div className={cn(
                   "w-full overflow-hidden", 
-                  index % 5 === 0 ? "aspect-square" : "aspect-[4/5]"
+                  // Uniform aspect ratio on mobile
+                  "aspect-square",
+                  // Variable on desktop
+                  index % 5 === 0 ? "md:aspect-square" : "md:aspect-[4/5]"
                 )}>
                   <img 
                     src={item.image} 
                     alt={item.alt} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 active:scale-100"
                     loading="lazy"
                   />
                 </div>
-                <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 transition-all duration-300 flex items-center justify-center">
-                  <span className="text-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-serif text-base md:text-lg">
+                {/* Overlay only on desktop hover */}
+                <div className="absolute inset-0 bg-background/0 md:group-hover:bg-background/30 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                  <span className="text-foreground opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 font-serif text-base md:text-lg">
                     Ver
                   </span>
                 </div>
@@ -130,31 +135,33 @@ const Galeria = () => {
         </div>
       </section>
 
-      {/* Lightbox */}
+      {/* Lightbox - Fullscreen on mobile */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-5xl bg-background/95 backdrop-blur-xl border-border p-2 md:p-4">
+        <DialogContent className="max-w-5xl w-[95vw] md:w-auto bg-background/98 backdrop-blur-2xl border-border/50 p-0 md:p-4 rounded-xl md:rounded-lg">
           {selectedImage && (
             <div className="relative">
               <img 
                 src={selectedImage.image} 
                 alt={selectedImage.alt} 
-                className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
+                className="w-full h-auto max-h-[75vh] md:max-h-[80vh] object-contain rounded-lg"
               />
+              {/* Navigation - Larger buttons positioned for thumbs */}
               <button 
                 onClick={() => navigateLightbox("prev")} 
-                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-11 h-11 md:w-12 md:h-12 rounded-full bg-background/80 flex items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground transition-colors duration-200 touch-target" 
+                className="absolute left-2 bottom-20 md:bottom-auto md:top-1/2 md:-translate-y-1/2 w-14 h-14 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center text-foreground text-xl font-bold hover:bg-primary hover:text-primary-foreground transition-all duration-200 touch-target-lg shadow-lg tap-highlight" 
                 aria-label="Anterior"
               >
                 ←
               </button>
               <button 
                 onClick={() => navigateLightbox("next")} 
-                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-11 h-11 md:w-12 md:h-12 rounded-full bg-background/80 flex items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground transition-colors duration-200 touch-target" 
+                className="absolute right-2 bottom-20 md:bottom-auto md:top-1/2 md:-translate-y-1/2 w-14 h-14 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center text-foreground text-xl font-bold hover:bg-primary hover:text-primary-foreground transition-all duration-200 touch-target-lg shadow-lg tap-highlight" 
                 aria-label="Siguiente"
               >
                 →
               </button>
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 px-4 py-2 rounded-full text-sm text-foreground">
+              {/* Counter - More prominent */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-5 py-2.5 rounded-full text-sm font-medium text-foreground shadow-lg">
                 {currentIndex + 1} / {filteredImages.length}
               </div>
             </div>

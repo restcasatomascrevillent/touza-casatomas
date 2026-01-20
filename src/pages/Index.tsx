@@ -52,8 +52,8 @@ const Index = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Hero Section - Optimized for mobile */}
+      <section className="relative min-h-[90vh] md:min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <img
@@ -62,27 +62,30 @@ const Index = () => {
             className="w-full h-full object-cover"
             loading="eager"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/40 to-transparent" />
+          {/* Stronger overlay for mobile readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background md:from-background/70 md:via-background/50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/50 to-transparent md:from-background/40" />
         </div>
 
-        {/* Content */}
-        <div className="relative z-10 container-custom text-center px-4 pt-20">
-          <div className="max-w-3xl mx-auto">
-            <span className="inline-block text-primary text-sm tracking-[0.3em] uppercase mb-6 opacity-0 animate-fade-up">
+        {/* Content - Left aligned on mobile */}
+        <div className="relative z-10 container-custom px-5 md:px-4 pt-20 md:pt-20">
+          <div className="max-w-3xl md:mx-auto md:text-center">
+            <span className="inline-block text-primary text-xs md:text-sm tracking-[0.3em] uppercase mb-4 md:mb-6 opacity-0 animate-fade-up">
               Cocktail Bar
             </span>
-            <h1 className="font-serif text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-foreground mb-6 opacity-0 animate-fade-up animation-delay-100 text-shadow-lg tracking-tight">
+            <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-foreground mb-4 md:mb-6 opacity-0 animate-fade-up animation-delay-100 text-shadow-lg tracking-tight">
               TOUZA
             </h1>
-            <p className="text-lg md:text-xl lg:text-2xl text-foreground/90 font-light leading-relaxed mb-10 opacity-0 animate-fade-up animation-delay-200 text-shadow max-w-xl mx-auto">
+            <p className="text-base md:text-lg lg:text-xl xl:text-2xl text-foreground/90 font-light leading-relaxed mb-8 md:mb-10 opacity-0 animate-fade-up animation-delay-200 text-shadow max-w-md md:max-w-xl md:mx-auto">
               Momentos de ensueño con los mejores cócteles
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-up animation-delay-300">
+            
+            {/* CTAs - Stack on mobile, row on desktop */}
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 md:justify-center opacity-0 animate-fade-up animation-delay-300">
               <Button
                 asChild
                 size="lg"
-                className="h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground text-base font-medium"
+                className="h-14 w-full sm:w-auto px-6 md:px-8 bg-primary hover:bg-primary/90 text-primary-foreground text-base font-medium rounded-xl tap-highlight"
               >
                 <Link to="/carta">
                   Descubre nuestra carta
@@ -93,7 +96,7 @@ const Index = () => {
                 asChild
                 variant="outline"
                 size="lg"
-                className="h-14 px-8 border-foreground/30 text-foreground hover:bg-foreground/10 hover:border-foreground/50 text-base font-medium"
+                className="h-14 w-full sm:w-auto px-6 md:px-8 border-foreground/30 text-foreground hover:bg-foreground/10 hover:border-foreground/50 text-base font-medium rounded-xl tap-highlight"
               >
                 <Link to="/reservado">El Reservado</Link>
               </Button>
@@ -101,8 +104,8 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Scroll indicator - simplified */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0 animate-fade-in animation-delay-500">
+        {/* Scroll indicator - Hidden on mobile */}
+        <div className="hidden md:block absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0 animate-fade-in animation-delay-500">
           <div className="flex flex-col items-center gap-3">
             <span className="text-xs text-muted-foreground tracking-widest uppercase">Scroll</span>
             <div className="w-6 h-10 border border-primary/40 rounded-full flex items-start justify-center p-2">
@@ -192,11 +195,12 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {/* Mobile: horizontal scroll, Desktop: grid */}
+          <div className="flex overflow-x-auto gap-4 pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 lg:gap-8 md:overflow-visible scroll-snap-x scrollbar-hide">
             {featuredCocktails.map((cocktail) => (
               <div
                 key={cocktail.id}
-                className="group card-premium card-hover-lift"
+                className="group card-premium card-hover-lift flex-shrink-0 w-[280px] md:w-auto scroll-snap-align-start"
               >
                 <div className="aspect-[4/5] overflow-hidden rounded-t-lg">
                   <img
@@ -206,8 +210,8 @@ const Index = () => {
                     loading="lazy"
                   />
                 </div>
-                <div className="p-5 md:p-6">
-                  <h3 className="font-serif text-xl md:text-2xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-200">
+                <div className="p-4 md:p-5 lg:p-6">
+                  <h3 className="font-serif text-lg md:text-xl lg:text-2xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-200">
                     {cocktail.name}
                   </h3>
                   <p className="text-muted-foreground text-sm line-clamp-2">
