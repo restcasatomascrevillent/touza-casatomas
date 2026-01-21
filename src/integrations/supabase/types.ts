@@ -381,6 +381,7 @@ export type Database = {
           activado: boolean | null
           alergenos_notas: string | null
           alergenos_oficiales: Json | null
+          base: string | null
           categoria: string | null
           categoria_en: string | null
           categoria_fr: string | null
@@ -406,6 +407,7 @@ export type Database = {
           activado?: boolean | null
           alergenos_notas?: string | null
           alergenos_oficiales?: Json | null
+          base?: string | null
           categoria?: string | null
           categoria_en?: string | null
           categoria_fr?: string | null
@@ -431,6 +433,7 @@ export type Database = {
           activado?: boolean | null
           alergenos_notas?: string | null
           alergenos_oficiales?: Json | null
+          base?: string | null
           categoria?: string | null
           categoria_en?: string | null
           categoria_fr?: string | null
