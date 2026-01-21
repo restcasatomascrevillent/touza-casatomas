@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Search, Filter, Wine, Beer, Martini, GlassWater, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
 import { useAnimateOnScroll } from "@/hooks/useAnimateOnScroll";
+import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
 
 // Categorías principales de bebidas
 const mainCategories = [
@@ -34,143 +35,7 @@ const bases = [
   { id: "ron", name: "Ron" },
   { id: "tequila", name: "Tequila" },
   { id: "aperol", name: "Aperol" },
-];
-
-// CÓCTELES REALES DE TOUZA
-const cocktailsData = [
-  // Cócteles de Autor
-  {
-    id: 1,
-    name: "Green Dream",
-    category: "autor",
-    base: "ginebra",
-    price: "9,00€",
-    description: "Un sueño verde refrescante que combina la frescura del kiwi con notas de manzana verde.",
-    ingredients: ["Puré de kiwi", "Lima", "Sirope de manzana verde", "Ginebra"],
-    image: "https://images.unsplash.com/photo-1536935338788-846bb9981813?w=500&h=600&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Beso Escarlata",
-    category: "autor",
-    base: "ginebra",
-    price: "9,00€",
-    description: "Un beso de frutos rojos con la elegancia del licor de flor de saúco.",
-    ingredients: ["Ginebra", "Zumo de lima", "Licor de flor de saúco", "Fresa", "Frambuesa"],
-    image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=500&h=600&fit=crop",
-  },
-  {
-    id: 3,
-    name: "Furia Frutal",
-    category: "autor",
-    base: "ron",
-    price: "10,00€",
-    description: "Una explosión tropical de sabores intensos con un toque de almendra amarga.",
-    ingredients: ["Ron especiado", "Licor Chartreuse", "Mango", "Fruta de la pasión", "Lima", "Sirope de almendra amarga"],
-    image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&h=600&fit=crop",
-  },
-  {
-    id: 4,
-    name: "Spicy Mango Margarita",
-    category: "autor",
-    base: "tequila",
-    price: "9,00€",
-    description: "El clásico mexicano reinventado con mango picante y borde de Tajín.",
-    ingredients: ["Tequila", "Zumo de lima", "Triple seco", "Mango picante", "Borde de Tajín"],
-    image: "https://images.unsplash.com/photo-1556855810-ac404aa91e85?w=500&h=600&fit=crop",
-  },
-  // Cócteles Clásicos
-  {
-    id: 5,
-    name: "Pornstar Martini",
-    category: "clasicos",
-    base: "vodka",
-    price: "10,00€",
-    description: "El sensual clásico moderno con fruta de la pasión y su chupito de cava.",
-    ingredients: ["Vodka", "Vainilla", "Lima", "Licor de fruta de la pasión", "Chupito de cava"],
-    image: "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=500&h=600&fit=crop",
-  },
-  {
-    id: 6,
-    name: "Clover Club",
-    category: "clasicos",
-    base: "ginebra",
-    price: "8,50€",
-    description: "Elegante cóctel pre-prohibición con frambuesa fresca y espuma sedosa.",
-    ingredients: ["Ginebra", "Limón", "Frambuesa"],
-    image: "https://images.unsplash.com/photo-1527761939622-9119094290d4?w=500&h=600&fit=crop",
-  },
-  {
-    id: 7,
-    name: "Piña Colada",
-    category: "clasicos",
-    base: "ron",
-    price: "8,50€",
-    description: "El clásico tropical cremoso con coco natural y piña fresca.",
-    ingredients: ["Ron blanco", "Zumo de piña", "Puré de coco"],
-    image: "https://images.unsplash.com/photo-1587223962930-cb7f31384c19?w=500&h=600&fit=crop",
-  },
-  {
-    id: 8,
-    name: "Aperol Spritz",
-    category: "clasicos",
-    base: "aperol",
-    price: "8,50€",
-    description: "El aperitivo italiano por excelencia, refrescante y vibrante.",
-    ingredients: ["Aperol", "Vino espumoso", "Soda"],
-    image: "https://images.unsplash.com/photo-1560512823-829485b8bf24?w=500&h=600&fit=crop",
-  },
-  {
-    id: 9,
-    name: "Mojito",
-    category: "clasicos",
-    base: "ron",
-    price: "8,50€",
-    description: "El inmortal cubano con hierbabuena fresca machacada a mano.",
-    ingredients: ["Ron", "Lima", "Sirope de caña", "Hierbabuena"],
-    image: "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=500&h=600&fit=crop",
-  },
-  {
-    id: 10,
-    name: "Moscow Mule",
-    category: "clasicos",
-    base: "vodka",
-    price: "8,50€",
-    description: "Refrescante y especiado, servido en su icónica taza de cobre.",
-    ingredients: ["Vodka", "Ginger beer", "Lima"],
-    image: "https://images.unsplash.com/photo-1546171753-97d7676e4602?w=500&h=600&fit=crop",
-  },
-  // Mocktails (Sin Alcohol)
-  {
-    id: 11,
-    name: "Colada Virgen",
-    category: "sin-alcohol",
-    base: "all",
-    price: "7,00€",
-    description: "Toda la cremosidad tropical sin alcohol.",
-    ingredients: ["Coco", "Puré de piña", "Zumo de piña"],
-    image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=500&h=600&fit=crop",
-  },
-  {
-    id: 12,
-    name: "Ipanema",
-    category: "sin-alcohol",
-    base: "all",
-    price: "7,00€",
-    description: "La versión brasileña sin alcohol del mojito, refrescante y tropical.",
-    ingredients: ["Zumo de lima", "Piña natural", "Ginger beer"],
-    image: "https://images.unsplash.com/photo-1497534446932-c925b458314e?w=500&h=600&fit=crop",
-  },
-  {
-    id: 13,
-    name: "Mojito Virgen",
-    category: "sin-alcohol",
-    base: "all",
-    price: "7,00€",
-    description: "Toda la frescura del mojito con variantes de sabor: frambuesa, fruta de la pasión o jabuticaba.",
-    ingredients: ["Lima", "Frambuesa / Fruta de la pasión / Jabuticaba", "Hierbabuena", "Soda"],
-    image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=500&h=600&fit=crop",
-  },
+  { id: "sin-alcohol", name: "Sin Alcohol" },
 ];
 
 // CHAMPAGNE
@@ -317,7 +182,7 @@ const Carta = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedBase, setSelectedBase] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCocktail, setSelectedCocktail] = useState<typeof cocktailsData[0] | null>(null);
+  const [selectedCocktail, setSelectedCocktail] = useState<CoctelUI | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
   const [tabIndicatorStyle, setTabIndicatorStyle] = useState({ left: 0, width: 0 });
@@ -326,6 +191,10 @@ const Carta = () => {
   const contentSectionRef = useRef<HTMLElement>(null);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const { ref: heroRef, isVisible: heroVisible } = useAnimateOnScroll<HTMLDivElement>();
+
+  // Cargar cócteles desde Supabase
+  const { data: coctelesData, isLoading: loadingCocteles } = useCocteles();
+  const cocktailsData = useMemo(() => transformCoctelesToUI(coctelesData), [coctelesData]);
 
   // Update tab indicator position
   useEffect(() => {
@@ -350,7 +219,7 @@ const Carta = () => {
   }, [activeMainCategory]);
 
   // Handle modal open with animation
-  const openCocktailModal = (cocktail: typeof cocktailsData[0]) => {
+  const openCocktailModal = (cocktail: CoctelUI) => {
     setIsModalAnimating(true);
     setSelectedCocktail(cocktail);
     setTimeout(() => setIsModalAnimating(false), 50);
