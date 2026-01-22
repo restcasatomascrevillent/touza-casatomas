@@ -8,6 +8,9 @@ import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
 import { useAnimateOnScroll } from "@/hooks/useAnimateOnScroll";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
+import { useVinos, transformVinosToUI } from "@/hooks/useVinos";
+import { useBebidas, transformBebidasToUI } from "@/hooks/useBebidas";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Categorías principales de bebidas
 const mainCategories = [
@@ -38,120 +41,6 @@ const bases = [
   { id: "sin-alcohol", name: "Sin Alcohol" },
 ];
 
-// CHAMPAGNE
-const champagneData = [
-  { id: 1, name: "Roederer Collection 243", price: "80,00€" },
-  { id: 2, name: "Roederer Brut Vintage Rosé 2012", price: "200,00€" },
-  { id: 3, name: "Roederer Brut Vintage Rosé 2016", price: "120,00€" },
-  { id: 4, name: "Roederer Brut Vintage Rosé Magnum", price: "198,00€" },
-  { id: 5, name: "Roederer Cristal", price: "420,00€", featured: true },
-  { id: 6, name: "Laurent-Perrier La Cuvée", price: "68,00€" },
-  { id: 7, name: "Laurent-Perrier Ultra Brut", price: "87,00€" },
-  { id: 8, name: "Laurent-Perrier Millésime 2012", price: "110,00€" },
-  { id: 9, name: "Laurent-Perrier Rosé", price: "110,00€" },
-  { id: 10, name: "Laurent-Perrier Magnum", price: "155,00€" },
-  { id: 11, name: "Laurent-Perrier Rosé Magnum", price: "250,00€" },
-  { id: 12, name: "Louis Martin Rosé", price: "150,00€" },
-  { id: 13, name: "Cuvée Vincent Blanc de Blancs Brut", price: "180,00€" },
-  { id: 14, name: "Louis Martin Grand Cru", price: "130,00€" },
-  { id: 15, name: "Martel Prestige Brut", price: "48,50€" },
-  { id: 16, name: "Martel Premier Cru", price: "65,90€" },
-  { id: 17, name: "Martel Blanc de Blanc", price: "65,50€" },
-  { id: 18, name: "Martel Rosé Brut", price: "55,00€" },
-  { id: 19, name: "Roederer Brut Vintage 2015", price: "110,00€" },
-  { id: 20, name: "Martel Victoire Celebration 150 Aniversario", price: "78,50€" },
-  { id: 21, name: "Collet Brut", price: "51,00€" },
-  { id: 22, name: "Collet Rosé", price: "66,00€" },
-  { id: 23, name: "Dom Pérignon Plénitude 2 - 2002", price: "735,00€", featured: true },
-  { id: 24, name: "Dom Pérignon Rosé Vintage 2005", price: "530,00€", featured: true },
-  { id: 25, name: "Laurent-Perrier Alexandra Rosé", price: "620,00€", featured: true },
-  { id: 26, name: "Laurent-Perrier Gran Siècle", price: "320,00€", featured: true },
-  { id: 27, name: "Krug Grande Cuvée 170 Ed.", price: "295,00€", featured: true },
-  { id: 28, name: "Moët Chandon Grand Vintage", price: "115,00€" },
-  { id: 29, name: "Moët Grand Vintage Rosé", price: "125,00€" },
-  { id: 30, name: "Philippe Gonet Signature", price: "68,00€" },
-  { id: 31, name: "Piper-Heidsieck", price: "56,00€" },
-  { id: 32, name: "Piper-Heidsieck Rosado", price: "60,00€" },
-  { id: 33, name: "Ruinart Rosé", price: "110,00€" },
-  { id: 34, name: "Ruinart Blanc de Blancs", price: "125,00€" },
-  { id: 35, name: "Laurent-Perrier Millésime 2015", price: "130,00€" },
-  { id: 36, name: "Dom Pérignon Vintage 2013", price: "320,00€", featured: true },
-];
-
-// CAVAS
-const cavasData = [
-  { id: 1, name: "Agustí Torelló", price: "35,00€" },
-  { id: 2, name: "Agustí Torelló Kripta G.Rva.", price: "90,00€", featured: true },
-  { id: 3, name: "Crémant de Chanceny Brut Rosé", price: "27,00€" },
-  { id: 4, name: "Edone Cuvée de María", price: "18,50€" },
-  { id: 5, name: "Edone Grand Cuvée Magnum", price: "50,00€" },
-  { id: 6, name: "Edone Grand Cuvée", price: "25,00€" },
-  { id: 7, name: "Juvé & Camps Rva. Familia", price: "27,00€" },
-  { id: 8, name: "Juvé & Camps Millésime", price: "35,00€" },
-  { id: 9, name: "Juvé & Camps Gran Juvé", price: "50,00€", featured: true },
-  { id: 10, name: "Mirgin Gran Reserva", price: "22,50€" },
-  { id: 11, name: "Torelló", price: "26,50€" },
-  { id: 12, name: "Torelló Rosé", price: "27,50€" },
-  { id: 13, name: "Torelló Rosé Magnum", price: "61,60€" },
-];
-
-// CERVEZAS
-const cervezasData = [
-  { id: 1, name: "Heineken", price: "3,00€" },
-  { id: 2, name: "Heineken 0.0", price: "3,00€", tag: "Sin Alcohol" },
-  { id: 3, name: "Amstel Oro 0.0", price: "3,00€", tag: "Sin Alcohol" },
-  { id: 4, name: "Desperados", price: "3,50€" },
-  { id: 5, name: "Sol", price: "3,50€" },
-  { id: 6, name: "Rubia 18/70", price: "3,50€" },
-  { id: 7, name: "Cruz Campo Sin Gluten", price: "3,00€", tag: "Sin Gluten" },
-  { id: 8, name: "Cruz Campo Gran Reserva", price: "3,50€" },
-  { id: 9, name: "Radler", price: "3,00€" },
-  { id: 10, name: "Mort Subite", price: "3,00€" },
-  { id: 11, name: "Águila Dorada", price: "3,00€" },
-  { id: 12, name: "Judas", price: "4,00€", tag: "Especial" },
-  { id: 13, name: "Ladrón de Manzanas", price: "3,00€", tag: "Sidra" },
-  { id: 14, name: "Águila Sin Filtrar", price: "3,50€" },
-  { id: 15, name: "Alcázar", price: "4,00€" },
-  { id: 16, name: "Paulaner", price: "4,50€", tag: "Premium" },
-];
-
-// COPAS DE VINO, CAVA Y CHAMPAGNE
-const copasData = [
-  { id: 1, name: "Copa Ribera del Duero Aster Crianza", price: "4,50€", type: "Tinto" },
-  { id: 2, name: "Copa Rosado Marqués de Riscal XR", price: "4,50€", type: "Rosado" },
-  { id: 3, name: "Copa Verdejo", price: "4,50€", type: "Blanco" },
-  { id: 4, name: "Copa Cava Edone", price: "5,00€", type: "Cava" },
-  { id: 5, name: "Copa Champagne Laurent-Perrier", price: "13,50€", type: "Champagne" },
-  { id: 6, name: "Copa Cava Juvé & Camps", price: "5,00€", type: "Cava" },
-  { id: 7, name: "Copa Cava Rosado", price: "5,00€", type: "Cava" },
-  { id: 8, name: "Copa Vino Dulce Oremus Tokaji", price: "12,00€", type: "Dulce" },
-  { id: 9, name: "Copa Champagne Laurent-Perrier Rosé", price: "25,00€", type: "Champagne" },
-  { id: 10, name: "Copa Champagne Laurent-Perrier Millésime", price: "28,00€", type: "Champagne" },
-  { id: 11, name: "Copa Champagne Laurent-Perrier Ultra Brut", price: "25,00€", type: "Champagne" },
-];
-
-// WHISKIES
-const whiskiesData = [
-  { id: 1, name: "Johnnie Walker Red Label", price: "7,00€", type: "Blend" },
-  { id: 2, name: "Johnnie Walker Black Label", price: "9,00€", type: "Blend 12 años" },
-  { id: 3, name: "Johnnie Walker Green Label", price: "12,00€", type: "Blended Malt 15 años" },
-  { id: 4, name: "Johnnie Walker Blue Label", price: "40,00€", type: "Premium Blend", featured: true },
-  { id: 5, name: "Jack Daniel's Rye", price: "8,00€", type: "Tennessee Rye" },
-  { id: 6, name: "Jack Daniel's Gentleman Jack", price: "9,00€", type: "Tennessee Whiskey" },
-  { id: 7, name: "Jack Daniel's Single Barrel Select", price: "11,00€", type: "Single Barrel" },
-  { id: 8, name: "Glenrothes 12", price: "10,00€", type: "Single Malt, Speyside" },
-  { id: 9, name: "Glenfarclas Family Malt", price: "8,00€", type: "Single Malt, Speyside" },
-  { id: 10, name: "Dewar's 12 Double Aged", price: "10,00€", type: "Blend" },
-  { id: 11, name: "Monkey Shoulder", price: "8,00€", type: "Blend, Speyside" },
-  { id: 12, name: "The Kurayoshi Pure Malt 12 años", price: "15,00€", type: "Japanese Whisky", featured: true },
-  { id: 13, name: "Lagavulin 8", price: "10,00€", type: "Single Malt, Islay" },
-  { id: 14, name: "Aberfeldy 12 años", price: "9,00€", type: "Single Malt, Highlands" },
-  { id: 15, name: "Ballantine's", price: "7,00€", type: "Blend" },
-  { id: 16, name: "Ballantine's 10", price: "8,00€", type: "Blend 10 años" },
-  { id: 17, name: "Ballantine's Light", price: "7,00€", type: "Blend Light" },
-  { id: 18, name: "Chivas Regal 18", price: "15,00€", type: "Blend Premium", featured: true },
-];
-
 // Tapas para maridaje
 const tapasData = [
   {
@@ -177,6 +66,23 @@ const tapasData = [
   },
 ];
 
+// Skeleton para bebidas
+const DrinksSkeleton = ({ count = 6 }: { count?: number }) => (
+  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} className="bg-card border border-border/50 rounded-xl p-5">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/4" />
+          </div>
+          <Skeleton className="h-6 w-16" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 const Carta = () => {
   const [activeMainCategory, setActiveMainCategory] = useState("cocteles");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -195,6 +101,20 @@ const Carta = () => {
   // Cargar cócteles desde Supabase
   const { data: coctelesData, isLoading: loadingCocteles } = useCocteles();
   const cocktailsData = useMemo(() => transformCoctelesToUI(coctelesData), [coctelesData]);
+
+  // Cargar champagnes y cavas desde Vinos
+  const { data: champagnesRaw, isLoading: loadingChampagnes } = useVinos('CHAMPAGNES');
+  const { data: cavasRaw, isLoading: loadingCavas } = useVinos('CAVAS Y OTROS ESPUMOSOS');
+  const champagneData = useMemo(() => transformVinosToUI(champagnesRaw), [champagnesRaw]);
+  const cavasData = useMemo(() => transformVinosToUI(cavasRaw), [cavasRaw]);
+
+  // Cargar cervezas, copas y whiskies desde Bebidas
+  const { data: cervezasRaw, isLoading: loadingCervezas } = useBebidas('Cervezas');
+  const { data: copasRaw, isLoading: loadingCopas } = useBebidas('Copas');
+  const { data: whiskiesRaw, isLoading: loadingWhiskies } = useBebidas('Whiskies');
+  const cervezasData = useMemo(() => transformBebidasToUI(cervezasRaw), [cervezasRaw]);
+  const copasData = useMemo(() => transformBebidasToUI(copasRaw), [copasRaw]);
+  const whiskiesData = useMemo(() => transformBebidasToUI(whiskiesRaw), [whiskiesRaw]);
 
   // Update tab indicator position
   useEffect(() => {
@@ -514,34 +434,38 @@ const Carta = () => {
                   <p className="text-muted-foreground text-sm md:text-base">Las mejores burbujas de Francia</p>
                 </div>
               </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filterBySearch(champagneData).map((item, index) => (
-                  <div
-                    key={item.id}
-                    style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
-                    className={cn(
-                      "group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer",
-                      item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5 ring-1 ring-primary/20"
-                    )}
-                  >
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
-                          {item.name}
-                        </h3>
-                        {item.featured && (
-                          <span className="inline-flex items-center gap-1 mt-1 text-xs text-primary font-medium animate-pulse">
-                            <span className="text-gold">✦</span> Premium
-                          </span>
-                        )}
+              {loadingChampagnes ? (
+                <DrinksSkeleton count={9} />
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filterBySearch(champagneData).map((item, index) => (
+                    <div
+                      key={item.id}
+                      style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
+                      className={cn(
+                        "group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer",
+                        item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5 ring-1 ring-primary/20"
+                      )}
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
+                            {item.name}
+                          </h3>
+                          {item.featured && (
+                            <span className="inline-flex items-center gap-1 mt-1 text-xs text-primary font-medium animate-pulse">
+                              <span className="text-gold">✦</span> Premium
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
+                          {item.price}
+                        </span>
                       </div>
-                      <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
-                        {item.price}
-                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -561,34 +485,38 @@ const Carta = () => {
                   <p className="text-muted-foreground text-sm md:text-base">Espumosos españoles de primera calidad</p>
                 </div>
               </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filterBySearch(cavasData).map((item, index) => (
-                  <div
-                    key={item.id}
-                    style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
-                    className={cn(
-                      "group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer",
-                      item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5 ring-1 ring-primary/20"
-                    )}
-                  >
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
-                          {item.name}
-                        </h3>
-                        {item.featured && (
-                          <span className="inline-flex items-center gap-1 mt-1 text-xs text-primary font-medium animate-pulse">
-                            <span className="text-gold">✦</span> Premium
-                          </span>
-                        )}
+              {loadingCavas ? (
+                <DrinksSkeleton count={6} />
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filterBySearch(cavasData).map((item, index) => (
+                    <div
+                      key={item.id}
+                      style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
+                      className={cn(
+                        "group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer",
+                        item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5 ring-1 ring-primary/20"
+                      )}
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
+                            {item.name}
+                          </h3>
+                          {item.featured && (
+                            <span className="inline-flex items-center gap-1 mt-1 text-xs text-primary font-medium animate-pulse">
+                              <span className="text-gold">✦</span> Premium
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
+                          {item.price}
+                        </span>
                       </div>
-                      <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
-                        {item.price}
-                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -600,31 +528,35 @@ const Carta = () => {
                 <div className="w-16 h-0.5 bg-gradient-to-r from-primary to-gold mx-auto mb-3" />
                 <p className="text-muted-foreground">Selección nacional e internacional</p>
               </div>
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {filterBySearch(cervezasData).map((item, index) => (
-                  <div
-                    key={item.id}
-                    style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
-                    className="group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer"
-                  >
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
-                          {item.name}
-                        </h3>
-                        {item.tag && (
-                          <span className="inline-block mt-1 text-xs text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-full">
-                            {item.tag}
-                          </span>
-                        )}
+              {loadingCervezas ? (
+                <DrinksSkeleton count={8} />
+              ) : (
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {filterBySearch(cervezasData).map((item, index) => (
+                    <div
+                      key={item.id}
+                      style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
+                      className="group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer"
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
+                            {item.name}
+                          </h3>
+                          {item.tag && (
+                            <span className="inline-block mt-1 text-xs text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-full">
+                              {item.tag}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
+                          {item.price}
+                        </span>
                       </div>
-                      <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
-                        {item.price}
-                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -636,29 +568,33 @@ const Carta = () => {
                 <div className="w-16 h-0.5 bg-gradient-to-r from-primary to-gold mx-auto mb-3" />
                 <p className="text-muted-foreground">Disfruta por copas de nuestra selección</p>
               </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filterBySearch(copasData).map((item, index) => (
-                  <div
-                    key={item.id}
-                    style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
-                    className="group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer"
-                  >
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
-                          {item.name}
-                        </h3>
-                        <span className="inline-block mt-1 text-xs text-primary/80">
-                          {item.type}
+              {loadingCopas ? (
+                <DrinksSkeleton count={6} />
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filterBySearch(copasData).map((item, index) => (
+                    <div
+                      key={item.id}
+                      style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
+                      className="group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer"
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
+                            {item.name}
+                          </h3>
+                          <span className="inline-block mt-1 text-xs text-primary/80">
+                            {item.type}
+                          </span>
+                        </div>
+                        <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
+                          {item.price}
                         </span>
                       </div>
-                      <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
-                        {item.price}
-                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -678,37 +614,41 @@ const Carta = () => {
                   <p className="text-muted-foreground text-sm md:text-base">Selección de los mejores whiskies del mundo</p>
                 </div>
               </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filterBySearch(whiskiesData).map((item, index) => (
-                  <div
-                    key={item.id}
-                    style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
-                    className={cn(
-                      "group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer",
-                      item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5 ring-1 ring-primary/20"
-                    )}
-                  >
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
-                          {item.name}
-                        </h3>
-                        <span className="inline-block mt-1 text-xs text-muted-foreground">
-                          {item.type}
-                        </span>
-                        {item.featured && (
-                          <span className="inline-flex items-center gap-1 ml-2 text-xs text-primary font-medium animate-pulse">
-                            <span className="text-gold">✦</span> Premium
+              {loadingWhiskies ? (
+                <DrinksSkeleton count={9} />
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filterBySearch(whiskiesData).map((item, index) => (
+                    <div
+                      key={item.id}
+                      style={{ animationDelay: `${index * 50 + 200}ms`, opacity: 0 }}
+                      className={cn(
+                        "group bg-card border border-border/50 rounded-xl p-5 transition-all duration-300 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 animate-stagger-fade-up cursor-pointer",
+                        item.featured && "border-primary/50 bg-gradient-to-br from-card to-primary/5 ring-1 ring-primary/20"
+                      )}
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
+                            {item.name}
+                          </h3>
+                          <span className="inline-block mt-1 text-xs text-muted-foreground">
+                            {item.type}
                           </span>
-                        )}
+                          {item.featured && (
+                            <span className="inline-flex items-center gap-1 ml-2 text-xs text-primary font-medium animate-pulse">
+                              <span className="text-gold">✦</span> Premium
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
+                          {item.price}
+                        </span>
                       </div>
-                      <span className="text-primary font-bold text-lg whitespace-nowrap group-hover:scale-110 transition-transform duration-300">
-                        {item.price}
-                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
