@@ -24,16 +24,21 @@ export interface CoctelUI {
   image: string;
 }
 
-export const useCocteles = () => {
+export const useCocteles = (soloTouza: boolean = true) => {
   return useQuery({
-    queryKey: ['cocteles'],
+    queryKey: ['cocteles', soloTouza],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('Cocteles')
         .select('*')
         .eq('activado', true)
         .order('orden', { ascending: true });
       
+      if (soloTouza) {
+        query = query.eq('touza', true);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data as Coctel[];
     },
