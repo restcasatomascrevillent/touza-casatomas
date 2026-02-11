@@ -120,7 +120,13 @@ const Contacto = () => {
               </div>
 
               {/* Social */}
-              <div className="flex gap-3 mb-10">
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: 0.3, ease: appleEase }}
+                className="flex gap-3 mb-10"
+              >
                 <a href="https://www.instagram.com/touzabar/" target="_blank" rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all duration-300"
                   aria-label="Instagram">
@@ -131,16 +137,22 @@ const Contacto = () => {
                   aria-label="Facebook">
                   <Facebook className="w-5 h-5" />
                 </a>
-              </div>
+              </motion.div>
 
               {/* Map */}
-              <div className="rounded-2xl overflow-hidden border border-border/30">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.8, ease: appleEase }}
+                className="rounded-2xl overflow-hidden border border-border/30"
+              >
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3127.8967799847837!2d-0.8111399!3d38.2493699!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd63b5c3d9d4e0cf%3A0x4a1234567890abcd!2sC.%20San%20Vicente%2C%2014%2C%2003330%20Crevillent%2C%20Alicante!5e0!3m2!1ses!2ses!4v1234567890123"
                   width="100%" height="250" style={{ border: 0 }} allowFullScreen loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade" title="Ubicación Touza"
                 />
-              </div>
+              </motion.div>
             </div>
 
             {/* Form */}
