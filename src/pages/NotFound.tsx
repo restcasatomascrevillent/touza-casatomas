@@ -1,7 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import Seo from "@/components/Seo";
 
 const NotFound = () => {
@@ -21,34 +20,25 @@ const NotFound = () => {
         description="La página que buscas no existe."
         keywords={[]}
       />
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
-        <div className="max-w-md space-y-6">
-          <span className="inline-block text-primary text-sm tracking-[0.3em] uppercase opacity-80">
-            Error 404
-          </span>
-          <h1 className="font-serif text-6xl md:text-8xl font-bold text-foreground">
-            Touza
-          </h1>
-          <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto opacity-50" />
-          <h2 className="text-2xl font-serif text-foreground/90">
-            Página no encontrada
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Lo sentimos, la página que estás buscando no existe o ha sido movida.
-          </p>
-          <div className="pt-4">
-            <Button
-              asChild
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
-            >
-              <Link to="/">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Volver al Inicio
-              </Link>
-            </Button>
-          </div>
-        </div>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-black p-6 text-center">
+        <h1
+          className="font-sans text-[8rem] md:text-[12rem] font-extralight text-white/10 leading-none mb-4"
+        >
+          404
+        </h1>
+        <h2 className="font-serif text-2xl md:text-3xl text-white/80 mb-4">
+          Página no encontrada
+        </h2>
+        <p className="text-white/30 font-light max-w-sm mb-10 leading-relaxed">
+          Lo sentimos, la página que buscas no existe o ha sido movida.
+        </p>
+        <Button
+          asChild
+          size="lg"
+          className="h-14 px-10 bg-white text-black hover:bg-white/90 font-medium rounded-full"
+        >
+          <Link to="/">Volver al Inicio</Link>
+        </Button>
       </div>
     </>
   );
