@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Layout from "@/components/layout/Layout";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css";
 import { cn } from "@/lib/utils";
+import { OptimizedImage } from "@/components/ui/optimized-image";
+import Seo from "@/components/Seo";
+import ScrollTextReveal from "@/components/ScrollTextReveal";
 
 const galleryCategories = [
   { id: "all", name: "Todo" },
@@ -49,27 +55,41 @@ const Galeria = () => {
 
   return (
     <Layout>
+      <Seo
+        title="Galería de Imágenes"
+        description="Explora la galería de imágenes de Touza. Fotos de nuestros cócteles artesanales, el ambiente exclusivo y nuestro reservado en Crevillente."
+        keywords={['fotos touza', 'galería cócteles', 'imágenes bar crevillente', 'fotos reservado']}
+      />
       {/* Hero */}
       <section className="relative pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden">
-        <div className="absolute inset-0">
-          <img 
-            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp" 
-            alt="Galería" 
+        <div
+          className="absolute inset-0"
+        >
+          <OptimizedImage
+            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp"
+            alt="Galería"
             className="w-full h-full object-cover opacity-25"
-            loading="eager"
+            priority={true}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
         </div>
+
         <div className="relative z-10 container-custom text-center">
-          <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block opacity-0 animate-fade-up">
+          <span
+            className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block"
+          >
             Descubre
           </span>
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 opacity-0 animate-fade-up animation-delay-100">
+          <h1
+            className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6"
+          >
             Galería
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto opacity-0 animate-fade-up animation-delay-200">
-            Un vistazo a la esencia de Touza: ambiente, cócteles y momentos inolvidables.
-          </p>
+          <div className="flex justify-center">
+            <ScrollTextReveal className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto justify-center">
+              Un vistazo a la esencia de Touza: ambiente, cócteles y momentos inolvidables.
+            </ScrollTextReveal>
+          </div>
         </div>
       </section>
 
@@ -98,39 +118,52 @@ const Galeria = () => {
       {/* Gallery Grid - Uniform on mobile */}
       <section className="py-6 md:section-padding">
         <div className="container-custom px-3 md:px-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
-            {filteredImages.map((item, index) => (
-              <div
-                key={item.id}
-                onClick={() => openLightbox(item)}
-                className={cn(
-                  "group cursor-pointer relative overflow-hidden rounded-lg tap-highlight",
-                  // Only apply special sizing on tablet+
-                  index % 5 === 0 && "md:col-span-2 md:row-span-2"
-                )}
+          <div className="container-custom px-3 md:px-4">
+            <LayoutGroup>
+              <motion.div
+                layout
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4"
               >
-                <div className={cn(
-                  "w-full overflow-hidden", 
-                  // Uniform aspect ratio on mobile
-                  "aspect-square",
-                  // Variable on desktop
-                  index % 5 === 0 ? "md:aspect-square" : "md:aspect-[4/5]"
-                )}>
-                  <img 
-                    src={item.image} 
-                    alt={item.alt} 
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 active:scale-100"
-                    loading="lazy"
-                  />
-                </div>
-                {/* Overlay only on desktop hover */}
-                <div className="absolute inset-0 bg-background/0 md:group-hover:bg-background/30 transition-all duration-300 flex items-center justify-center pointer-events-none">
-                  <span className="text-foreground opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 font-serif text-base md:text-lg">
-                    Ver
-                  </span>
-                </div>
-              </div>
-            ))}
+                <AnimatePresence mode="popLayout">
+                  {filteredImages.map((item, index) => (
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.4 }}
+                      key={item.id}
+                      onClick={() => openLightbox(item)}
+                      className={cn(
+                        "group cursor-pointer relative overflow-hidden rounded-lg tap-highlight",
+                        // Only apply special sizing on tablet+
+                        index % 5 === 0 && "md:col-span-2 md:row-span-2"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-full overflow-hidden",
+                        // Uniform aspect ratio on mobile
+                        "aspect-square",
+                        // Variable on desktop
+                        index % 5 === 0 ? "md:aspect-square" : "md:aspect-[4/5]"
+                      )}>
+                        <OptimizedImage
+                          src={item.image}
+                          alt={item.alt}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                      </div>
+                      {/* Overlay only on desktop hover */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none backdrop-blur-[2px]">
+                        <span className="text-white font-serif text-base md:text-lg tracking-widest uppercase border border-white/30 px-6 py-2 rounded-full backdrop-blur-md bg-white/10">
+                          Ver
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            </LayoutGroup>
           </div>
         </div>
       </section>
@@ -140,22 +173,23 @@ const Galeria = () => {
         <DialogContent className="max-w-5xl w-[95vw] md:w-auto bg-background/98 backdrop-blur-2xl border-border/50 p-0 md:p-4 rounded-xl md:rounded-lg">
           {selectedImage && (
             <div className="relative">
-              <img 
-                src={selectedImage.image} 
-                alt={selectedImage.alt} 
+              <OptimizedImage
+                src={selectedImage.image}
+                alt={selectedImage.alt}
                 className="w-full h-auto max-h-[75vh] md:max-h-[80vh] object-contain rounded-lg"
+                priority={true}
               />
               {/* Navigation - Larger buttons positioned for thumbs */}
-              <button 
-                onClick={() => navigateLightbox("prev")} 
-                className="absolute left-2 bottom-20 md:bottom-auto md:top-1/2 md:-translate-y-1/2 w-14 h-14 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center text-foreground text-xl font-bold hover:bg-primary hover:text-primary-foreground transition-all duration-200 touch-target-lg shadow-lg tap-highlight" 
+              <button
+                onClick={() => navigateLightbox("prev")}
+                className="absolute left-2 bottom-20 md:bottom-auto md:top-1/2 md:-translate-y-1/2 w-14 h-14 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center text-foreground text-xl font-bold hover:bg-primary hover:text-primary-foreground transition-all duration-200 touch-target-lg shadow-lg tap-highlight"
                 aria-label="Anterior"
               >
                 ←
               </button>
-              <button 
-                onClick={() => navigateLightbox("next")} 
-                className="absolute right-2 bottom-20 md:bottom-auto md:top-1/2 md:-translate-y-1/2 w-14 h-14 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center text-foreground text-xl font-bold hover:bg-primary hover:text-primary-foreground transition-all duration-200 touch-target-lg shadow-lg tap-highlight" 
+              <button
+                onClick={() => navigateLightbox("next")}
+                className="absolute right-2 bottom-20 md:bottom-auto md:top-1/2 md:-translate-y-1/2 w-14 h-14 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center text-foreground text-xl font-bold hover:bg-primary hover:text-primary-foreground transition-all duration-200 touch-target-lg shadow-lg tap-highlight"
                 aria-label="Siguiente"
               >
                 →

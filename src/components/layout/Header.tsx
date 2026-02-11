@@ -84,14 +84,14 @@ const Header = () => {
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <button
-                  className="p-2 rounded-full transition-all duration-200 hover:bg-muted active:scale-95 touch-target"
+                  className="p-3 rounded-full transition-all duration-200 hover:bg-muted active:scale-95 touch-target min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label="Abrir menú"
                 >
                   <Menu className="w-6 h-6 text-foreground" />
                 </button>
               </SheetTrigger>
-              <SheetContent 
-                side="right" 
+              <SheetContent
+                side="right"
                 className="w-[85vw] max-w-[320px] bg-background/98 backdrop-blur-2xl border-l border-border/30 p-0"
               >
                 <div className="flex flex-col h-full">
@@ -111,7 +111,7 @@ const Header = () => {
                         const isActive = location.pathname === link.path;
                         const Icon = link.icon;
                         return (
-                          <li 
+                          <li
                             key={link.path}
                             style={{ animationDelay: `${index * 50}ms` }}
                             className="opacity-0 animate-fade-up"

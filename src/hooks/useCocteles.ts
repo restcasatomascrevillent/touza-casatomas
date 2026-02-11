@@ -33,22 +33,30 @@ export const useCocteles = (soloTouza: boolean = true) => {
         .select('*')
         .eq('activado', true)
         .order('orden', { ascending: true });
-      
+
       if (soloTouza) {
         query = query.eq('touza', true);
       }
-      
+
       const { data, error } = await query;
-      if (error) throw error;
+
+      if (error) {
+        console.error('Error loading cocktails:', error);
+        throw new Error('No se pudieron cargar los cócteles. Por favor, intenta de nuevo.');
+      }
+
       return data as Coctel[];
     },
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 5 * 60 * 1000, // 5 minutos
   });
 };
 
 // Transforma los datos de Supabase al formato usado en el UI
 export const transformCoctelesToUI = (cocteles: Coctel[] | undefined): CoctelUI[] => {
   if (!cocteles) return [];
-  
+
   return cocteles.map(c => ({
     id: c.id,
     name: c.nombre || '',

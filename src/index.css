@@ -7,7 +7,7 @@
    All colors MUST be HSL.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap');
+/* Fonts loaded via index.html for better performance */
 
 @layer base {
   :root {
@@ -76,7 +76,7 @@
     --secondary: 0 0% 10%;
     --secondary-foreground: 42 20% 88%;
     --muted: 0 0% 9%;
-    --muted-foreground: 0 0% 55%;
+    --muted-foreground: 0 0% 60%;
     --accent: 35 75% 48%;
     --accent-foreground: 0 0% 4%;
     --destructive: 0 62.8% 30.6%;
@@ -101,7 +101,7 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth; - Disabled for Lenis */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -113,7 +113,12 @@
     line-height: 1.6;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Cormorant Garamond', serif;
     @apply font-semibold tracking-wide leading-tight;
   }
@@ -133,6 +138,7 @@
 }
 
 @layer components {
+
   /* Container */
   .container-custom {
     @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
@@ -253,7 +259,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .scroll-snap-x > * {
+  .scroll-snap-x>* {
     scroll-snap-align: start;
   }
 
@@ -282,20 +288,38 @@
   }
 
   /* Stagger animation for children */
-  .stagger-children > * {
+  .stagger-children>* {
     @apply opacity-0;
     animation: stagger-fade-up 0.4s ease-out forwards;
   }
 
-  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-  .stagger-children > *:nth-child(2) { animation-delay: 60ms; }
-  .stagger-children > *:nth-child(3) { animation-delay: 120ms; }
-  .stagger-children > *:nth-child(4) { animation-delay: 180ms; }
-  .stagger-children > *:nth-child(5) { animation-delay: 240ms; }
-  .stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+  .stagger-children>*:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  .stagger-children>*:nth-child(2) {
+    animation-delay: 60ms;
+  }
+
+  .stagger-children>*:nth-child(3) {
+    animation-delay: 120ms;
+  }
+
+  .stagger-children>*:nth-child(4) {
+    animation-delay: 180ms;
+  }
+
+  .stagger-children>*:nth-child(5) {
+    animation-delay: 240ms;
+  }
+
+  .stagger-children>*:nth-child(6) {
+    animation-delay: 300ms;
+  }
 }
 
 @layer utilities {
+
   /* Hide scrollbar */
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -321,6 +345,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -328,8 +353,13 @@
   }
 
   @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes stagger-fade-up {
@@ -337,6 +367,7 @@
       opacity: 0;
       transform: translateY(16px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -348,6 +379,7 @@
       opacity: 0;
       transform: translateY(100%);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -359,6 +391,7 @@
       opacity: 0;
       transform: translateX(100%);
     }
+
     to {
       opacity: 1;
       transform: translateX(0);
@@ -378,11 +411,25 @@
   }
 
   /* Animation delays */
-  .animation-delay-100 { animation-delay: 100ms; }
-  .animation-delay-200 { animation-delay: 200ms; }
-  .animation-delay-300 { animation-delay: 300ms; }
-  .animation-delay-400 { animation-delay: 400ms; }
-  .animation-delay-500 { animation-delay: 500ms; }
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
 
   /* Subtle hover utilities */
   .hover-lift {
@@ -400,6 +447,7 @@
 
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {

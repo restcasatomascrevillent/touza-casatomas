@@ -36,15 +36,23 @@ export const useVinos = (categoria: string, soloTouza: boolean = true) => {
         .eq('categoria', categoria)
         .eq('activado', true)
         .order('orden', { ascending: true });
-      
+
       if (soloTouza) {
         query = query.eq('touza', true);
       }
-      
+
       const { data, error } = await query;
-      if (error) throw error;
+
+      if (error) {
+        console.error('Error loading wines:', error);
+        throw new Error('No se pudieron cargar los vinos. Por favor, intenta de nuevo.');
+      }
+
       return data as Vino[];
     },
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 5 * 60 * 1000, // 5 minutos
   });
 };
 

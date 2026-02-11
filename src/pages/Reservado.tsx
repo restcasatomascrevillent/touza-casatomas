@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Users, Wine, Music, Star, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
+import Seo from "@/components/Seo";
+import ScrollTextReveal from "@/components/ScrollTextReveal";
 
 const features = [
   {
@@ -55,14 +59,14 @@ const Reservado = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    
+
     toast({
       title: "¡Solicitud enviada!",
       description: "Nos pondremos en contacto contigo pronto para confirmar tu reserva.",
     });
-    
+
     setFormData({
       nombre: "",
       email: "",
@@ -76,37 +80,55 @@ const Reservado = () => {
 
   return (
     <Layout>
+      <Seo
+        title="El Reservado - Eventos Privados"
+        description="Celebra tus eventos más especiales en El Reservado de Touza. Un espacio exclusivo para reuniones privadas, cumpleaños y celebraciones en Crevillente."
+        keywords={['reservado crevillente', 'eventos privados', 'fiestas privadas', 'sala vip', 'celebraciones']}
+      />
       {/* Hero */}
       <section className="relative pt-28 md:pt-32 pb-16 md:pb-20 overflow-hidden">
-        <div className="absolute inset-0">
-          <img
+        <motion.div
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="absolute inset-0"
+        >
+          <OptimizedImage
             src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-8-scaled-e1699522690950.webp"
             alt="El Reservado"
             className="w-full h-full object-cover opacity-35"
-            loading="eager"
+            priority={true}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
-        </div>
+          <div className="absolute inset-0 bg-background/50" />
+        </motion.div>
+
         <div className="relative z-10 container-custom text-center">
-          <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block opacity-0 animate-fade-up">
+          <span
+            className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block"
+          >
             Espacio exclusivo
           </span>
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6 opacity-0 animate-fade-up animation-delay-100">
+          <h1
+            className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 md:mb-6"
+          >
             El Reservado
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto opacity-0 animate-fade-up animation-delay-200">
-            Un rincón privado donde crear momentos únicos. 
-            Perfecto para celebraciones íntimas y eventos especiales.
-          </p>
+          <div className="flex justify-center">
+            <ScrollTextReveal className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto justify-center">
+              Un rincón privado donde crear momentos únicos. Perfecto para celebraciones íntimas y eventos especiales.
+            </ScrollTextReveal>
+          </div>
         </div>
       </section>
-
-      {/* Features */}
       <section className="section-padding bg-charcoal">
         <div className="container-custom">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {features.map((feature, index) => (
-              <div
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
                 key={index}
                 className="text-center p-5 md:p-6 rounded-lg bg-card border border-border/30 hover:border-primary/30 transition-colors duration-200"
               >
@@ -117,7 +139,7 @@ const Reservado = () => {
                   {feature.title}
                 </h3>
                 <p className="text-muted-foreground text-xs md:text-sm">{feature.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -137,25 +159,29 @@ const Reservado = () => {
 
           <div className="grid md:grid-cols-3 gap-4 md:gap-6">
             {galleryImages.map((image, index) => (
-              <div
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.2, duration: 0.6 }}
                 key={index}
                 className="group relative overflow-hidden rounded-lg aspect-[3/2]"
               >
                 <img
                   src={image}
                   alt={`El Reservado ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
-              </div>
+              </motion.div>
             ))}
           </div>
 
           <div className="text-center mt-8">
-            <Button 
-              asChild 
-              variant="outline" 
+            <Button
+              asChild
+              variant="outline"
               className="h-12 px-6 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
             >
               <Link to="/galeria">Ver galería completa</Link>
@@ -175,12 +201,21 @@ const Reservado = () => {
               <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
                 Solicita información
               </h2>
-              <p className="text-muted-foreground text-base md:text-lg">
-                Cuéntanos sobre tu evento y diseñaremos una experiencia a medida.
-              </p>
+              <div className="mb-6 md:mb-8">
+                <ScrollTextReveal className="text-muted-foreground text-base md:text-lg justify-center">
+                  Cuéntanos sobre tu evento y diseñaremos una experiencia a medida.
+                </ScrollTextReveal>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+            <motion.form
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              onSubmit={handleSubmit}
+              className="space-y-4 md:space-y-6"
+            >
               {/* Name & Email - Stack on mobile */}
               <div className="grid gap-4 md:grid-cols-2 md:gap-6">
                 <div>
@@ -301,11 +336,11 @@ const Reservado = () => {
                   )}
                 </Button>
               </div>
-            </form>
+            </motion.form>
           </div>
         </div>
       </section>
-    </Layout>
+    </Layout >
   );
 };
 

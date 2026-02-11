@@ -1,282 +1,199 @@
+import { useRef } from "react";
+import { ArrowRight, Star, MapPin, Clock } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Wine, Sparkles, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
-import { useAnimateOnScroll } from "@/hooks/useAnimateOnScroll";
-import { cn } from "@/lib/utils";
-
-// Datos de ejemplo para cócteles destacados
-const featuredCocktails = [
-  {
-    id: 1,
-    name: "Touza Signature",
-    description: "Nuestra creación estrella con ginebra premium, cítricos mediterráneos y un toque de romero.",
-    image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400&h=500&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Mediterranean Sunset",
-    description: "Una explosión de sabores con ron añejo, maracuyá fresca y especias exóticas.",
-    image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=400&h=500&fit=crop",
-  },
-  {
-    id: 3,
-    name: "Galician Mist",
-    description: "Homenaje a Galicia con orujo, miel de brezo y esencia de eucalipto.",
-    image: "https://images.unsplash.com/photo-1536935338788-846bb9981813?w=400&h=500&fit=crop",
-  },
-];
-
-const features = [
-  {
-    icon: Wine,
-    title: "Cócteles Artesanales",
-    description: "Creaciones únicas",
-  },
-  {
-    icon: Sparkles,
-    title: "Ambiente Único",
-    description: "Diseño exclusivo",
-  },
-  {
-    icon: Users,
-    title: "El Reservado",
-    description: "Eventos privados",
-  },
-];
+import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/optimized-image";
+import Seo from "@/components/Seo";
+import ScrollTextReveal from "@/components/ScrollTextReveal";
+import StickyScrollSection from "@/components/StickyScrollSection";
+import VisitUs from "@/components/VisitUs";
 
 const Index = () => {
-  const aboutSection = useAnimateOnScroll<HTMLDivElement>();
-  const cocktailsSection = useAnimateOnScroll<HTMLDivElement>();
-  const ctaSection = useAnimateOnScroll<HTMLDivElement>();
-
   return (
     <Layout>
-      {/* Hero Section - Optimized for mobile */}
-      <section className="relative min-h-[90vh] md:min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <img
+      <Seo
+        title="Touza - Cocktail Bar Premium en Crevillente"
+        description="Touza es un cocktail bar premium en Crevillente. Disfruta de cócteles artesanales, ambiente único y nuestro espacio privado El Reservado."
+        keywords={['cocktail bar', 'crevillente', 'cócteles', 'premium', 'reservado', 'eventos']}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "BarOrPub",
+          "name": "Touza Cocktail Bar",
+          "image": "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp",
+          "telephone": "966 782 000",
+          "email": "info@touzabar.es",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "C/ San Vicente, 14",
+            "addressLocality": "Crevillente",
+            "addressRegion": "Alicante",
+            "postalCode": "03330",
+            "addressCountry": "ES"
+          },
+          "url": "https://touzabar.es/",
+          "priceRange": "$$"
+        }}
+      />
+      {/* Hero Section - Cinematic & Immersive */}
+      <section className="relative h-[100dvh] flex items-center justify-center overflow-hidden w-full">
+        {/* Background Image - Slow Zoom Out */}
+        <motion.div
+          initial={{ scale: 1.15, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+          className="absolute inset-0 z-0"
+        >
+          <OptimizedImage
             src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp"
-            alt="Bar ambiente"
+            alt="Bar ambiente oscuro y elegante"
             className="w-full h-full object-cover"
-            loading="eager"
+            priority={true}
           />
-          {/* Stronger overlay for mobile readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background md:from-background/70 md:via-background/50" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/50 to-transparent md:from-background/40" />
-        </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background/90" />
+        </motion.div>
 
-        {/* Content - Left aligned on mobile */}
-        <div className="relative z-10 container-custom px-5 md:px-4 pt-20 md:pt-20">
-          <div className="max-w-3xl md:mx-auto md:text-center">
-            <span className="inline-block text-primary text-xs md:text-sm tracking-[0.3em] uppercase mb-4 md:mb-6 opacity-0 animate-fade-up">
-              Cocktail Bar
+        {/* Content - Staggered Reveal */}
+        <div className="relative z-10 container-custom px-6 h-full flex flex-col justify-center text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+            className="mb-6"
+          >
+            <span className="inline-block text-white/80 text-xs md:text-sm tracking-[0.4em] uppercase font-medium backdrop-blur-md bg-white/5 px-4 py-2 rounded-full border border-white/10">
+              Est. 2023 &bull; Crevillente
             </span>
-            <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-foreground mb-4 md:mb-6 opacity-0 animate-fade-up animation-delay-100 text-shadow-lg tracking-tight">
-              TOUZA
-            </h1>
-            <p className="text-base md:text-lg lg:text-xl xl:text-2xl text-foreground/90 font-light leading-relaxed mb-8 md:mb-10 opacity-0 animate-fade-up animation-delay-200 text-shadow max-w-md md:max-w-xl md:mx-auto">
-              Momentos de ensueño con los mejores cócteles
-            </p>
-            
-            {/* CTAs - Stack on mobile, row on desktop */}
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 md:justify-center opacity-0 animate-fade-up animation-delay-300">
-              <Button
-                asChild
-                size="lg"
-                className="h-14 w-full sm:w-auto px-6 md:px-8 bg-primary hover:bg-primary/90 text-primary-foreground text-base font-medium rounded-xl tap-highlight"
-              >
-                <Link to="/carta">
-                  Descubre nuestra carta
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="h-14 w-full sm:w-auto px-6 md:px-8 border-foreground/30 text-foreground hover:bg-foreground/10 hover:border-foreground/50 text-base font-medium rounded-xl tap-highlight"
-              >
-                <Link to="/reservado">El Reservado</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
+          </motion.div>
 
-        {/* Scroll indicator - Hidden on mobile */}
-        <div className="hidden md:block absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0 animate-fade-in animation-delay-500">
-          <div className="flex flex-col items-center gap-3">
-            <span className="text-xs text-muted-foreground tracking-widest uppercase">Scroll</span>
-            <div className="w-6 h-10 border border-primary/40 rounded-full flex items-start justify-center p-2">
-              <div className="w-1 h-2 bg-primary/60 rounded-full" />
-            </div>
-          </div>
-        </div>
-      </section>
+          <motion.h1
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 1.2, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-[10rem] font-bold text-white mb-6 md:mb-8 tracking-tighter leading-[0.9]"
+          >
+            TOUZA
+          </motion.h1>
 
-      {/* ¿Qué es Touza? */}
-      <section className="section-padding bg-charcoal">
-        <div 
-          ref={aboutSection.ref}
-          className={cn(
-            "container-custom transition-all duration-700 ease-out",
-            aboutSection.isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          )}
-        >
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div className="order-2 lg:order-1">
-              <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block">
-                Nuestra esencia
-              </span>
-              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-                ¿Qué es Touza?
-              </h2>
-              <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-6">
-                Touza es un refugio donde las raíces gallegas se entrelazan con el 
-                encanto mediterráneo. Un espacio íntimo diseñado para los amantes 
-                de los buenos cócteles y las conversaciones memorables.
-              </p>
-              <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-8">
-                Cada copa que servimos cuenta una historia, cada ingrediente es 
-                seleccionado con mimo, y cada momento está pensado para 
-                transportarte a un estado de puro disfrute.
-              </p>
-              <div className="grid grid-cols-3 gap-4 md:gap-6">
-                {features.map((feature, index) => (
-                  <div 
-                    key={index}
-                    className="text-center group"
-                  >
-                    <feature.icon className="w-7 h-7 md:w-8 md:h-8 text-primary mb-3 mx-auto" />
-                    <h4 className="font-medium text-foreground text-sm md:text-base mb-1">
-                      {feature.title}
-                    </h4>
-                    <p className="text-xs md:text-sm text-muted-foreground">{feature.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="order-1 lg:order-2 relative">
-              <div className="aspect-[4/5] rounded-lg overflow-hidden">
-                <img
-                  src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp"
-                  alt="Interior Touza"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-              {/* Decorative border */}
-              <div className="absolute -bottom-4 -left-4 w-full h-full border border-primary/20 rounded-lg -z-10" />
-            </div>
-          </div>
-        </div>
-      </section>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5, delay: 1.2 }}
+            className="flex justify-center mb-12"
+          >
+            <ScrollTextReveal className="text-xl md:text-2xl lg:text-3xl text-white/80 font-light leading-relaxed max-w-2xl mx-auto justify-center">
+              Donde la alquimia de los cócteles se encuentra con la excelencia. Un refugio para los sentidos.
+            </ScrollTextReveal>
+          </motion.div>
 
-      {/* Cócteles Destacados */}
-      <section className="section-padding">
-        <div 
-          ref={cocktailsSection.ref}
-          className={cn(
-            "container-custom transition-all duration-700 ease-out",
-            cocktailsSection.isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          )}
-        >
-          <div className="text-center mb-12 md:mb-16">
-            <span className="text-primary text-sm tracking-[0.2em] uppercase mb-4 block">
-              Nuestra selección
-            </span>
-            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-              Cócteles Destacados
-            </h2>
-            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-              Descubre algunas de nuestras creaciones más emblemáticas, 
-              elaboradas con pasión y los mejores ingredientes.
-            </p>
-          </div>
-
-          {/* Mobile: horizontal scroll, Desktop: grid */}
-          <div className="flex overflow-x-auto gap-4 pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 lg:gap-8 md:overflow-visible scroll-snap-x scrollbar-hide">
-            {featuredCocktails.map((cocktail) => (
-              <div
-                key={cocktail.id}
-                className="group card-premium card-hover-lift flex-shrink-0 w-[280px] md:w-auto scroll-snap-align-start"
-              >
-                <div className="aspect-[4/5] overflow-hidden rounded-t-lg">
-                  <img
-                    src={cocktail.image}
-                    alt={cocktail.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="p-4 md:p-5 lg:p-6">
-                  <h3 className="font-serif text-lg md:text-xl lg:text-2xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-200">
-                    {cocktail.name}
-                  </h3>
-                  <p className="text-muted-foreground text-sm line-clamp-2">
-                    {cocktail.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-10 md:mt-12">
+          {/* CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.5, ease: "easeOut" }}
+            className="flex flex-col sm:flex-row gap-5 justify-center items-center"
+          >
             <Button
               asChild
               size="lg"
-              variant="outline"
-              className="h-12 px-8 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              className="h-14 px-10 bg-white text-black hover:bg-white/90 text-base font-semibold rounded-full transition-all duration-300 shadow-xl"
             >
               <Link to="/carta">
-                Ver carta completa
-                <ArrowRight className="ml-2 w-5 h-5" />
+                Nuestra Carta
               </Link>
             </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="h-14 px-10 border-white/20 text-white hover:bg-white/10 hover:border-white/40 text-base font-medium rounded-full backdrop-blur-md transition-all duration-300"
+            >
+              <Link to="/reservado">El Reservado</Link>
+            </Button>
+          </motion.div>
+        </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 2.5 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce"
+        >
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-[10px] text-white/50 tracking-[0.2em] uppercase">Descubre</span>
+            <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-white/50 to-transparent" />
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Intro Section - Scroll Text Reveal */}
+      <section className="py-16 md:py-24 bg-background relative z-20">
+        <div className="container-custom max-w-4xl mx-auto px-6 text-center">
+          <span className="text-primary text-xs tracking-[0.3em] uppercase mb-8 block font-semibold">
+            Filosofía
+          </span>
+          <ScrollTextReveal className="font-serif text-2xl md:text-5xl lg:text-6xl text-foreground/20 leading-tight justify-center">
+            Touza no es solo un bar; es una declaración de intenciones. Un espacio donde el tiempo se detiene y los detalles cobran vida. Fusionamos la tradición gallega con la sofisticación contemporánea.
+          </ScrollTextReveal>
+        </div>
+      </section>
+
+      {/* Sticky Cocktail Showcase */}
+      <StickyScrollSection
+        title="Cócteles de Autor"
+        description="Cada copa que servimos cuenta una historia. Ingredientes seleccionados, técnicas de vanguardia y una presentación que desafía lo convencional para sorprender a tu paladar."
+        image="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp"
+        ctaText="Ver Carta Completa"
+        ctaLink="/carta"
+      />
+
+      {/* Sticky Reserved Showcase (Reversed) */}
+      <StickyScrollSection
+        title="El Privado"
+        description="Un espacio exclusivo diseñado para la intimidad. Perfecto para celebraciones especiales o simplemente para desconectar del mundo exterior en un ambiente inigualable."
+        image="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-10.webp"
+        ctaText="Reservar ahora"
+        ctaLink="/reservado"
+        reversed={true}
+      />
+
+      {/* Features Grid */}
+      <section className="py-16 bg-[#050505] text-white border-t border-white/5">
+        <div className="container-custom">
+          <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+            {features.map((feature, index) => (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                key={index}
+                className="text-center group"
+              >
+                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-500">
+                  <feature.icon className="w-6 h-6 text-white/70 group-hover:text-primary transition-colors" />
+                </div>
+                <h4 className="font-serif text-xl text-white mb-3">{feature.title}</h4>
+                <p className="text-white/50 leading-relaxed font-light">{feature.description}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-10.webp"
-            alt="Ambiente bar"
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-background/80" />
-        </div>
-        <div 
-          ref={ctaSection.ref}
-          className={cn(
-            "relative z-10 container-custom text-center transition-all duration-700 ease-out",
-            ctaSection.isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          )}
-        >
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            ¿Buscas un espacio único?
-          </h2>
-          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto mb-8">
-            Descubre El Reservado, nuestro espacio privado perfecto para 
-            celebraciones íntimas y eventos exclusivos.
-          </p>
-          <Button
-            asChild
-            size="lg"
-            className="h-14 px-10 bg-primary hover:bg-primary/90 text-primary-foreground text-base font-medium"
-          >
-            <Link to="/reservado">
-              Conoce El Reservado
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-          </Button>
-        </div>
-      </section>
+      {/* VISIT US SECTION - NUEVA SECCIÓN */}
+      <VisitUs />
+
     </Layout>
   );
 };
+
+const features = [
+  { icon: Star, title: "Coctelería de Autor", description: "Creaciones únicas que desafían lo convencional." },
+  { icon: MapPin, title: "Ubicación Privilegiada", description: "En el corazón de Crevillente, un oasis urbano." },
+  { icon: Clock, title: "Ambiente Nocturno", description: "El lugar perfecto para acabar tus noches." }
+];
 
 export default Index;

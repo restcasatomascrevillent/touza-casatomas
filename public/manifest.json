@@ -1,0 +1,21 @@
+{
+    "name": "Touza Cocktail Bar",
+    "short_name": "Touza",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0a0a",
+    "theme_color": "#D4A574",
+    "description": "Cocktail Bar Premium en Crevillente. Cócteles de autor, ambiente único y eventos privados.",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

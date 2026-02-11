@@ -42,7 +42,7 @@ const Footer = () => {
                 <li key={link.path}>
                   <Link
                     to={link.path}
-                    className="text-muted-foreground text-sm link-underline-elegant transition-colors duration-200 hover:text-foreground"
+                    className="block py-2 text-muted-foreground text-sm link-underline-elegant transition-colors duration-200 hover:text-foreground"
                   >
                     {link.name}
                   </Link>
@@ -95,7 +95,7 @@ const Footer = () => {
             </p>
             <div className="flex gap-3">
               <a
-                href="https://www.instagram.com/"
+                href="https://www.instagram.com/touzabar/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
@@ -109,7 +109,7 @@ const Footer = () => {
                 <Instagram className="w-5 h-5" />
               </a>
               <a
-                href="https://www.facebook.com/"
+                href="https://www.facebook.com/touzabar/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(

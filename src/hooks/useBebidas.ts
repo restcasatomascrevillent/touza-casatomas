@@ -36,15 +36,23 @@ export const useBebidas = (categoria: string, soloTouza: boolean = true) => {
         .eq('categoria', categoria)
         .eq('activado', true)
         .order('orden', { ascending: true });
-      
+
       if (soloTouza) {
         query = query.eq('touza', true);
       }
-      
+
       const { data, error } = await query;
-      if (error) throw error;
+
+      if (error) {
+        console.error('Error loading drinks:', error);
+        throw new Error('No se pudieron cargar las bebidas. Por favor, intenta de nuevo.');
+      }
+
       return data as Bebida[];
     },
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 5 * 60 * 1000, // 5 minutos
   });
 };
 
