@@ -135,15 +135,27 @@ const Reservado = () => {
       <section className="py-20 md:py-32 bg-background">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12 md:mb-16">
-            <span className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium">
+            <motion.span
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.6, ease: appleEase }}
+              className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
+            >
               Descubre el espacio
-            </span>
-            <h2 className={cn(
-              "font-serif font-bold text-foreground",
-              isMobile ? "text-3xl" : "text-5xl lg:text-6xl"
-            )}>
+            </motion.span>
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
+              className={cn(
+                "font-serif font-bold text-foreground",
+                isMobile ? "text-3xl" : "text-5xl lg:text-6xl"
+              )}
+            >
               Un ambiente único
-            </h2>
+            </motion.h2>
           </div>
 
           {isMobile ? (
@@ -194,18 +206,36 @@ const Reservado = () => {
       <section className="py-20 md:py-32 bg-black">
         <div className="max-w-2xl mx-auto px-6">
           <div className="text-center mb-12">
-            <span className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium">
+            <motion.span
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.6, ease: appleEase }}
+              className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
+            >
               Reserva tu espacio
-            </span>
-            <h2 className={cn(
-              "font-serif font-bold text-white mb-4",
-              isMobile ? "text-3xl" : "text-5xl"
-            )}>
+            </motion.span>
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
+              className={cn(
+                "font-serif font-bold text-white mb-4",
+                isMobile ? "text-3xl" : "text-5xl"
+              )}
+            >
               Solicita información
-            </h2>
-            <p className="text-white/30 font-light">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7, delay: 0.2, ease: appleEase }}
+              className="text-white/30 font-light"
+            >
               Cuéntanos sobre tu evento y diseñaremos una experiencia a medida.
-            </p>
+            </motion.p>
           </div>
 
           <motion.form

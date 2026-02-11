@@ -116,37 +116,54 @@ const Carta = () => {
 
       {/* Hero */}
       <section className={cn(
-        "bg-black overflow-hidden",
-        isMobile ? "pt-28 pb-12 px-6" : "pt-48 pb-32"
+        "relative overflow-hidden",
+        isMobile ? "h-[60vh]" : "h-[80vh]"
       )}>
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, ease: appleEase }}
-            className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
-          >
-            Selección Exclusiva
-          </motion.span>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: appleEase }}
-            className={cn(
-              "font-serif font-bold text-white",
-              isMobile ? "text-4xl mb-4" : "text-7xl lg:text-8xl mb-6"
-            )}
-          >
-            Nuestra Carta
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: appleEase }}
-            className="text-white/40 text-base md:text-lg font-light max-w-xl mx-auto"
-          >
-            Una colección curada de sabores. Desde clásicos atemporales hasta innovaciones audaces.
-          </motion.p>
+        <motion.div
+          initial={{ scale: 1.05, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: appleEase }}
+          className="absolute inset-0"
+        >
+          <OptimizedImage
+            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp"
+            alt="Barra de Touza"
+            className="w-full h-full object-cover"
+            priority={true}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black" />
+        </motion.div>
+
+        <div className="absolute inset-0 z-10 flex items-end pb-12 md:pb-20 px-6">
+          <div className="max-w-6xl mx-auto w-full text-center">
+            <motion.span
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: appleEase }}
+              className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
+            >
+              Selección Exclusiva
+            </motion.span>
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.5, ease: appleEase }}
+              className={cn(
+                "font-serif font-bold text-white leading-[0.9]",
+                isMobile ? "text-4xl mb-4" : "text-7xl lg:text-8xl mb-6"
+              )}
+            >
+              Nuestra Carta
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.7, ease: appleEase }}
+              className="text-white/50 text-base md:text-lg font-light max-w-xl mx-auto"
+            >
+              Una colección curada de sabores. Desde clásicos atemporales hasta innovaciones audaces.
+            </motion.p>
+          </div>
         </div>
       </section>
 
@@ -216,18 +233,17 @@ const Carta = () => {
           {/* Cocktails Grid */}
           {activeMainCategory === "cocteles" && (
             loadingCocteles ? <DrinksSkeleton /> :
-              <motion.div
-                variants={containerVars}
-                initial="hidden"
-                animate="show"
-                className={cn(
+              <div className={cn(
                   "grid gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8",
                   isMobile ? "grid-cols-2" : "grid-cols-3 lg:grid-cols-4"
                 )}
               >
-                {filteredCocktails.map((cocktail) => (
+                {filteredCocktails.map((cocktail, index) => (
                   <motion.div
-                    variants={itemVars}
+                    initial={{ opacity: 0, y: 25 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.6, delay: index * 0.06, ease: appleEase }}
                     key={cocktail.id}
                     onClick={() => setSelectedCocktail(cocktail)}
                     className="group cursor-pointer"
@@ -247,17 +263,13 @@ const Carta = () => {
                     <p className="text-white/30 text-sm line-clamp-2 font-light">{cocktail.description}</p>
                   </motion.div>
                 ))}
-              </motion.div>
+              </div>
           )}
 
           {/* Generic Drinks */}
           {activeMainCategory !== "cocteles" && (
-            <motion.div
-              variants={containerVars}
-              initial="hidden"
-              animate="show"
-              className="max-w-4xl mx-auto"
-            >
+            <div className="max-w-4xl mx-auto">
+            
               {(
                 (activeMainCategory === "champagne" && loadingChampagnes) ||
                 (activeMainCategory === "cavas" && loadingCavas) ||
@@ -272,9 +284,12 @@ const Carta = () => {
                     activeMainCategory === "cervezas" ? cervezasData :
                       activeMainCategory === "copas" ? copasData :
                         whiskiesData
-              ).map((drink) => (
+              ).map((drink, index) => (
                 <motion.div
-                  variants={itemVars}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-30px" }}
+                  transition={{ duration: 0.5, delay: index * 0.04, ease: appleEase }}
                   key={drink.id}
                   className="flex justify-between items-center py-5 border-b border-white/5 group"
                 >
@@ -287,7 +302,7 @@ const Carta = () => {
                   <span className="text-primary font-medium text-lg">{drink.price}</span>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           )}
         </div>
       </div>
@@ -295,15 +310,38 @@ const Carta = () => {
       {/* Tapas Section */}
       <section className="py-20 bg-white/[0.02] mt-16">
         <div className="max-w-6xl mx-auto px-6 text-center mb-12">
-          <h2 className="font-serif text-3xl md:text-4xl text-white mb-4">Tapea con tu Cóctel</h2>
-          <p className="text-white/30 font-light">El maridaje perfecto para elevar la experiencia.</p>
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.7, ease: appleEase }}
+            className="font-serif text-3xl md:text-4xl text-white mb-4"
+          >
+            Tapea con tu Cóctel
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
+            className="text-white/30 font-light"
+          >
+            El maridaje perfecto para elevar la experiencia.
+          </motion.p>
         </div>
         <div className={cn(
           "max-w-6xl mx-auto px-6",
           isMobile ? "flex overflow-x-auto gap-4 snap-x scrollbar-hide" : "grid grid-cols-3 gap-8"
         )}>
-          {tapasData.map((tapa) => (
-            <div key={tapa.id} className={cn("group", isMobile && "min-w-[280px] snap-center")}>
+          {tapasData.map((tapa, index) => (
+            <motion.div
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: index * 0.1, ease: appleEase }}
+              key={tapa.id}
+              className={cn("group", isMobile && "min-w-[280px] snap-center")}
+            >
               <div className="aspect-video rounded-2xl overflow-hidden mb-4">
                 <OptimizedImage
                   src={tapa.image}
@@ -318,7 +356,7 @@ const Carta = () => {
                 </div>
                 <span className="text-primary font-medium ml-4">{tapa.price}</span>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
