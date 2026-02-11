@@ -1,6 +1,5 @@
 import Header from "./Header";
 import Footer from "./Footer";
-import MobileReserveCTA from "@/components/MobileReserveCTA";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,7 +11,6 @@ const Layout = ({ children }: LayoutProps) => {
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
-      <MobileReserveCTA />
     </div>
   );
 };
