@@ -405,9 +405,6 @@ const Carta = () => {
               )}
             </div>
           </div>
-          <DialogClose className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition-colors">
-            <X className="w-5 h-5" />
-          </DialogClose>
         </DialogContent>
       </Dialog>
     </Layout>
