@@ -1,182 +1,112 @@
 
 
-## Plan: Rediseno Apple Design para todas las paginas
+## Plan: Animaciones scroll-triggered + Imagenes de fondo en Carta
 
-Se aplicara el estilo Apple (tipografia masiva, espaciado generoso, animaciones suaves con ease [0.25, 0.1, 0.25, 1], fondos negros puros, minimalismo) a todas las paginas del sitio, con vistas separadas mobile/desktop donde sea necesario.
+### Resumen
 
----
-
-### Cambios Globales
-
-**`src/index.css`** - Nuevas utilidades Apple:
-- Clase `.apple-ease` con transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1)
-- Clase `.text-balance` con text-wrap: balance
-- Eliminar App.css innecesario (estilos de Vite boilerplate)
-
-**`src/App.css`** - Eliminar archivo completo (estilos sobrantes del scaffold de Vite que no se usan)
-
-**`src/components/layout/Header.tsx`** - Refinar estilo Apple:
-- Logo mas limpio, sin subtitulo "Cocktail Bar" en movil
-- Navegacion desktop con tracking mas amplio y font-weight light
-- Menu movil: fondo negro puro, items con mas padding, sin bordes redondeados excesivos
-- Blur mas sutil en scroll
-
-**`src/components/layout/Footer.tsx`** - Estilo Apple:
-- Fondo negro puro (bg-black)
-- Tipografia mas ligera
-- Espaciado mas generoso entre secciones
-- Links sin decoracion, solo hover color
-
-**`src/components/MobileReserveCTA.tsx`** - Refinar:
-- Fondo negro puro con blur
-- Boton mas limpio con esquinas mas suaves (rounded-2xl)
-- Sin sombras doradas excesivas
-- Sin icono Sparkles (demasiado ruidoso)
+Mejorar las animaciones en todas las paginas para que los elementos aparezcan conforme el usuario baja (scroll-triggered), y anadir una imagen de fondo inmersiva en la seccion hero de la pagina Carta usando fotos reales de Touza.
 
 ---
 
-### Pagina Index (/)
+### 1. Carta - Hero con imagen de fondo
 
-**`src/pages/Index.tsx`** - Convertir en router mobile/desktop:
+Anadir una imagen de fondo inmersiva al hero de la pagina Carta, similar al estilo del hero del Index y Reservado.
+
+**`src/pages/Carta.tsx`** - Cambios en el hero:
+- Anadir imagen de fondo del bar: `https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp`
+- Gradiente oscuro encima para legibilidad del texto
+- Aumentar la altura del hero (de solo padding a una seccion con min-height)
+- Animacion de entrada con scale sutil en la imagen (como en HeroDesktop)
+
+### 2. Carta - Animaciones scroll-triggered en el contenido
+
+**`src/pages/Carta.tsx`** - Mejorar animaciones:
+- Cambiar el grid de cocteles de `animate="show"` (que anima al montar) a `whileInView` para que aparezcan al hacer scroll
+- Anadir `viewport={{ once: true, margin: "-50px" }}` a todos los motion elements
+- Las bebidas genericas (champagne, cervezas, etc.) tambien con `whileInView` y stagger
+- Seccion de tapas: titulo y cards con `whileInView` y stagger progresivo
+- Cada card de coctel individual con animacion `whileInView` con delay escalonado
+
+### 3. Galeria - Animaciones scroll-triggered
+
+**`src/pages/Galeria.tsx`** - Mejorar:
+- Cada imagen del grid con `whileInView` individual en vez de animacion de grupo
+- Stagger visual: delay basado en el indice (index * 0.05) para efecto cascada
+- Anadir imagen de fondo sutil al hero (opcional, fondo negro funciona bien)
+
+### 4. Reservado - Mas animaciones scroll
+
+**`src/pages/Reservado.tsx`** - Mejorar:
+- Anadir animaciones `whileInView` a los labels y titulos de la seccion de galeria
+- Formulario: cada campo con animacion escalonada conforme aparece en pantalla
+- Boton de envio con animacion separada
+
+### 5. Contacto - Animaciones scroll
+
+**`src/pages/Contacto.tsx`** - Mejorar:
+- Info de contacto: ya tiene `whileInView`, mantener
+- Formulario: envolver cada campo del formulario en motion.div con `whileInView` escalonado
+- Mapa con animacion de aparicion (fade + scale sutil)
+- Redes sociales con animacion de entrada
+
+### 6. Home (Desktop + Mobile) - Refinar animaciones
+
+**`src/components/home/FeaturesGrid.tsx`** y **`src/components/home/FeaturesMobile.tsx`**:
+- Ya tienen `whileInView`, solo asegurar que el margin sea `-80px` para que se disparen antes del borde de pantalla
+
+**`src/components/VisitUs.tsx`**:
+- Ya tiene `whileInView`, verificar consistencia
+
+### 7. NotFound - Animacion de entrada
+
+**`src/pages/NotFound.tsx`**:
+- Envolver en motion.div con fade-in inicial para el titulo 404 y los textos
+
+---
+
+### Seccion Tecnica
+
+**Patron de animacion consistente para todos los elementos:**
+
 ```typescript
-const Index = () => {
-  const isMobile = useIsMobile();
-  return isMobile ? <IndexMobile /> : <IndexDesktop />;
-};
+// Elementos individuales
+<motion.div
+  initial={{ opacity: 0, y: 30 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, margin: "-80px" }}
+  transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+>
+
+// Elementos con stagger (listas, grids)
+<motion.div
+  initial={{ opacity: 0, y: 25 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, margin: "-50px" }}
+  transition={{ duration: 0.6, delay: index * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
+>
+
+// Imagenes grandes (scale reveal)
+<motion.div
+  initial={{ opacity: 0, scale: 0.95 }}
+  whileInView={{ opacity: 1, scale: 1 }}
+  viewport={{ once: true, margin: "-100px" }}
+  transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+>
 ```
 
-**Nuevos archivos:**
+**Imagen de fondo para Carta hero:**
+- URL: `https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp` (imagen de la barra/cocteles)
+- Gradiente: `bg-gradient-to-b from-black/60 via-black/40 to-black`
+- La seccion hero pasara de ser solo texto con padding a tener min-height relativa con imagen de fondo y contenido centrado verticalmente
 
-| Archivo | Descripcion |
-|---------|-------------|
-| `src/components/home/IndexDesktop.tsx` | Composicion completa desktop |
-| `src/components/home/IndexMobile.tsx` | Composicion completa mobile |
-| `src/components/home/HeroDesktop.tsx` | Hero inmersivo con titulo text-[12rem], parallax sutil |
-| `src/components/home/HeroMobile.tsx` | Hero optimizado: titulo text-6xl, botones full-width, sin scroll indicator |
-| `src/components/home/ShowcaseSection.tsx` | Reemplaza StickyScrollSection: imagen full-width con scale-reveal, texto centrado debajo |
-| `src/components/home/ShowcaseMobile.tsx` | Imagen aspect-4/5, texto debajo, CTA full-width |
-| `src/components/home/FeaturesGrid.tsx` | 3 columnas con iconos grandes, fondo negro puro |
-| `src/components/home/FeaturesMobile.tsx` | Stack vertical, layout horizontal por item |
+**Resumen de archivos modificados:**
 
-**`src/components/VisitUs.tsx`** - Rediseno:
-- Eliminar textura cubes y spin animation del fondo
-- Fondo negro limpio
-- Grid mas espacioso con separadores finos
-- Datos de contacto reales (corregir direccion placeholder)
+| Archivo | Cambios |
+|---------|---------|
+| `src/pages/Carta.tsx` | Hero con imagen de fondo + animaciones whileInView en grid y tapas |
+| `src/pages/Galeria.tsx` | Animaciones whileInView individuales por imagen |
+| `src/pages/Reservado.tsx` | Animaciones escalonadas en formulario y galeria |
+| `src/pages/Contacto.tsx` | Animaciones escalonadas en formulario y mapa |
+| `src/pages/NotFound.tsx` | Animaciones de entrada con framer-motion |
 
----
-
-### Pagina Carta (/carta)
-
-**`src/pages/Carta.tsx`** - Refactorizar con vistas separadas:
-
-**Desktop:**
-- Hero mas inmersivo: titulo text-8xl, mas espacio negativo (pt-48 pb-40)
-- Tabs con estilo Apple: pill buttons mas grandes, sin iconos dentro de los tabs (limpieza visual)
-- Buscador mas minimal: sin icono Search visible, placeholder centrado, border solo al focus
-- Grid de cocteles: gap mas generoso, hover sutil (solo opacity change, sin translate)
-- Cards de bebidas genericas: sin bordes, solo separador inferior fino, fondo transparente
-- Modal de detalle: mas espacio, tipografia mas grande
-
-**Mobile:**
-- Hero reducido: titulo text-4xl, pt-28 pb-12
-- Tabs horizontales scrollables con snap
-- Grid cocteles 2 columnas con gap reducido
-- Cards mas compactas con tap feedback
-- Modal fullscreen con gesture dismiss
-
----
-
-### Pagina Galeria (/galeria)
-
-**`src/pages/Galeria.tsx`** - Rediseno Apple:
-
-**Desktop:**
-- Hero minimalista: titulo text-8xl, sin imagen de fondo (fondo negro puro)
-- Filtros como pills flotantes centrados
-- Grid masonry-like: imagenes con rounded-2xl, gap generoso
-- Hover: overlay minimalista sin texto "Ver", solo oscurecimiento sutil
-- Lightbox: fondo negro puro, navegacion con flechas minimalistas
-
-**Mobile:**
-- Hero compacto
-- Filtros scrollables horizontalmente
-- Grid 2 columnas uniforme, aspect-square
-- Tap para abrir lightbox, swipe para navegar
-- Navegacion lightbox con botones mas grandes en zona inferior
-
----
-
-### Pagina Reservado (/reservado)
-
-**`src/pages/Reservado.tsx`** - Rediseno Apple:
-
-**Desktop:**
-- Hero inmersivo: imagen full-width con titulo superpuesto text-8xl
-- Features en fila horizontal con iconos grandes y texto centrado, sin cards con borde
-- Galeria: imagenes con scale-reveal al scroll, rounded-2xl
-- Formulario: inputs con estilo minimal (border-bottom only o bordes muy sutiles), labels floating style
-
-**Mobile:**
-- Hero con titulo text-4xl
-- Features en grid 2x2 compacto
-- Galeria scroll horizontal con snap
-- Formulario: inputs full-width con altura generosa (h-14), labels arriba
-
----
-
-### Pagina Contacto (/contacto)
-
-**`src/pages/Contacto.tsx`** - Rediseno Apple:
-
-**Desktop:**
-- Hero minimalista: solo titulo text-8xl centrado, fondo negro
-- Layout 2 columnas: info contacto a la izquierda con iconos grandes y espaciado generoso, formulario a la derecha en card sutil
-- Mapa con bordes redondeados (rounded-2xl), sin filtro grayscale
-- Redes sociales: iconos mas grandes
-
-**Mobile:**
-- Hero compacto
-- Info de contacto en stack vertical con cards individuales
-- Formulario full-width debajo
-- Mapa full-width con rounded-xl
-
----
-
-### Pagina NotFound (404)
-
-**`src/pages/NotFound.tsx`** - Estilo Apple:
-- Titulo "404" masivo (text-[12rem]) en font-sans, ultra-light, color white/10
-- Subtitulo elegante centrado
-- Boton estilo Apple: blanco con texto negro, rounded-full
-- Sin icono de flecha
-
----
-
-### Resumen de archivos
-
-| Archivo | Accion |
-|---------|--------|
-| `src/pages/Index.tsx` | Modificar - router mobile/desktop |
-| `src/components/home/IndexDesktop.tsx` | Crear |
-| `src/components/home/IndexMobile.tsx` | Crear |
-| `src/components/home/HeroDesktop.tsx` | Crear |
-| `src/components/home/HeroMobile.tsx` | Crear |
-| `src/components/home/ShowcaseSection.tsx` | Crear |
-| `src/components/home/ShowcaseMobile.tsx` | Crear |
-| `src/components/home/FeaturesGrid.tsx` | Crear |
-| `src/components/home/FeaturesMobile.tsx` | Crear |
-| `src/components/VisitUs.tsx` | Modificar |
-| `src/components/layout/Header.tsx` | Modificar |
-| `src/components/layout/Footer.tsx` | Modificar |
-| `src/components/MobileReserveCTA.tsx` | Modificar |
-| `src/pages/Carta.tsx` | Modificar |
-| `src/pages/Galeria.tsx` | Modificar |
-| `src/pages/Reservado.tsx` | Modificar |
-| `src/pages/Contacto.tsx` | Modificar |
-| `src/pages/NotFound.tsx` | Modificar |
-| `src/index.css` | Modificar |
-| `src/App.css` | Eliminar |
-
-Total: 9 archivos nuevos, 10 modificados, 1 eliminado.
-
+Total: 5 archivos modificados.
