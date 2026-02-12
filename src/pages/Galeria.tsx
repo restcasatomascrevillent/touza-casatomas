@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Layout from "@/components/layout/Layout";
@@ -37,6 +37,7 @@ const Galeria = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedImage, setSelectedImage] = useState<typeof galleryData[0] | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
   const isMobile = useIsMobile();
 
   const filteredImages = galleryData.filter(
@@ -48,12 +49,27 @@ const Galeria = () => {
     setCurrentIndex(filteredImages.findIndex((img) => img.id === image.id));
   };
 
-  const navigateLightbox = (direction: "prev" | "next") => {
-    const newIndex = direction === "next"
-      ? (currentIndex + 1) % filteredImages.length
-      : (currentIndex - 1 + filteredImages.length) % filteredImages.length;
+  const navigateLightbox = useCallback((dir: "prev" | "next") => {
+    const d = dir === "next" ? 1 : -1;
+    setDirection(d);
+    const newIndex = (currentIndex + d + filteredImages.length) % filteredImages.length;
     setCurrentIndex(newIndex);
     setSelectedImage(filteredImages[newIndex]);
+  }, [currentIndex, filteredImages]);
+
+  const handleDragEnd = useCallback((_: any, info: { offset: { x: number }; velocity: { x: number } }) => {
+    const swipeThreshold = 50;
+    if (info.offset.x < -swipeThreshold || info.velocity.x < -200) {
+      navigateLightbox("next");
+    } else if (info.offset.x > swipeThreshold || info.velocity.x > 200) {
+      navigateLightbox("prev");
+    }
+  }, [navigateLightbox]);
+
+  const slideVariants = {
+    enter: (d: number) => ({ x: d > 0 ? 300 : -300, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (d: number) => ({ x: d > 0 ? -300 : 300, opacity: 0 }),
   };
 
   return (
@@ -64,7 +80,7 @@ const Galeria = () => {
         keywords={['fotos touza', 'galería cócteles', 'imágenes bar crevillente', 'fotos reservado']}
       />
 
-      {/* Hero - Pure black, no background image */}
+      {/* Hero */}
       <section className={cn(
         "bg-black overflow-hidden",
         isMobile ? "pt-28 pb-12 px-6" : "pt-40 pb-24"
@@ -159,7 +175,6 @@ const Galeria = () => {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     </div>
-                    {/* Hover overlay - desktop only, minimal */}
                     <div className="absolute inset-0 bg-black/30 opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                   </motion.div>
                 ))}
@@ -169,17 +184,34 @@ const Galeria = () => {
         </div>
       </section>
 
-      {/* Lightbox */}
+      {/* Lightbox with swipe */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-5xl w-[95vw] bg-black border-white/5 p-0 md:p-4 rounded-2xl">
           {selectedImage && (
-            <div className="relative">
-              <OptimizedImage
-                src={selectedImage.image}
-                alt={selectedImage.alt}
-                className="w-full h-auto max-h-[80vh] object-contain rounded-xl"
-                priority={true}
-              />
+            <div className="relative overflow-hidden">
+              <AnimatePresence initial={false} custom={direction} mode="wait">
+                <motion.div
+                  key={selectedImage.id}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.3, ease: appleEase }}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.7}
+                  onDragEnd={handleDragEnd}
+                  className="cursor-grab active:cursor-grabbing"
+                >
+                  <OptimizedImage
+                    src={selectedImage.image}
+                    alt={selectedImage.alt}
+                    className="w-full h-auto max-h-[80vh] object-contain rounded-xl select-none pointer-events-none"
+                    priority={true}
+                  />
+                </motion.div>
+              </AnimatePresence>
               <button
                 onClick={() => navigateLightbox("prev")}
                 className={cn(

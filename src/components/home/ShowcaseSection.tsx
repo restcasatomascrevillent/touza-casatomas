@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,21 +24,31 @@ const ShowcaseSection = ({
   ctaLink = "/carta",
   label = "Touza Experience",
 }: ShowcaseSectionProps) => {
+  const imageRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: imageRef,
+    offset: ["start end", "end start"],
+  });
+  const imageY = useTransform(scrollYProgress, [0, 1], ["-5%", "5%"]);
+
   return (
     <section className="py-32 lg:py-40">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
+          ref={imageRef}
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 1.2, ease: appleEase }}
           className="relative w-full aspect-[16/9] rounded-3xl overflow-hidden mb-16"
         >
-          <OptimizedImage
-            src={image}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
+          <motion.div style={{ y: imageY }} className="absolute inset-[-10%]">
+            <OptimizedImage
+              src={image}
+              alt={title}
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
           <div className="absolute inset-0 bg-black/20" />
         </motion.div>
 
