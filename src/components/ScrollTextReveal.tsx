@@ -8,8 +8,9 @@ interface ScrollTextRevealProps {
 }
 
 const Word = ({ word, index, total, scrollYProgress }: { word: string; index: number; total: number; scrollYProgress: any }) => {
-    const start = index / total;
-    const end = (index + 1) / total;
+    // All words reveal within a compact 0-1 range, overlapping heavily so they light up fast
+    const start = (index / total) * 0.6;
+    const end = start + 0.4;
     const opacity = useTransform(scrollYProgress, [start, end], [0.15, 1]);
 
     return (
@@ -23,7 +24,7 @@ const ScrollTextReveal = ({ children, className }: ScrollTextRevealProps) => {
     const ref = useRef<HTMLParagraphElement>(null);
     const { scrollYProgress } = useScroll({
         target: ref,
-        offset: ["start 0.85", "end 0.65"],
+        offset: ["start 0.95", "start 0.55"],
     });
 
     const words = children.split(" ");
