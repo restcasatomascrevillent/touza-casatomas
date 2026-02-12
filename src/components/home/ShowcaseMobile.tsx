@@ -49,15 +49,22 @@ const ShowcaseMobile = ({
         </motion.div>
       </motion.div>
 
-      <motion.span
+      <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: appleEase }}
-        className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
+        className="flex flex-col items-center gap-2 mb-4"
       >
-        {label}
-      </motion.span>
+        <span className="text-primary text-xs tracking-[0.3em] uppercase font-medium">
+          {label}
+        </span>
+        <motion.div
+          animate={{ y: [0, 5, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+          className="w-px h-6 bg-gradient-to-b from-primary/50 to-transparent"
+        />
+      </motion.div>
 
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
@@ -74,7 +81,7 @@ const ShowcaseMobile = ({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.1, ease: appleEase }}
-        className="text-muted-foreground text-base font-light leading-relaxed mb-8"
+        className="text-white/65 text-base font-light leading-relaxed mb-8"
       >
         {description}
       </motion.p>

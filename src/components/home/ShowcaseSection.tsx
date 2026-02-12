@@ -53,15 +53,23 @@ const ShowcaseSection = ({
         </motion.div>
 
         <div className="max-w-3xl mx-auto text-center">
-          <motion.span
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: appleEase }}
-            className="text-primary text-xs tracking-[0.3em] uppercase mb-6 block font-medium"
+            className="flex flex-col items-center gap-2 mb-6"
           >
-            {label}
-          </motion.span>
+            <span className="text-primary text-xs tracking-[0.3em] uppercase font-medium">
+              {label}
+            </span>
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+              className="w-px h-8 bg-gradient-to-b from-primary/50 to-transparent"
+            />
+          </motion.div>
+
 
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
@@ -78,7 +86,7 @@ const ShowcaseSection = ({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2, ease: appleEase }}
-            className="text-muted-foreground text-xl font-light leading-relaxed mb-10"
+            className="text-white/70 text-xl font-light leading-relaxed mb-10"
           >
             {description}
           </motion.p>

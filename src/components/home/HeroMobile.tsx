@@ -37,7 +37,7 @@ const HeroMobile = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.7, ease: appleEase }}
-          className="text-white/50 text-base font-light max-w-[280px] mx-auto mb-10 leading-relaxed"
+          className="text-white/70 text-base font-light max-w-[280px] mx-auto mb-10 leading-relaxed"
         >
           Donde la alquimia de los cócteles se encuentra con la excelencia.
         </motion.p>
