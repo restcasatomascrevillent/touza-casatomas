@@ -56,7 +56,7 @@ const HeroDesktop = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.9, ease: appleEase }}
-          className="text-white/60 text-xl font-light max-w-lg mx-auto mb-14 leading-relaxed"
+          className="text-white/80 text-xl font-light max-w-lg mx-auto mb-14 leading-relaxed"
           style={{ textWrap: "balance" }}
         >
           Donde la alquimia de los cócteles se encuentra con la excelencia.

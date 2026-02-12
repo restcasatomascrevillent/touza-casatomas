@@ -50,7 +50,7 @@ const IndexDesktop = () => {
           >
             Filosofía
           </motion.span>
-          <ScrollTextReveal className="font-serif text-4xl lg:text-6xl text-foreground/80 leading-tight justify-center">
+          <ScrollTextReveal className="font-serif text-4xl lg:text-6xl text-foreground leading-tight justify-center">
             Touza no es solo un bar; es una declaración de intenciones. Un espacio donde el tiempo se detiene y los detalles cobran vida.
           </ScrollTextReveal>
         </div>
