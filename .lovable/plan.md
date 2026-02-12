@@ -1,112 +1,113 @@
 
 
-## Plan: Animaciones scroll-triggered + Imagenes de fondo en Carta
+## Plan: Mejoras Premium de UX para Touza
 
-### Resumen
-
-Mejorar las animaciones en todas las paginas para que los elementos aparezcan conforme el usuario baja (scroll-triggered), y anadir una imagen de fondo inmersiva en la seccion hero de la pagina Carta usando fotos reales de Touza.
+Mejoras enfocadas en elevar la experiencia del usuario con micro-interacciones, transiciones entre paginas mas cinematicas, y detalles visuales que transmiten lujo y cuidado.
 
 ---
 
-### 1. Carta - Hero con imagen de fondo
+### 1. Transiciones de pagina cinematicas
 
-Anadir una imagen de fondo inmersiva al hero de la pagina Carta, similar al estilo del hero del Index y Reservado.
+**`src/components/PageTransition.tsx`** - Reescribir con efecto de cortina/fade mas sofisticado:
+- Entrada: fade-in con un sutil desplazamiento vertical (y: 20px) y un ligero blur que se disipa
+- Salida: fade-out rapido sin blur
+- Duracion: 0.5s entrada, 0.3s salida
+- Esto crea una sensacion mas cinematica al navegar entre paginas
 
-**`src/pages/Carta.tsx`** - Cambios en el hero:
-- Anadir imagen de fondo del bar: `https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp`
-- Gradiente oscuro encima para legibilidad del texto
-- Aumentar la altura del hero (de solo padding a una seccion con min-height)
-- Animacion de entrada con scale sutil en la imagen (como en HeroDesktop)
+### 2. ScrollTextReveal real (texto que se revela palabra a palabra)
 
-### 2. Carta - Animaciones scroll-triggered en el contenido
+**`src/components/ScrollTextReveal.tsx`** - Implementar revelacion real:
+- Cada palabra se anima individualmente con `whileInView`
+- Opacidad de 0.15 a 1 conforme entra en el viewport
+- Usa `useScroll` + `useTransform` de Framer Motion para vincular la opacidad al progreso de scroll
+- Efecto: el texto parece "escribirse" conforme el usuario baja, como en las paginas de Apple
 
-**`src/pages/Carta.tsx`** - Mejorar animaciones:
-- Cambiar el grid de cocteles de `animate="show"` (que anima al montar) a `whileInView` para que aparezcan al hacer scroll
-- Anadir `viewport={{ once: true, margin: "-50px" }}` a todos los motion elements
-- Las bebidas genericas (champagne, cervezas, etc.) tambien con `whileInView` y stagger
-- Seccion de tapas: titulo y cards con `whileInView` y stagger progresivo
-- Cada card de coctel individual con animacion `whileInView` con delay escalonado
+### 3. Cursor personalizado (solo desktop)
 
-### 3. Galeria - Animaciones scroll-triggered
+**`src/components/CustomCursor.tsx`** - Nuevo componente:
+- Circulo pequeno (8px) que sigue el cursor con un ligero retraso (spring animation)
+- Al hacer hover sobre elementos interactivos (links, botones, cards), el circulo crece (40px) y se vuelve semi-transparente
+- Solo se muestra en desktop (oculto en touch devices)
+- Se anade en `Layout.tsx`
 
-**`src/pages/Galeria.tsx`** - Mejorar:
-- Cada imagen del grid con `whileInView` individual en vez de animacion de grupo
-- Stagger visual: delay basado en el indice (index * 0.05) para efecto cascada
-- Anadir imagen de fondo sutil al hero (opcional, fondo negro funciona bien)
+### 4. Parallax sutil en imagenes de las ShowcaseSections
 
-### 4. Reservado - Mas animaciones scroll
+**`src/components/home/ShowcaseSection.tsx`** - Mejorar:
+- Anadir efecto parallax con `useScroll` + `useTransform` en la imagen
+- La imagen se mueve ligeramente (translateY del -5% al 5%) al hacer scroll
+- Crea profundidad visual sin ser agresivo
 
-**`src/pages/Reservado.tsx`** - Mejorar:
-- Anadir animaciones `whileInView` a los labels y titulos de la seccion de galeria
-- Formulario: cada campo con animacion escalonada conforme aparece en pantalla
-- Boton de envio con animacion separada
+**`src/components/home/ShowcaseMobile.tsx`** - Mismo efecto pero mas sutil (translateY del -3% al 3%)
 
-### 5. Contacto - Animaciones scroll
+### 5. Header que desaparece al bajar y reaparece al subir
 
-**`src/pages/Contacto.tsx`** - Mejorar:
-- Info de contacto: ya tiene `whileInView`, mantener
-- Formulario: envolver cada campo del formulario en motion.div con `whileInView` escalonado
-- Mapa con animacion de aparicion (fade + scale sutil)
-- Redes sociales con animacion de entrada
+**`src/components/layout/Header.tsx`** - Mejorar comportamiento:
+- Al hacer scroll hacia abajo: el header se oculta con una transicion suave (translateY: -100%)
+- Al hacer scroll hacia arriba: el header reaparece con blur y fondo oscuro
+- Esto libera espacio visual y es un patron premium usado por Apple, Stripe, etc.
+- Se mantiene visible en la parte superior de la pagina (primeros 50px)
 
-### 6. Home (Desktop + Mobile) - Refinar animaciones
+### 6. Numeros animados en la seccion de Features
 
-**`src/components/home/FeaturesGrid.tsx`** y **`src/components/home/FeaturesMobile.tsx`**:
-- Ya tienen `whileInView`, solo asegurar que el margin sea `-80px` para que se disparen antes del borde de pantalla
+**`src/components/home/FeaturesGrid.tsx`** - Anadir datos con contadores:
+- Cambiar el grid para incluir estadisticas con numeros que se animan al entrar en pantalla
+- Ejemplo: "200+ Cocteles", "5 Anos", "El Unico Reservado Privado"
+- Los numeros cuentan de 0 al valor final con una animacion suave
+- Efecto de "counting up" que transmite dinamismo
 
-**`src/components/VisitUs.tsx`**:
-- Ya tiene `whileInView`, verificar consistencia
+### 7. Efecto hover magnetico en botones principales
 
-### 7. NotFound - Animacion de entrada
+**`src/hooks/useMagneticEffect.ts`** - Nuevo hook:
+- En desktop, los botones principales (CTA del hero, botones de navegacion) se desplazan ligeramente hacia el cursor cuando este se acerca
+- Desplazamiento maximo de 4-6px
+- Spring animation para el retorno
+- Se aplica a los botones del HeroDesktop y ShowcaseSection
 
-**`src/pages/NotFound.tsx`**:
-- Envolver en motion.div con fade-in inicial para el titulo 404 y los textos
+### 8. Loading screen premium
+
+**`src/App.tsx`** - Mejorar el PageLoader:
+- En vez del spinner generico, mostrar el logo "TOUZA" en grande con una animacion de fade-in
+- Una linea de progreso fina debajo que se llena
+- Al completar, fade-out del loader con una animacion de escala sutil
+- Solo se muestra la primera vez (no en cada navegacion)
+
+### 9. Footer con separador animado
+
+**`src/components/layout/Footer.tsx`** - Mejorar:
+- Anadir una linea horizontal dorada fina antes del footer que se expande de centro hacia los lados al entrar en viewport (whileInView, scaleX de 0 a 1)
+- Anadir un CTA final tipo "Reserva tu experiencia" antes del footer con tipografia grande
+
+### 10. Galeria lightbox con gestos swipe
+
+**`src/pages/Galeria.tsx`** - Mejorar lightbox:
+- Implementar deteccion de swipe (drag de Framer Motion) para navegar entre imagenes
+- `drag="x"` con `dragConstraints` y `onDragEnd` para detectar la direccion
+- Animacion de transicion entre imagenes con slide horizontal
+- Contador de imagenes con estilo pill flotante
 
 ---
 
 ### Seccion Tecnica
 
-**Patron de animacion consistente para todos los elementos:**
+**Archivos nuevos:**
+| Archivo | Descripcion |
+|---------|-------------|
+| `src/components/CustomCursor.tsx` | Cursor personalizado con efecto grow en hover |
+| `src/hooks/useMagneticEffect.ts` | Hook para efecto magnetico en botones |
 
-```typescript
-// Elementos individuales
-<motion.div
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true, margin: "-80px" }}
-  transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
->
-
-// Elementos con stagger (listas, grids)
-<motion.div
-  initial={{ opacity: 0, y: 25 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true, margin: "-50px" }}
-  transition={{ duration: 0.6, delay: index * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
->
-
-// Imagenes grandes (scale reveal)
-<motion.div
-  initial={{ opacity: 0, scale: 0.95 }}
-  whileInView={{ opacity: 1, scale: 1 }}
-  viewport={{ once: true, margin: "-100px" }}
-  transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
->
-```
-
-**Imagen de fondo para Carta hero:**
-- URL: `https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp` (imagen de la barra/cocteles)
-- Gradiente: `bg-gradient-to-b from-black/60 via-black/40 to-black`
-- La seccion hero pasara de ser solo texto con padding a tener min-height relativa con imagen de fondo y contenido centrado verticalmente
-
-**Resumen de archivos modificados:**
-
+**Archivos modificados:**
 | Archivo | Cambios |
 |---------|---------|
-| `src/pages/Carta.tsx` | Hero con imagen de fondo + animaciones whileInView en grid y tapas |
-| `src/pages/Galeria.tsx` | Animaciones whileInView individuales por imagen |
-| `src/pages/Reservado.tsx` | Animaciones escalonadas en formulario y galeria |
-| `src/pages/Contacto.tsx` | Animaciones escalonadas en formulario y mapa |
-| `src/pages/NotFound.tsx` | Animaciones de entrada con framer-motion |
+| `src/components/PageTransition.tsx` | Transicion cinematica con blur |
+| `src/components/ScrollTextReveal.tsx` | Revelacion palabra por palabra vinculada al scroll |
+| `src/components/layout/Header.tsx` | Auto-hide al bajar, reaparece al subir |
+| `src/components/layout/Footer.tsx` | Linea animada + CTA final |
+| `src/components/layout/Layout.tsx` | Integrar CustomCursor |
+| `src/components/home/ShowcaseSection.tsx` | Parallax en imagenes |
+| `src/components/home/ShowcaseMobile.tsx` | Parallax sutil |
+| `src/components/home/FeaturesGrid.tsx` | Numeros animados con contadores |
+| `src/pages/Galeria.tsx` | Swipe gestures en lightbox |
+| `src/App.tsx` | Loading screen premium |
 
-Total: 5 archivos modificados.
+Total: 2 archivos nuevos, 10 modificados.
+
