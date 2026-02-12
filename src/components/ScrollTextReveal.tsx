@@ -23,7 +23,7 @@ const ScrollTextReveal = ({ children, className }: ScrollTextRevealProps) => {
     const ref = useRef<HTMLParagraphElement>(null);
     const { scrollYProgress } = useScroll({
         target: ref,
-        offset: ["start 0.9", "end 0.4"],
+        offset: ["start 0.85", "end 0.65"],
     });
 
     const words = children.split(" ");
