@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,12 +15,24 @@ const navLinks = [
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const currentY = window.scrollY;
+      
+      setIsScrolled(currentY > 50);
+      
+      if (currentY > 100) {
+        setIsHidden(currentY > lastScrollY.current);
+      } else {
+        setIsHidden(false);
+      }
+      
+      lastScrollY.current = currentY;
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -36,7 +48,8 @@ const Header = () => {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled
           ? "bg-black/80 backdrop-blur-2xl border-b border-white/5 py-3"
-          : "bg-transparent py-5"
+          : "bg-transparent py-5",
+        isHidden ? "-translate-y-full" : "translate-y-0"
       )}
       style={{ transitionTimingFunction: "cubic-bezier(0.25, 0.1, 0.25, 1)" }}
     >
@@ -102,7 +115,7 @@ const Header = () => {
 
                   <nav className="flex-1 px-4 py-8">
                     <ul className="space-y-1">
-                      {navLinks.map((link, index) => {
+                      {navLinks.map((link) => {
                         const isActive = location.pathname === link.path;
                         return (
                           <li key={link.path}>

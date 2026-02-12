@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
@@ -22,20 +23,30 @@ const ShowcaseMobile = ({
   ctaLink = "/carta",
   label = "Touza Experience",
 }: ShowcaseMobileProps) => {
+  const imageRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: imageRef,
+    offset: ["start end", "end start"],
+  });
+  const imageY = useTransform(scrollYProgress, [0, 1], ["-3%", "3%"]);
+
   return (
     <section className="py-16 px-6">
       <motion.div
+        ref={imageRef}
         initial={{ opacity: 0, scale: 0.97 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.8, ease: appleEase }}
-        className="aspect-[4/5] rounded-2xl overflow-hidden mb-8"
+        className="aspect-[4/5] rounded-2xl overflow-hidden mb-8 relative"
       >
-        <OptimizedImage
-          src={image}
-          alt={title}
-          className="w-full h-full object-cover"
-        />
+        <motion.div style={{ y: imageY }} className="absolute inset-[-6%]">
+          <OptimizedImage
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
       </motion.div>
 
       <motion.span
