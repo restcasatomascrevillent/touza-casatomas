@@ -62,6 +62,7 @@ const IndexDesktop = () => {
         image="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp"
         ctaText="Ver Carta Completa"
         ctaLink="/carta"
+        label="Descubre"
       />
 
       <ShowcaseSection
