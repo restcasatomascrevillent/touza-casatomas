@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Seo from "@/components/Seo";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CocktailHoverOutlineSVG } from "@/components/ui/svg/CocktailHoverOutlineSVG";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -49,14 +50,11 @@ const tapasData = [
   { id: 3, name: "Croquetas de Jamón", description: "Cremosas croquetas caseras de jamón ibérico", price: "10€", image: "https://images.unsplash.com/photo-1551024601-562963525c5c?w=400&h=300&fit=crop" },
 ];
 
-const DrinksSkeleton = ({ count = 6 }: { count?: number }) => (
-  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-    {Array.from({ length: count }).map((_, i) => (
-      <div key={i} className="p-6 h-28 border-b border-white/5">
-        <Skeleton className="h-5 w-1/2 bg-white/5 mb-3" />
-        <Skeleton className="h-4 w-1/3 bg-white/5" />
-      </div>
-    ))}
+import { LiquidLoaderSVG } from "@/components/ui/svg/LiquidLoaderSVG";
+
+const DrinksSkeleton = () => (
+  <div className="w-full flex justify-center py-20 col-span-full">
+    <LiquidLoaderSVG />
   </div>
 );
 
@@ -234,9 +232,9 @@ const Carta = () => {
           {activeMainCategory === "cocteles" && (
             loadingCocteles ? <DrinksSkeleton /> :
               <div className={cn(
-                  "grid gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8",
-                  isMobile ? "grid-cols-2" : "grid-cols-3 lg:grid-cols-4"
-                )}
+                "grid gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8",
+                isMobile ? "grid-cols-2" : "grid-cols-3 lg:grid-cols-4"
+              )}
               >
                 {filteredCocktails.map((cocktail, index) => (
                   <motion.div
@@ -252,10 +250,11 @@ const Carta = () => {
                       <OptimizedImage
                         src={cocktail.image}
                         alt={cocktail.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        className="w-full h-full object-cover group-hover:scale-105 group-hover:opacity-40 transition-all duration-700"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                      <span className="absolute bottom-3 right-3 bg-white text-black text-xs font-medium px-3 py-1 rounded-full">
+                      <CocktailHoverOutlineSVG />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent group-hover:from-black/90 transition-all duration-700" />
+                      <span className="absolute bottom-3 right-3 bg-white text-black text-xs font-medium px-3 py-1 rounded-full z-30">
                         {cocktail.price}
                       </span>
                     </div>
@@ -269,7 +268,7 @@ const Carta = () => {
           {/* Generic Drinks */}
           {activeMainCategory !== "cocteles" && (
             <div className="max-w-4xl mx-auto">
-            
+
               {(
                 (activeMainCategory === "champagne" && loadingChampagnes) ||
                 (activeMainCategory === "cavas" && loadingCavas) ||
@@ -407,7 +406,7 @@ const Carta = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </Layout>
+    </Layout >
   );
 };
 

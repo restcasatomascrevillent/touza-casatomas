@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
+import { AnimatedDividerSVG } from "@/components/ui/svg/AnimatedDividerSVG";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -33,6 +34,7 @@ const ShowcaseSection = ({
 
   return (
     <section className="py-32 lg:py-40">
+      <AnimatedDividerSVG className="mb-16 hidden lg:flex" />
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           ref={imageRef}

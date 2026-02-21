@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { useRef } from "react";
+import { HeroBackgroundSVG } from "@/components/ui/svg/HeroBackgroundSVG";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -17,20 +18,27 @@ const HeroDesktop = () => {
 
   return (
     <section ref={ref} className="relative h-[100dvh] flex items-center justify-center overflow-hidden">
-      <motion.div style={{ y }} className="absolute inset-0 z-0">
+      <motion.div style={{ y }} className="absolute inset-0 z-0 bg-black">
         <motion.div
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 2, ease: appleEase }}
+          initial={{ scale: 1.05, opacity: 0 }}
+          animate={{ scale: 1.15, opacity: 1 }}
+          transition={{
+            opacity: { duration: 2, ease: appleEase },
+            scale: { duration: 30, repeat: Infinity, repeatType: "reverse", ease: "linear" }
+          }}
+          className="absolute inset-0"
         >
           <OptimizedImage
             src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp"
             alt="Bar ambiente oscuro y elegante"
-            className="w-full h-[100dvh] object-cover"
+            className="w-full h-[100dvh] object-cover opacity-60"
             priority={true}
           />
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/90" />
+
+        <HeroBackgroundSVG />
+
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/90 pointer-events-none" />
       </motion.div>
 
       <motion.div style={{ opacity }} className="relative z-10 text-center px-6">

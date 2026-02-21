@@ -2,26 +2,35 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
+import { HeroBackgroundSVG } from "@/components/ui/svg/HeroBackgroundSVG";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
 const HeroMobile = () => {
   return (
     <section className="relative h-[90dvh] flex items-end justify-center overflow-hidden pb-16 px-6">
-      <motion.div
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.5, ease: appleEase }}
-        className="absolute inset-0 z-0"
-      >
-        <OptimizedImage
-          src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp"
-          alt="Bar ambiente oscuro y elegante"
-          className="w-full h-full object-cover"
-          priority={true}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/95" />
-      </motion.div>
+      <div className="absolute inset-0 z-0 bg-black">
+        <motion.div
+          initial={{ scale: 1.05, opacity: 0 }}
+          animate={{ scale: 1.15, opacity: 1 }}
+          transition={{
+            opacity: { duration: 1.5, ease: appleEase },
+            scale: { duration: 30, repeat: Infinity, repeatType: "reverse", ease: "linear" }
+          }}
+          className="absolute inset-0"
+        >
+          <OptimizedImage
+            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp"
+            alt="Bar ambiente oscuro y elegante"
+            className="w-full h-full object-cover opacity-60 absolute inset-0"
+            priority={true}
+          />
+        </motion.div>
+
+        <HeroBackgroundSVG />
+
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/95 pointer-events-none" />
+      </div>
 
       <div className="relative z-10 w-full text-center">
         <motion.h1
