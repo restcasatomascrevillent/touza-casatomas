@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
+import { lazy, Suspense } from "react";
 import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
-import ScrollTextReveal from "@/components/ScrollTextReveal";
 import HeroMobile from "./HeroMobile";
 import ShowcaseMobile from "./ShowcaseMobile";
 import FeaturesMobile from "./FeaturesMobile";
-import VisitUs from "@/components/VisitUs";
+
+const VisitUs = lazy(() => import("@/components/VisitUs"));
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -38,20 +39,26 @@ const IndexMobile = () => {
 
       <HeroMobile />
 
-      {/* Philosophy */}
-      <section className="py-20 px-8">
+      {/* Philosophy — simple fade, no scroll-reveal on mobile */}
+      <section className="py-16 px-5">
         <motion.span
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: appleEase }}
-          className="text-primary text-xs tracking-[0.3em] uppercase mb-6 block font-medium text-center"
+          transition={{ duration: 0.5, ease: appleEase }}
+          className="text-primary text-[11px] tracking-[0.3em] uppercase mb-4 block font-medium text-center"
         >
           Filosofía
         </motion.span>
-        <ScrollTextReveal className="font-serif text-2xl text-foreground leading-tight justify-center text-center">
+        <motion.p
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: appleEase }}
+          className="font-serif text-[1.4rem] text-foreground leading-snug text-center"
+        >
           Touza no es solo un bar; es una declaración de intenciones. Un espacio donde el tiempo se detiene.
-        </ScrollTextReveal>
+        </motion.p>
       </section>
 
       <ShowcaseMobile
@@ -73,7 +80,10 @@ const IndexMobile = () => {
       />
 
       <FeaturesMobile />
-      <VisitUs />
+
+      <Suspense fallback={null}>
+        <VisitUs />
+      </Suspense>
     </Layout>
   );
 };

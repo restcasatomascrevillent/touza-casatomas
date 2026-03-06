@@ -23,24 +23,24 @@ const contactItems = [
 
 const VisitUs = () => {
   return (
-    <section className="py-24 md:py-32 bg-black text-white">
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="text-center mb-20">
+    <section className="py-16 md:py-32 bg-black text-white">
+      <div className="max-w-5xl mx-auto px-5 md:px-6">
+        <div className="text-center mb-12 md:mb-20">
           <motion.span
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: appleEase }}
-            className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
+            transition={{ duration: 0.5, ease: appleEase }}
+            className="text-primary text-[11px] md:text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
           >
             Contacto
           </motion.span>
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: appleEase }}
-            className="font-serif text-4xl md:text-6xl text-white mb-6"
+            transition={{ duration: 0.6, ease: appleEase }}
+            className="font-serif text-3xl md:text-6xl text-white mb-4 md:mb-6"
           >
             Visítanos
           </motion.h2>
@@ -48,14 +48,14 @@ const VisitUs = () => {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.1, ease: appleEase }}
-            className="text-white/40 text-lg max-w-xl mx-auto font-light"
+            transition={{ duration: 0.6, delay: 0.1, ease: appleEase }}
+            className="text-white/50 text-base md:text-lg max-w-xl mx-auto font-light"
           >
             Te esperamos en el corazón de Crevillente.
           </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-12 md:gap-16 relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 relative">
           {/* Vertical separators desktop */}
           <div className="hidden md:block absolute top-8 bottom-8 left-1/3 w-px bg-white/5" />
           <div className="hidden md:block absolute top-8 bottom-8 right-1/3 w-px bg-white/5" />
@@ -63,18 +63,18 @@ const VisitUs = () => {
           {contactItems.map((item, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: index * 0.1, ease: appleEase }}
+              transition={{ duration: 0.5, delay: index * 0.08, ease: appleEase }}
               className="text-center"
             >
-              <div className="w-14 h-14 mx-auto mb-6 rounded-full bg-white/5 flex items-center justify-center">
-                <item.icon className="w-6 h-6 text-white/50" />
+              <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-full bg-white/5 flex items-center justify-center">
+                <item.icon className="w-5 h-5 md:w-6 md:h-6 text-white/50" />
               </div>
-              <h4 className="font-serif text-xl text-white mb-3">{item.title}</h4>
+              <h4 className="font-serif text-lg md:text-xl text-white mb-2 md:mb-3">{item.title}</h4>
               {item.lines.map((line, i) => (
-                <p key={i} className="text-white/40 font-light leading-relaxed">{line}</p>
+                <p key={i} className="text-white/45 text-sm md:text-base font-light leading-relaxed">{line}</p>
               ))}
             </motion.div>
           ))}
@@ -84,24 +84,24 @@ const VisitUs = () => {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.3, ease: appleEase }}
-          className="flex justify-center gap-4 mt-16"
+          transition={{ duration: 0.6, delay: 0.2, ease: appleEase }}
+          className="flex justify-center gap-3 md:gap-4 mt-12 md:mt-16"
         >
           <a
             href="mailto:info@touzabar.es"
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors duration-300"
+            className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors duration-200"
             aria-label="Email"
           >
-            <Mail className="w-5 h-5 text-white/50" />
+            <Mail className="w-[18px] h-[18px] md:w-5 md:h-5 text-white/50" />
           </a>
           <a
             href="https://www.instagram.com/touzabar/"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors duration-300"
+            className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors duration-200"
             aria-label="Instagram"
           >
-            <Instagram className="w-5 h-5 text-white/50" />
+            <Instagram className="w-[18px] h-[18px] md:w-5 md:h-5 text-white/50" />
           </a>
         </motion.div>
       </div>
