@@ -17,20 +17,20 @@ const Footer = () => {
   return (
     <>
       {/* Pre-footer CTA */}
-      <section className="bg-black py-24 text-center px-6">
+      <section className="bg-black py-16 md:py-24 text-center px-5 md:px-6">
         <motion.div
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1, ease: appleEase }}
-          className="h-px bg-primary/40 max-w-xl mx-auto mb-16"
+          className="h-px bg-primary/40 max-w-xl mx-auto mb-10 md:mb-16"
         />
         <motion.h3
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3, ease: appleEase }}
-          className="font-serif text-4xl md:text-6xl text-white mb-6"
+          className="font-serif text-3xl md:text-6xl text-white mb-5 md:mb-6"
         >
           Reserva tu experiencia
         </motion.h3>
@@ -42,7 +42,7 @@ const Footer = () => {
         >
           <Link
             to="/reservado"
-            className="inline-block px-10 py-4 border border-white/20 rounded-full text-white/60 hover:text-white hover:border-white/40 transition-all duration-300 text-lg font-light"
+            className="inline-block px-8 md:px-10 py-3.5 md:py-4 border border-white/20 rounded-full text-white/70 hover:text-white hover:border-white/40 active:scale-[0.97] transition-all duration-300 text-base md:text-lg font-light"
           >
             El Reservado
           </Link>
@@ -50,8 +50,8 @@ const Footer = () => {
       </section>
 
       <footer className="bg-black border-t border-white/5">
-        <div className="max-w-6xl mx-auto px-6 py-16 md:py-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
+        <div className="max-w-6xl mx-auto px-5 md:px-6 py-12 md:py-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
             {/* Brand */}
             <div>
               <Link to="/" className="inline-block">
@@ -59,7 +59,7 @@ const Footer = () => {
                   TOUZA
                 </span>
               </Link>
-              <p className="mt-4 text-white/30 text-sm font-light leading-relaxed max-w-xs">
+              <p className="mt-3 md:mt-4 text-white/40 text-sm font-light leading-relaxed max-w-xs">
                 Un rincón donde las raíces gallegas se funden con el encanto
                 mediterráneo. Cócteles artesanales en un ambiente único.
               </p>
@@ -67,15 +67,15 @@ const Footer = () => {
 
             {/* Links */}
             <div>
-              <h4 className="text-white/50 text-xs tracking-[0.2em] uppercase mb-6">
+              <h4 className="text-white/50 text-xs tracking-[0.2em] uppercase mb-4 md:mb-6">
                 Explora
               </h4>
-              <ul className="space-y-4">
+              <ul className="space-y-3 md:space-y-4">
                 {footerLinks.map((link) => (
                   <li key={link.path}>
                     <Link
                       to={link.path}
-                      className="text-white/30 text-sm font-light hover:text-white/70 transition-colors duration-300"
+                      className="text-white/40 text-sm font-light hover:text-white/70 active:text-white/90 transition-colors duration-200 py-1 inline-block"
                     >
                       {link.name}
                     </Link>
@@ -86,39 +86,39 @@ const Footer = () => {
 
             {/* Contact + Social */}
             <div>
-              <h4 className="text-white/50 text-xs tracking-[0.2em] uppercase mb-6">
+              <h4 className="text-white/50 text-xs tracking-[0.2em] uppercase mb-4 md:mb-6">
                 Contacto
               </h4>
-              <div className="space-y-3 text-white/30 text-sm font-light mb-8">
+              <div className="space-y-2 md:space-y-3 text-white/40 text-sm font-light mb-6 md:mb-8">
                 <p>C/ San Vicente, 14</p>
                 <p>03330 Crevillente, Alicante</p>
-                <p>966 782 000</p>
+                <a href="tel:966782000" className="block active:text-white/70">966 782 000</a>
               </div>
               <div className="flex gap-3">
                 <a
                   href="https://www.instagram.com/touzabar/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/10 transition-all duration-300"
+                  className="w-11 h-11 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white/60 active:bg-white/15 transition-all duration-200"
                   aria-label="Instagram"
                 >
-                  <Instagram className="w-4 h-4" />
+                  <Instagram className="w-[18px] h-[18px]" />
                 </a>
                 <a
                   href="https://www.facebook.com/touzabar/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/10 transition-all duration-300"
+                  className="w-11 h-11 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white/60 active:bg-white/15 transition-all duration-200"
                   aria-label="Facebook"
                 >
-                  <Facebook className="w-4 h-4" />
+                  <Facebook className="w-[18px] h-[18px]" />
                 </a>
               </div>
             </div>
           </div>
 
-          <div className="mt-16 pt-8 border-t border-white/5">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/20 font-light">
+          <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-white/5">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 text-xs text-white/25 font-light">
               <p>© {currentYear} Touza Cocktail Bar</p>
               <p>
                 Parte de{" "}
@@ -126,7 +126,7 @@ const Footer = () => {
                   href="https://restaurantecasatomascrevillente.es/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/30 hover:text-white/50 transition-colors duration-300"
+                  className="text-white/35 hover:text-white/50 transition-colors duration-200"
                 >
                   Restaurante Casa Tomás
                 </a>
