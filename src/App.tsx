@@ -8,6 +8,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AnimatePresence, motion } from "framer-motion";
 import PageTransition from "./components/PageTransition";
 import SmoothScroll from "./components/SmoothScroll";
+import CookieConsent from "./components/CookieConsent";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -101,6 +102,7 @@ const App = () => {
                 <AnimatedRoutes />
               </Suspense>
             </BrowserRouter>
+            <CookieConsent />
           </TooltipProvider>
         </SmoothScroll>
       </HelmetProvider>

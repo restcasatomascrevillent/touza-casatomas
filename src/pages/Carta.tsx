@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
 import { useVinos, transformVinosToUI } from "@/hooks/useVinos";
 import { useBebidas, transformBebidasToUI } from "@/hooks/useBebidas";
+import { usePlatosTouza, transformPlatosToUI } from "@/hooks/usePlatos";
 import { Skeleton } from "@/components/ui/skeleton";
 import Seo from "@/components/Seo";
 import { OptimizedImage } from "@/components/ui/optimized-image";
@@ -44,12 +45,6 @@ const cocktailCategories = [
   { id: "sin-alcohol", name: "Sin Alcohol" },
 ];
 
-const tapasData = [
-  { id: 1, name: "Tabla de Quesos Gallegos", description: "Selección de quesos artesanales con membrillo y nueces", price: "14€", image: "https://images.unsplash.com/photo-1631379578550-7038263db699?q=80&w=2074&auto=format&fit=crop" },
-  { id: 2, name: "Pulpo a la Gallega", description: "Pulpo tierno con pimentón de la Vera y aceite de oliva", price: "16€", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=300&fit=crop" },
-  { id: 3, name: "Croquetas de Jamón", description: "Cremosas croquetas caseras de jamón ibérico", price: "10€", image: "https://images.unsplash.com/photo-1551024601-562963525c5c?w=400&h=300&fit=crop" },
-];
-
 import { LiquidLoaderSVG } from "@/components/ui/svg/LiquidLoaderSVG";
 
 const DrinksSkeleton = () => (
@@ -80,6 +75,9 @@ const Carta = () => {
   const cervezasData = useMemo(() => transformBebidasToUI(cervezasRaw), [cervezasRaw]);
   const copasData = useMemo(() => transformBebidasToUI(copasRaw), [copasRaw]);
   const whiskiesData = useMemo(() => transformBebidasToUI(whiskiesRaw), [whiskiesRaw]);
+
+  const { data: platosRaw, isLoading: loadingPlatos } = usePlatosTouza();
+  const tapasData = useMemo(() => transformPlatosToUI(platosRaw), [platosRaw]);
 
   const filteredCocktails = cocktailsData.filter((cocktail) => {
     const matchesCategory = selectedCategory === "all" || cocktail.category === selectedCategory;
@@ -307,58 +305,66 @@ const Carta = () => {
       </div>
 
       {/* Tapas Section */}
-      <section className="py-20 bg-white/[0.02] mt-16">
-        <div className="max-w-6xl mx-auto px-6 text-center mb-12">
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7, ease: appleEase }}
-            className="font-serif text-3xl md:text-4xl text-white mb-4"
-          >
-            Tapea con tu Cóctel
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
-            className="text-white/30 font-light"
-          >
-            El maridaje perfecto para elevar la experiencia.
-          </motion.p>
-        </div>
-        <div className={cn(
-          "max-w-6xl mx-auto px-6",
-          isMobile ? "flex overflow-x-auto gap-4 snap-x scrollbar-hide" : "grid grid-cols-3 gap-8"
-        )}>
-          {tapasData.map((tapa, index) => (
-            <motion.div
-              initial={{ opacity: 0, y: 25 }}
+      {(loadingPlatos || tapasData.length > 0) && (
+        <section className="py-20 bg-white/[0.02] mt-16">
+          <div className="max-w-6xl mx-auto px-6 text-center mb-12">
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: index * 0.1, ease: appleEase }}
-              key={tapa.id}
-              className={cn("group", isMobile && "min-w-[280px] snap-center")}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7, ease: appleEase }}
+              className="font-serif text-3xl md:text-4xl text-white mb-4"
             >
-              <div className="aspect-video rounded-2xl overflow-hidden mb-4">
-                <OptimizedImage
-                  src={tapa.image}
-                  alt={tapa.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-serif text-lg text-white mb-1">{tapa.name}</h3>
-                  <p className="text-white/30 text-sm font-light">{tapa.description}</p>
-                </div>
-                <span className="text-primary font-medium ml-4">{tapa.price}</span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+              Tapea con tu Cóctel
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
+              className="text-white/30 font-light"
+            >
+              El maridaje perfecto para elevar la experiencia.
+            </motion.p>
+          </div>
+          {loadingPlatos ? (
+            <div className="w-full flex justify-center py-10">
+              <LiquidLoaderSVG />
+            </div>
+          ) : (
+            <div className={cn(
+              "max-w-6xl mx-auto px-6",
+              isMobile ? "flex overflow-x-auto gap-4 snap-x scrollbar-hide" : "grid grid-cols-3 gap-8"
+            )}>
+              {tapasData.map((tapa, index) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 25 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, delay: index * 0.1, ease: appleEase }}
+                  key={tapa.id}
+                  className={cn("group", isMobile && "min-w-[280px] snap-center")}
+                >
+                  <div className="aspect-video rounded-2xl overflow-hidden mb-4">
+                    <OptimizedImage
+                      src={tapa.image}
+                      alt={tapa.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                  </div>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-serif text-lg text-white mb-1">{tapa.name}</h3>
+                      <p className="text-white/30 text-sm font-light">{tapa.description}</p>
+                    </div>
+                    <span className="text-primary font-medium ml-4">{tapa.price}</span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Detail Modal */}
       <Dialog open={!!selectedCocktail} onOpenChange={() => setSelectedCocktail(null)}>

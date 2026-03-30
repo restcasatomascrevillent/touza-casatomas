@@ -32,7 +32,21 @@ const IndexDesktop = () => {
             "addressCountry": "ES"
           },
           "url": "https://touzabar.es/",
-          "priceRange": "$$"
+          "priceRange": "$$",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Thursday", "Friday", "Saturday"],
+              "opens": "20:00",
+              "closes": "02:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Sunday"],
+              "opens": "18:00",
+              "closes": "00:00"
+            }
+          ]
         }}
       />
 
@@ -66,7 +80,7 @@ const IndexDesktop = () => {
       />
 
       <ShowcaseSection
-        title="El Privado"
+        title="El Reservado"
         description="Un espacio exclusivo diseñado para la intimidad. Perfecto para celebraciones especiales o simplemente para desconectar del mundo exterior."
         image="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-10.webp"
         ctaText="Reservar ahora"

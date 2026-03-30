@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { useRef } from "react";
 import { HeroBackgroundSVG } from "@/components/ui/svg/HeroBackgroundSVG";
+import Scene3D from "@/components/3d/Scene3D";
+import { Scene3DErrorBoundary } from "@/components/3d/Scene3DErrorBoundary";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -37,6 +39,10 @@ const HeroDesktop = () => {
         </motion.div>
 
         <HeroBackgroundSVG />
+
+        <Scene3DErrorBoundary>
+          <Scene3D />
+        </Scene3DErrorBoundary>
 
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/90 pointer-events-none" />
       </motion.div>
