@@ -127,6 +127,7 @@ const Contacto = () => {
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3127.8967799847837!2d-0.8111399!3d38.2493699!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd63b5c3d9d4e0cf%3A0x4a1234567890abcd!2sC.%20San%20Vicente%2C%2014%2C%2003330%20Crevillent%2C%20Alicante!5e0!3m2!1ses!2ses!4v1234567890123"
               width="100%" height="350" style={{ border: 0 }} allowFullScreen loading="lazy"
               referrerPolicy="no-referrer-when-downgrade" title="Ubicación Touza"
+              sandbox="allow-scripts allow-same-origin"
             />
           </motion.div>
         </div>

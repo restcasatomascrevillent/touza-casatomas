@@ -11,6 +11,7 @@ import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -42,13 +43,43 @@ const Reservado = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    toast({
-      title: "¡Solicitud enviada!",
-      description: "Nos pondremos en contacto contigo pronto para confirmar tu reserva.",
-    });
-    setFormData({ nombre: "", email: "", telefono: "", fecha: "", personas: "", mensaje: "" });
-    setIsSubmitting(false);
+    try {
+      const notas = [
+        "Solicitud desde El Reservado (espacio privado)",
+        formData.mensaje ? `Mensaje: ${formData.mensaje}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | ");
+
+      const { error } = await supabase.from("reservas").insert({
+        nombre: formData.nombre,
+        email: formData.email || null,
+        telefono: formData.telefono,
+        fecha: formData.fecha || new Date().toISOString().split("T")[0],
+        hora: "00:00",
+        numero_comensales: formData.personas ? parseInt(formData.personas, 10) : 1,
+        notas_cliente: notas,
+        canal: "web",
+        estado: "pendiente",
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "¡Solicitud enviada!",
+        description: "Nos pondremos en contacto contigo pronto para confirmar tu reserva.",
+      });
+      setFormData({ nombre: "", email: "", telefono: "", fecha: "", personas: "", mensaje: "" });
+    } catch (err) {
+      console.error("Error al enviar la solicitud:", err);
+      toast({
+        title: "Error al enviar la solicitud",
+        description: "Ha ocurrido un problema. Por favor, inténtalo de nuevo o llámanos directamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
