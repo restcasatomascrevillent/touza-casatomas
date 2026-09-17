@@ -2,10 +2,15 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
-import { useRef } from "react";
+import { lazy, Suspense, useRef } from "react";
+import { ClientOnly } from "vite-react-ssg";
 import { HeroBackgroundSVG } from "@/components/ui/svg/HeroBackgroundSVG";
-import Scene3D from "@/components/3d/Scene3D";
 import { Scene3DErrorBoundary } from "@/components/3d/Scene3DErrorBoundary";
+
+// Three.js (~478KB) se carga de forma diferida y SOLO en cliente:
+// queda fuera del HTML del SSG (que requeriría WebGL en Node) y fuera del
+// chunk principal, mejorando el peso inicial y el LCP de la home.
+const Scene3D = lazy(() => import("@/components/3d/Scene3D"));
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -41,7 +46,13 @@ const HeroDesktop = () => {
         <HeroBackgroundSVG />
 
         <Scene3DErrorBoundary>
-          <Scene3D />
+          <ClientOnly>
+            {() => (
+              <Suspense fallback={null}>
+                <Scene3D />
+              </Suspense>
+            )}
+          </ClientOnly>
         </Scene3DErrorBoundary>
 
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/90 pointer-events-none" />
@@ -64,6 +75,7 @@ const HeroDesktop = () => {
           className="font-serif text-[10rem] xl:text-[12rem] font-bold text-white leading-[0.85] tracking-tighter mb-8"
         >
           TOUZA
+          <span className="sr-only"> · Cocktail Bar en Crevillente</span>
         </motion.h1>
 
         <motion.p

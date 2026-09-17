@@ -1,22 +1,15 @@
-import { Suspense, lazy, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, type ComponentType } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import { ClientOnly, type RouteRecord } from "vite-react-ssg";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
 import { AnimatePresence, motion } from "framer-motion";
+import ErrorBoundary from "./components/ui/error-boundary";
 import PageTransition from "./components/PageTransition";
 import SmoothScroll from "./components/SmoothScroll";
 import CookieConsent from "./components/CookieConsent";
-
-// Lazy load pages for better performance
-const Index = lazy(() => import("./pages/Index"));
-const Carta = lazy(() => import("./pages/Carta"));
-const Galeria = lazy(() => import("./pages/Galeria"));
-const Reservado = lazy(() => import("./pages/Reservado"));
-const Contacto = lazy(() => import("./pages/Contacto"));
-const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -63,7 +56,25 @@ const PremiumLoader = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-// Simple fallback for subsequent navigations
+// El loader es una intro 100% de cliente. Va dentro de <ClientOnly> para que
+// NO se prerenderice (si no, el overlay negro fixed taparía el contenido en el
+// HTML estático). sessionStorage es seguro aquí porque solo corre en cliente.
+const PremiumLoaderGate = () => {
+  const [showLoader, setShowLoader] = useState(() => !sessionStorage.getItem("touza-loaded"));
+
+  const handleLoaderComplete = () => {
+    setShowLoader(false);
+    sessionStorage.setItem("touza-loaded", "1");
+  };
+
+  return (
+    <AnimatePresence>
+      {showLoader && <PremiumLoader onComplete={handleLoaderComplete} />}
+    </AnimatePresence>
+  );
+};
+
+// Fallback para navegaciones lazy
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <div className="animate-pulse flex flex-col items-center gap-4">
@@ -72,61 +83,53 @@ const PageLoader = () => (
   </div>
 );
 
-const App = () => {
-  const [showLoader, setShowLoader] = useState(() => {
-    if (typeof window !== "undefined" && sessionStorage.getItem("touza-loaded")) {
-      return false;
-    }
-    return true;
-  });
-
-  const handleLoaderComplete = () => {
-    setShowLoader(false);
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("touza-loaded", "1");
-    }
-  };
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <SmoothScroll>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AnimatePresence>
-              {showLoader && <PremiumLoader onComplete={handleLoaderComplete} />}
-            </AnimatePresence>
-            <BrowserRouter>
-              <Suspense fallback={<PageLoader />}>
-                <AnimatedRoutes />
-              </Suspense>
-            </BrowserRouter>
-            <CookieConsent />
-          </TooltipProvider>
-        </SmoothScroll>
-      </HelmetProvider>
-    </QueryClientProvider>
-  );
-};
-
-// Separate component to use useLocation hook
-import { useLocation } from "react-router-dom";
-
-const AnimatedRoutes = () => {
+// Layout raíz: providers globales + transición de página alrededor del <Outlet />.
+// vite-react-ssg construye el router internamente a partir de `routes`.
+const RootLayout = () => {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
-        <Route path="/carta" element={<PageTransition><Carta /></PageTransition>} />
-        <Route path="/galeria" element={<PageTransition><Galeria /></PageTransition>} />
-        <Route path="/reservado" element={<PageTransition><Reservado /></PageTransition>} />
-        <Route path="/contacto" element={<PageTransition><Contacto /></PageTransition>} />
-        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
-      </Routes>
-    </AnimatePresence>
+    <div className="min-h-screen bg-background font-sans antialiased">
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <SmoothScroll>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <ClientOnly>{() => <PremiumLoaderGate />}</ClientOnly>
+              <AnimatePresence mode="wait">
+                <PageTransition key={location.pathname}>
+                  <Suspense fallback={<PageLoader />}>
+                    <Outlet />
+                  </Suspense>
+                </PageTransition>
+              </AnimatePresence>
+              <CookieConsent />
+            </TooltipProvider>
+          </SmoothScroll>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </div>
   );
 };
 
-export default App;
+// Adapta el `export default` de cada página al contrato `lazy` de react-router.
+// vite-react-ssg espera (await) este `lazy` antes de renderizar → el HTML del
+// SSG contiene el contenido real (a diferencia de React.lazy + Suspense).
+const lazyRoute =
+  (factory: () => Promise<{ default: ComponentType }>) =>
+  async () => ({ Component: (await factory()).default });
+
+export const routes: RouteRecord[] = [
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      { index: true, lazy: lazyRoute(() => import("./pages/Index")) },
+      { path: "carta", lazy: lazyRoute(() => import("./pages/Carta")) },
+      { path: "galeria", lazy: lazyRoute(() => import("./pages/Galeria")) },
+      { path: "reservado", lazy: lazyRoute(() => import("./pages/Reservado")) },
+      { path: "contacto", lazy: lazyRoute(() => import("./pages/Contacto")) },
+      { path: "*", lazy: lazyRoute(() => import("./pages/NotFound")) },
+    ],
+  },
+];

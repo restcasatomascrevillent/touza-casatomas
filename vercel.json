@@ -1,6 +1,7 @@
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "trailingSlash": false,
+  "cleanUrls": true,
   "regions": ["fra1"],
   "headers": [
     {

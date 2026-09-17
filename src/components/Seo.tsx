@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async';
+import { Head } from 'vite-react-ssg';
 
 interface SeoProps {
     title: string;
@@ -9,6 +9,7 @@ interface SeoProps {
     twitterCard?: 'summary' | 'summary_large_image';
     keywords?: string[];
     schema?: Record<string, unknown>;
+    noindex?: boolean;
 }
 
 const Seo = ({
@@ -19,17 +20,19 @@ const Seo = ({
     ogType = 'website',
     twitterCard = 'summary_large_image',
     keywords = [],
-    schema
+    schema,
+    noindex = false
 }: SeoProps) => {
     const siteTitle = 'Touza - Cocktail Bar Premium en Crevillente';
     const fullTitle = title === siteTitle ? title : `${title} | Touza Cocktail Bar`;
 
     return (
-        <Helmet>
+        <Head>
             {/* Basic Meta Tags */}
             <title>{fullTitle}</title>
             <meta name="description" content={description} />
             <meta name="keywords" content={keywords.join(', ')} />
+            {noindex && <meta name="robots" content="noindex, nofollow" />}
             <link rel="canonical" href={canonical} />
 
             {/* Open Graph / Facebook */}
@@ -54,7 +57,7 @@ const Seo = ({
                     {JSON.stringify(schema)}
                 </script>
             )}
-        </Helmet>
+        </Head>
     );
 };
 
