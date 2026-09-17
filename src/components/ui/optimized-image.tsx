@@ -55,6 +55,8 @@ export const OptimizedImage = ({
             <img
                 src={src}
                 alt={alt}
+                width={width}
+                height={height}
                 loading={priority ? "eager" : "lazy"}
                 onLoad={() => setIsLoaded(true)}
                 onError={() => setHasError(true)}

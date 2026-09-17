@@ -28,6 +28,7 @@ const HeroMobile = () => {
           className="font-serif text-[3.5rem] font-bold text-white leading-[0.85] tracking-tighter mb-3"
         >
           TOUZA
+          <span className="sr-only"> · Cocktail Bar en Crevillente</span>
         </motion.h1>
 
         <motion.p
