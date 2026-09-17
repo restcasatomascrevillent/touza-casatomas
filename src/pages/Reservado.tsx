@@ -87,6 +87,7 @@ const Reservado = () => {
       <Seo
         title="El Reservado - Eventos Privados"
         description="Celebra tus eventos más especiales en El Reservado de Touza. Un espacio exclusivo para reuniones privadas, cumpleaños y celebraciones en Crevillente."
+        canonical="https://touzabar.es/reservado"
         keywords={['reservado crevillente', 'eventos privados', 'fiestas privadas', 'sala vip', 'celebraciones']}
       />
 
@@ -200,7 +201,7 @@ const Reservado = () => {
                   key={index}
                   className="min-w-[75vw] snap-center aspect-[3/4] rounded-2xl overflow-hidden"
                 >
-                  <img src={image} alt={`El Reservado ${index + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                  <img src={image} alt={`Espacio privado El Reservado de Touza en Crevillente - vista ${index + 1}`} className="w-full h-full object-cover" loading="lazy" />
                 </motion.div>
               ))}
             </div>
@@ -215,7 +216,7 @@ const Reservado = () => {
                   key={index}
                   className="aspect-[3/4] rounded-2xl overflow-hidden"
                 >
-                  <img src={image} alt={`El Reservado ${index + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                  <img src={image} alt={`Espacio privado El Reservado de Touza en Crevillente - vista ${index + 1}`} className="w-full h-full object-cover" loading="lazy" />
                 </motion.div>
               ))}
             </div>

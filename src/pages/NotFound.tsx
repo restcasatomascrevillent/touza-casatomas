@@ -22,6 +22,7 @@ const NotFound = () => {
         title="Página no encontrada"
         description="La página que buscas no existe."
         keywords={[]}
+        noindex={true}
       />
       <div className="flex min-h-screen flex-col items-center justify-center bg-black p-6 text-center">
         <motion.h1

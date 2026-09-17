@@ -15,13 +15,14 @@ const IndexDesktop = () => {
       <Seo
         title="Touza - Cocktail Bar Premium en Crevillente"
         description="Touza es un cocktail bar premium en Crevillente. Disfruta de cócteles artesanales, ambiente único y nuestro espacio privado El Reservado."
+        canonical="https://touzabar.es/"
         keywords={['cocktail bar', 'crevillente', 'cócteles', 'premium', 'reservado', 'eventos']}
         schema={{
           "@context": "https://schema.org",
           "@type": "BarOrPub",
           "name": "Touza Cocktail Bar",
           "image": "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp",
-          "telephone": "966 782 000",
+          "telephone": "+34966782000",
           "email": "info@touzabar.es",
           "address": {
             "@type": "PostalAddress",
@@ -31,7 +32,18 @@ const IndexDesktop = () => {
             "postalCode": "03330",
             "addressCountry": "ES"
           },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 38.2493699,
+            "longitude": -0.8111399
+          },
           "url": "https://touzabar.es/",
+          "sameAs": [
+            "https://www.instagram.com/touzabar/",
+            "https://www.facebook.com/touzabar/"
+          ],
+          "acceptsReservations": true,
+          "servesCuisine": ["Cócteles", "Tapas"],
           "priceRange": "$$",
           "openingHoursSpecification": [
             {

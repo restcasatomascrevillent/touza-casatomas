@@ -105,8 +105,9 @@ const Carta = () => {
   return (
     <Layout>
       <Seo
-        title="Carta de Cócteles y Bebidas | Touza"
+        title="Carta de Cócteles y Bebidas"
         description="Explora nuestra selección de cócteles de autor, vinos premium y más."
+        canonical="https://touzabar.es/carta"
         keywords={['carta', 'menú', 'cócteles', 'precios']}
       />
 

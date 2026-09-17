@@ -77,6 +77,7 @@ const Galeria = () => {
       <Seo
         title="Galería de Imágenes"
         description="Explora la galería de imágenes de Touza. Fotos de nuestros cócteles artesanales, el ambiente exclusivo y nuestro reservado en Crevillente."
+        canonical="https://touzabar.es/galeria"
         keywords={['fotos touza', 'galería cócteles', 'imágenes bar crevillente', 'fotos reservado']}
       />
 

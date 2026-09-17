@@ -22,6 +22,7 @@ const Contacto = () => {
       <Seo
         title="Contacto y Ubicación"
         description="Contacta con Touza Cocktail Bar en Crevillente. Horarios, ubicación y reservas."
+        canonical="https://touzabar.es/contacto"
         keywords={['contacto touza', 'ubicación touza', 'reserva mesa', 'horario cocktail bar']}
       />
 
