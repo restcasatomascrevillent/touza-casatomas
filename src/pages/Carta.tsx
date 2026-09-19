@@ -16,6 +16,10 @@ import Seo from "@/components/Seo";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CocktailHoverOutlineSVG } from "@/components/ui/svg/CocktailHoverOutlineSVG";
+import { IMAGENES } from "@/assets/imagenes";
+import { canonical } from "@/lib/site";
+import { menuSchema } from "@/lib/negocio";
+import { CARTA_SSG } from "@/lib/carta-ssg";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -79,6 +83,25 @@ const Carta = () => {
   const { data: platosRaw, isLoading: loadingPlatos } = usePlatosTouza();
   const tapasData = useMemo(() => transformPlatosToUI(platosRaw), [platosRaw]);
 
+  // JSON-LD `Menu` con TODA la carta, no solo la pestaña activa.
+  // En pantalla champagnes, cavas, cervezas, copas y whiskies viven detrás de
+  // una pestaña, así que no están en el HTML inicial; aquí sí llegan, con
+  // nombre y precio, legibles por buscadores y por asistentes de IA.
+  // Se construye desde la instantánea del build (constante) para que el HTML
+  // prerenderizado y el de la hidratación sean idénticos.
+  const schemaCarta = useMemo(() => {
+    if (!CARTA_SSG) return undefined;
+    return menuSchema([
+      { nombre: "Cócteles", items: CARTA_SSG.cocteles },
+      { nombre: "Champagnes", items: CARTA_SSG.vinos["CHAMPAGNES"] ?? [] },
+      { nombre: "Cavas y otros espumosos", items: CARTA_SSG.vinos["CAVAS Y OTROS ESPUMOSOS"] ?? [] },
+      { nombre: "Cervezas", items: CARTA_SSG.bebidas["Cervezas"] ?? [] },
+      { nombre: "Copas de vino", items: CARTA_SSG.bebidas["Copas"] ?? [] },
+      { nombre: "Whiskies", items: CARTA_SSG.bebidas["Whiskies"] ?? [] },
+      { nombre: "Tapas", items: CARTA_SSG.platos },
+    ]);
+  }, []);
+
   const filteredCocktails = cocktailsData.filter((cocktail) => {
     const matchesCategory = selectedCategory === "all" || cocktail.category === selectedCategory;
     const matchesBase = selectedBase === "all" || cocktail.base === selectedBase;
@@ -107,8 +130,9 @@ const Carta = () => {
       <Seo
         title="Carta de Cócteles y Bebidas"
         description="Explora nuestra selección de cócteles de autor, vinos premium y más."
-        canonical="https://touzabar.es/carta"
+        canonical={canonical("/carta")}
         keywords={['carta', 'menú', 'cócteles', 'precios']}
+        schema={schemaCarta}
       />
 
       {/* Hero */}
@@ -123,9 +147,10 @@ const Carta = () => {
           className="absolute inset-0"
         >
           <OptimizedImage
-            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp"
+            imagen={IMAGENES.barra}
             alt="Barra de Touza"
             className="w-full h-full object-cover"
+            sizes="100vw"
             priority={true}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black" />

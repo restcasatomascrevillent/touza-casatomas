@@ -5,6 +5,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 import { VitePWA } from "vite-plugin-pwa";
+import { loadEnv } from "vite";
+import { cartaSSG } from "./scripts/carta-ssg-plugin.mjs";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -15,12 +17,24 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  // `ssgOptions` lo lee vite-react-ssg (no Vite): ahí se generan sitemap.xml y
+  // robots.txt con la URL base real, en lugar de tenerlos fijos en public/.
+  ssgOptions: {
+    onFinished: async (dir: string) => {
+      const env = loadEnv(mode, process.cwd(), "VITE_");
+      const { generarSitemapYRobots } = await import("./scripts/generar-sitemap.mjs");
+      await generarSitemapYRobots(dir, env.VITE_SITE_URL || "https://touzabar.es");
+    },
+  },
   plugins: [
     react(),
+    // Trae la carta de Supabase en build y la expone en `virtual:touza/carta`.
+    cartaSSG(),
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+      // robots.txt ya no está en public/: lo genera el build (ver ssgOptions).
+      includeAssets: ['favicon.ico'],
       manifest: {
         name: 'Touza Cocktail Bar',
         short_name: 'Touza',

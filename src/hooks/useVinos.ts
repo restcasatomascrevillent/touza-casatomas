@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 
 export interface Vino {
   id: string;
@@ -53,6 +54,8 @@ export const useVinos = (categoria: string, soloTouza: boolean = true) => {
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 5 * 60 * 1000, // 5 minutos
+    // Solo hay instantánea de las categorías que pinta /carta.
+    ...semilla(soloTouza ? CARTA_SSG?.vinos[categoria] : undefined),
   });
 };
 

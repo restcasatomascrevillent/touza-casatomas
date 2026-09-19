@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 
 export interface Coctel {
   id: string;
@@ -50,6 +51,8 @@ export const useCocteles = (soloTouza: boolean = true) => {
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 5 * 60 * 1000, // 5 minutos
+    // Instantánea del build: el HTML prerenderizado ya sale con los cócteles.
+    ...semilla(soloTouza ? CARTA_SSG?.cocteles : undefined),
   });
 };
 

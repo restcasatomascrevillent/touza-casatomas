@@ -1,9 +1,12 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { cartaSSG } from "./scripts/carta-ssg-plugin.mjs";
 
 export default defineConfig({
-  plugins: [react()],
+  // Resuelve `virtual:touza/carta`. Fuera de `build` devuelve null y no toca
+  // la red, así que los hooks se comportan igual que antes en los tests.
+  plugins: [react(), cartaSSG()],
   test: {
     environment: "jsdom",
     globals: true,
