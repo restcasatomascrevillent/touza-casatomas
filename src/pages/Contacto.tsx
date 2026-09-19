@@ -4,6 +4,7 @@ import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { canonical } from "@/lib/site";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -22,7 +23,7 @@ const Contacto = () => {
       <Seo
         title="Contacto y Ubicación"
         description="Contacta con Touza Cocktail Bar en Crevillente. Horarios, ubicación y reservas."
-        canonical="https://touzabar.es/contacto"
+        canonical={canonical("/contacto")}
         keywords={['contacto touza', 'ubicación touza', 'reserva mesa', 'horario cocktail bar']}
       />
 
