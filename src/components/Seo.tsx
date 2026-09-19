@@ -12,10 +12,13 @@ interface SeoProps {
     noindex?: boolean;
 }
 
+// `canonical` NO tiene valor por defecto a propósito: si lo tuviera (la portada),
+// cualquier página que no lo pase — el 404 incluido — se declararía canónica a la
+// home. Cada página declara el suyo; las que no deben indexarse no declaran ninguno.
 const Seo = ({
     title,
     description,
-    canonical = 'https://touzabar.es/',
+    canonical,
     ogImage = 'https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp',
     ogType = 'website',
     twitterCard = 'summary_large_image',
@@ -33,11 +36,11 @@ const Seo = ({
             <meta name="description" content={description} />
             <meta name="keywords" content={keywords.join(', ')} />
             {noindex && <meta name="robots" content="noindex, nofollow" />}
-            <link rel="canonical" href={canonical} />
+            {canonical && <link rel="canonical" href={canonical} />}
 
             {/* Open Graph / Facebook */}
             <meta property="og:type" content={ogType} />
-            <meta property="og:url" content={canonical} />
+            {canonical && <meta property="og:url" content={canonical} />}
             <meta property="og:title" content={fullTitle} />
             <meta property="og:description" content={description} />
             <meta property="og:image" content={ogImage} />
@@ -46,7 +49,7 @@ const Seo = ({
 
             {/* Twitter */}
             <meta name="twitter:card" content={twitterCard} />
-            <meta name="twitter:url" content={canonical} />
+            {canonical && <meta name="twitter:url" content={canonical} />}
             <meta name="twitter:title" content={fullTitle} />
             <meta name="twitter:description" content={description} />
             <meta name="twitter:image" content={ogImage} />
