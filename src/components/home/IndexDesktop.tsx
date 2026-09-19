@@ -6,6 +6,9 @@ import HeroDesktop from "./HeroDesktop";
 import ShowcaseSection from "./ShowcaseSection";
 import FeaturesGrid from "./FeaturesGrid";
 import VisitUs from "@/components/VisitUs";
+import { canonical } from "@/lib/site";
+import { barSchema } from "@/lib/negocio";
+import { IMAGENES } from "@/assets/imagenes";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -15,51 +18,9 @@ const IndexDesktop = () => {
       <Seo
         title="Touza - Cocktail Bar Premium en Crevillente"
         description="Touza es un cocktail bar premium en Crevillente. Disfruta de cócteles artesanales, ambiente único y nuestro espacio privado El Reservado."
-        canonical="https://touzabar.es/"
+        canonical={canonical("/")}
         keywords={['cocktail bar', 'crevillente', 'cócteles', 'premium', 'reservado', 'eventos']}
-        schema={{
-          "@context": "https://schema.org",
-          "@type": "BarOrPub",
-          "name": "Touza Cocktail Bar",
-          "image": "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp",
-          "telephone": "+34966782000",
-          "email": "info@touzabar.es",
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "C/ San Vicente, 14",
-            "addressLocality": "Crevillente",
-            "addressRegion": "Alicante",
-            "postalCode": "03330",
-            "addressCountry": "ES"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": 38.2493699,
-            "longitude": -0.8111399
-          },
-          "url": "https://touzabar.es/",
-          "sameAs": [
-            "https://www.instagram.com/touzabar/",
-            "https://www.facebook.com/touzabar/"
-          ],
-          "acceptsReservations": true,
-          "servesCuisine": ["Cócteles", "Tapas"],
-          "priceRange": "$$",
-          "openingHoursSpecification": [
-            {
-              "@type": "OpeningHoursSpecification",
-              "dayOfWeek": ["Thursday", "Friday", "Saturday"],
-              "opens": "20:00",
-              "closes": "02:00"
-            },
-            {
-              "@type": "OpeningHoursSpecification",
-              "dayOfWeek": ["Sunday"],
-              "opens": "18:00",
-              "closes": "00:00"
-            }
-          ]
-        }}
+        schema={barSchema()}
       />
 
       <HeroDesktop />
@@ -85,7 +46,7 @@ const IndexDesktop = () => {
       <ShowcaseSection
         title="Cócteles de Autor"
         description="Cada copa que servimos cuenta una historia. Ingredientes seleccionados, técnicas de vanguardia y una presentación que desafía lo convencional."
-        image="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp"
+        imagen={IMAGENES.barra}
         ctaText="Ver Carta Completa"
         ctaLink="/carta"
         label="Descubre"
@@ -94,7 +55,7 @@ const IndexDesktop = () => {
       <ShowcaseSection
         title="El Reservado"
         description="Un espacio exclusivo diseñado para la intimidad. Perfecto para celebraciones especiales o simplemente para desconectar del mundo exterior."
-        image="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-10.webp"
+        imagen={IMAGENES.decoracion}
         ctaText="Reservar ahora"
         ctaLink="/reservado"
         label="Espacio Exclusivo"

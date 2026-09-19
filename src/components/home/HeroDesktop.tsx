@@ -2,6 +2,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
+import { IMAGENES } from "@/assets/imagenes";
 import { lazy, Suspense, useRef } from "react";
 import { ClientOnly } from "vite-react-ssg";
 import { HeroBackgroundSVG } from "@/components/ui/svg/HeroBackgroundSVG";
@@ -36,9 +37,10 @@ const HeroDesktop = () => {
           className="absolute inset-0"
         >
           <OptimizedImage
-            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp"
+            imagen={IMAGENES.interior}
             alt="Bar ambiente oscuro y elegante"
             className="w-full h-[100dvh] object-cover opacity-60"
+            sizes="100vw"
             priority={true}
           />
         </motion.div>

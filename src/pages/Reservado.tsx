@@ -12,6 +12,8 @@ import Seo from "@/components/Seo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { IMAGENES } from "@/assets/imagenes";
+import { canonical } from "@/lib/site";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -22,11 +24,7 @@ const features = [
   { icon: Star, title: "Eventos Especiales", description: "Cumpleaños, cenas y reuniones" },
 ];
 
-const galleryImages = [
-  "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-7-scaled.webp",
-  "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-8-1-scaled.webp",
-  "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp",
-];
+const galleryImages = [IMAGENES.reservado, IMAGENES.mesaPrivada, IMAGENES.barra];
 
 const Reservado = () => {
   const { toast } = useToast();
@@ -87,7 +85,7 @@ const Reservado = () => {
       <Seo
         title="El Reservado - Eventos Privados"
         description="Celebra tus eventos más especiales en El Reservado de Touza. Un espacio exclusivo para reuniones privadas, cumpleaños y celebraciones en Crevillente."
-        canonical="https://touzabar.es/reservado"
+        canonical={canonical("/reservado")}
         keywords={['reservado crevillente', 'eventos privados', 'fiestas privadas', 'sala vip', 'celebraciones']}
       />
 
@@ -103,9 +101,10 @@ const Reservado = () => {
           className="absolute inset-0"
         >
           <OptimizedImage
-            src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-8-scaled-e1699522690950.webp"
+            imagen={IMAGENES.local}
             alt="El Reservado"
             className="w-full h-full object-cover"
+            sizes="100vw"
             priority={true}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/80" />
@@ -201,7 +200,21 @@ const Reservado = () => {
                   key={index}
                   className="min-w-[75vw] snap-center aspect-[3/4] rounded-2xl overflow-hidden"
                 >
-                  <img src={image} alt={`Espacio privado El Reservado de Touza en Crevillente - vista ${index + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                  {/* <picture> con `contents`: el <img> sigue siendo hijo
+                      directo del contenedor, misma maquetación que antes. */}
+                  <picture className="contents">
+                    <source type="image/avif" srcSet={image.avif} sizes="75vw" />
+                    <source type="image/webp" srcSet={image.webp} sizes="75vw" />
+                    <img
+                      src={image.src}
+                      width={image.width}
+                      height={image.height}
+                      alt={`Espacio privado El Reservado de Touza en Crevillente - vista ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
                 </motion.div>
               ))}
             </div>
@@ -216,7 +229,21 @@ const Reservado = () => {
                   key={index}
                   className="aspect-[3/4] rounded-2xl overflow-hidden"
                 >
-                  <img src={image} alt={`Espacio privado El Reservado de Touza en Crevillente - vista ${index + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                  {/* <picture> con `contents`: el <img> sigue siendo hijo
+                      directo del contenedor, misma maquetación que antes. */}
+                  <picture className="contents">
+                    <source type="image/avif" srcSet={image.avif} sizes="(min-width: 768px) 33vw, 100vw" />
+                    <source type="image/webp" srcSet={image.webp} sizes="(min-width: 768px) 33vw, 100vw" />
+                    <img
+                      src={image.src}
+                      width={image.width}
+                      height={image.height}
+                      alt={`Espacio privado El Reservado de Touza en Crevillente - vista ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
                 </motion.div>
               ))}
             </div>

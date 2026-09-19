@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
+import { IMAGENES } from "@/assets/imagenes";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -12,9 +13,10 @@ const HeroMobile = () => {
       {/* Background image — static on mobile for perf */}
       <div className="absolute inset-0 z-0 bg-black">
         <OptimizedImage
-          src="https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp"
+          imagen={IMAGENES.interior}
           alt="Bar ambiente oscuro y elegante"
           className="w-full h-full object-cover opacity-50 absolute inset-0"
+          sizes="100vw"
           priority={true}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black pointer-events-none" />

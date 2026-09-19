@@ -1,0 +1,99 @@
+/**
+ * Catálogo de las imágenes fijas del sitio, servidas desde el propio dominio.
+ *
+ * Antes se hotlinkeaban de `restaurantecasatomascrevillente.es/wp-content/…`.
+ * Ese WordPress desaparece el día que se despliegue la web nueva del
+ * restaurante sobre ese dominio, y con él el hero, la og:image y la galería.
+ *
+ * Los maestros viven en `src/assets/originales/` (no se empaquetan) y las
+ * variantes en `src/assets/img/`, generadas con `npm run imagenes`.
+ */
+import dimensiones from "./img/dimensiones.json";
+
+export interface ImagenResponsive {
+  /** URL del fallback (el ancho mayor disponible, en WebP). */
+  src: string;
+  /** Dimensiones intrínsecas del original: evitan saltos de maquetación. */
+  width: number;
+  height: number;
+  /** srcset por formato. Cadena vacía si no hay variantes (imagen remota). */
+  avif: string;
+  webp: string;
+}
+
+type Variantes = Record<string, string>;
+
+// Vite resuelve estos globs en build y emite cada fichero a /assets con hash
+// de contenido → `Cache-Control: immutable` (ya configurado en vercel.json).
+const avifs = import.meta.glob("./img/*.avif", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Variantes;
+
+const webps = import.meta.glob("./img/*.webp", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Variantes;
+
+/** "./img/touza-8-1-640.webp" → { nombre: "touza-8-1", ancho: 640 } */
+function trocear(ruta: string) {
+  const base = ruta.slice(ruta.lastIndexOf("/") + 1).replace(/\.(avif|webp)$/, "");
+  const corte = base.lastIndexOf("-");
+  return { nombre: base.slice(0, corte), ancho: Number(base.slice(corte + 1)) };
+}
+
+function srcset(variantes: Variantes, nombre: string): { srcset: string; mayor: string } {
+  const propias = Object.entries(variantes)
+    .map(([ruta, url]) => ({ ...trocear(ruta), url }))
+    .filter((v) => v.nombre === nombre && Number.isFinite(v.ancho))
+    .sort((a, b) => a.ancho - b.ancho);
+
+  return {
+    srcset: propias.map((v) => `${v.url} ${v.ancho}w`).join(", "),
+    mayor: propias.length ? propias[propias.length - 1].url : "",
+  };
+}
+
+function construir(nombre: string): ImagenResponsive {
+  const dim = (dimensiones as Record<string, { width: number; height: number }>)[nombre];
+  if (!dim) throw new Error(`[imagenes] Falta ${nombre} en img/dimensiones.json`);
+
+  const avif = srcset(avifs, nombre);
+  const webp = srcset(webps, nombre);
+  if (!webp.mayor) throw new Error(`[imagenes] No hay variantes WebP de ${nombre}`);
+
+  return { src: webp.mayor, width: dim.width, height: dim.height, avif: avif.srcset, webp: webp.srcset };
+}
+
+/**
+ * Claves = nombre del maestro en `src/assets/originales/`. Se mantienen los
+ * nombres del origen (`Touza-2`, `Touza-5`…) para poder rastrear cada foto.
+ */
+export const IMAGENES = {
+  /** Interior, apaisada. Hero de la portada, og:image y `image` del JSON-LD. */
+  interior: construir("touza-2"),
+  /** Barra, vertical. Hero de /carta y showcase "Cócteles de Autor". */
+  barra: construir("touza-5"),
+  /** El Reservado, vertical. */
+  reservado: construir("touza-7"),
+  /** Mesa privada, vertical. */
+  mesaPrivada: construir("touza-8-1"),
+  /** Vista general del local, cuadrada. Hero de /reservado. */
+  local: construir("touza-8"),
+  /** Detalle de decoración, vertical. Showcase "El Reservado". */
+  decoracion: construir("touza-10"),
+} satisfies Record<string, ImagenResponsive>;
+
+/**
+ * Envuelve una URL externa (Unsplash, Supabase Storage) con la misma forma,
+ * para poder pasar siempre `width`/`height` al `<img>` aunque no haya srcset.
+ */
+export const imagenRemota = (src: string, width: number, height: number): ImagenResponsive => ({
+  src,
+  width,
+  height,
+  avif: "",
+  webp: "",
+});

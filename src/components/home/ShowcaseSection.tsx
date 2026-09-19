@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
+import type { ImagenResponsive } from "@/assets/imagenes";
 import { AnimatedDividerSVG } from "@/components/ui/svg/AnimatedDividerSVG";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
@@ -11,7 +12,7 @@ const appleEase = [0.25, 0.1, 0.25, 1] as const;
 interface ShowcaseSectionProps {
   title: string;
   description: string;
-  image: string;
+  imagen: ImagenResponsive;
   ctaText?: string;
   ctaLink?: string;
   label?: string;
@@ -20,7 +21,7 @@ interface ShowcaseSectionProps {
 const ShowcaseSection = ({
   title,
   description,
-  image,
+  imagen,
   ctaText = "Descubrir",
   ctaLink = "/carta",
   label = "Touza Experience",
@@ -46,9 +47,10 @@ const ShowcaseSection = ({
         >
           <motion.div style={{ y: imageY }} className="absolute inset-[-10%]">
             <OptimizedImage
-              src={image}
+              imagen={imagen}
               alt={title}
               className="w-full h-full object-cover"
+              sizes="(min-width: 1280px) 1280px, 100vw"
             />
           </motion.div>
           <div className="absolute inset-0 bg-black/20" />

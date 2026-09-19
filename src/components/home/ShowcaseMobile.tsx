@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
+import type { ImagenResponsive } from "@/assets/imagenes";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
 interface ShowcaseMobileProps {
   title: string;
   description: string;
-  image: string;
+  imagen: ImagenResponsive;
   ctaText?: string;
   ctaLink?: string;
   label?: string;
@@ -18,7 +19,7 @@ interface ShowcaseMobileProps {
 const ShowcaseMobile = ({
   title,
   description,
-  image,
+  imagen,
   ctaText = "Descubrir",
   ctaLink = "/carta",
   label = "Touza Experience",
@@ -52,9 +53,10 @@ const ShowcaseMobile = ({
         className="aspect-[3/4] rounded-2xl overflow-hidden mb-6"
       >
         <OptimizedImage
-          src={image}
+          imagen={imagen}
           alt={title}
           className="w-full h-full object-cover"
+          sizes="100vw"
         />
       </motion.div>
 

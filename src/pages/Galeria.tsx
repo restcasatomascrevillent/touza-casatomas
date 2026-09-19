@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import Seo from "@/components/Seo";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { IMAGENES, imagenRemota } from "@/assets/imagenes";
+import { canonical } from "@/lib/site";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -18,19 +20,23 @@ const galleryCategories = [
   { id: "reservado", name: "El Reservado" },
 ];
 
+// Las fotos de ambiente y reservado son propias (src/assets).
+// ⚠️ Las 5 de "cocktails" siguen siendo stock de Unsplash: un bar real
+// ilustrado con fotos de catálogo resta credibilidad frente a la ficha de
+// Google, donde sí habrá fotos reales. Pendiente de fotos del dueño.
 const galleryData = [
-  { id: 1, category: "ambiente", image: "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-2-scaled.webp", alt: "Interior del bar con iluminación cálida" },
-  { id: 2, category: "cocktails", image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&h=800&fit=crop", alt: "Cóctel Signature" },
-  { id: 3, category: "ambiente", image: "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp", alt: "Barra del bar" },
-  { id: 4, category: "cocktails", image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&h=800&fit=crop", alt: "Cóctel tropical" },
-  { id: 5, category: "reservado", image: "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-7-scaled.webp", alt: "El Reservado - espacio privado" },
-  { id: 6, category: "cocktails", image: "https://images.unsplash.com/photo-1536935338788-846bb9981813?w=600&h=800&fit=crop", alt: "Cóctel clásico" },
-  { id: 7, category: "ambiente", image: "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-10.webp", alt: "Detalle decoración" },
-  { id: 8, category: "reservado", image: "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-8-1-scaled.webp", alt: "Mesa privada" },
-  { id: 9, category: "cocktails", image: "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=600&h=800&fit=crop", alt: "Mojito" },
-  { id: 10, category: "ambiente", image: "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-8-scaled-e1699522690950.webp", alt: "Vista general del local" },
-  { id: 11, category: "cocktails", image: "https://images.unsplash.com/photo-1556855810-ac404aa91e85?w=600&h=800&fit=crop", alt: "Margarita" },
-  { id: 12, category: "reservado", image: "https://restaurantecasatomascrevillente.es/wp-content/uploads/2023/11/Touza-5-scaled.webp", alt: "Evento en El Reservado" },
+  { id: 1, category: "ambiente", image: IMAGENES.interior, alt: "Interior del bar con iluminación cálida" },
+  { id: 2, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel Signature" },
+  { id: 3, category: "ambiente", image: IMAGENES.barra, alt: "Barra del bar" },
+  { id: 4, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel tropical" },
+  { id: 5, category: "reservado", image: IMAGENES.reservado, alt: "El Reservado - espacio privado" },
+  { id: 6, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1536935338788-846bb9981813?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel clásico" },
+  { id: 7, category: "ambiente", image: IMAGENES.decoracion, alt: "Detalle decoración" },
+  { id: 8, category: "reservado", image: IMAGENES.mesaPrivada, alt: "Mesa privada" },
+  { id: 9, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=600&h=800&fit=crop", 600, 800), alt: "Mojito" },
+  { id: 10, category: "ambiente", image: IMAGENES.local, alt: "Vista general del local" },
+  { id: 11, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1556855810-ac404aa91e85?w=600&h=800&fit=crop", 600, 800), alt: "Margarita" },
+  { id: 12, category: "reservado", image: IMAGENES.barra, alt: "Evento en El Reservado" },
 ];
 
 const Galeria = () => {
@@ -77,7 +83,7 @@ const Galeria = () => {
       <Seo
         title="Galería de Imágenes"
         description="Explora la galería de imágenes de Touza. Fotos de nuestros cócteles artesanales, el ambiente exclusivo y nuestro reservado en Crevillente."
-        canonical="https://touzabar.es/galeria"
+        canonical={canonical("/galeria")}
         keywords={['fotos touza', 'galería cócteles', 'imágenes bar crevillente', 'fotos reservado']}
       />
 
@@ -171,9 +177,12 @@ const Galeria = () => {
                       isMobile ? "aspect-square" : (index % 5 === 0 ? "aspect-square" : "aspect-[4/5]")
                     )}>
                       <OptimizedImage
-                        src={item.image}
+                        imagen={item.image}
                         alt={item.alt}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                        /* Las primeras son candidatas a LCP: nunca lazy. */
+                        priority={index < 4}
                       />
                     </div>
                     <div className="absolute inset-0 bg-black/30 opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -206,8 +215,9 @@ const Galeria = () => {
                   className="cursor-grab active:cursor-grabbing"
                 >
                   <OptimizedImage
-                    src={selectedImage.image}
+                    imagen={selectedImage.image}
                     alt={selectedImage.alt}
+                    sizes="95vw"
                     className="w-full h-auto max-h-[80vh] object-contain rounded-xl select-none pointer-events-none"
                     priority={true}
                   />
