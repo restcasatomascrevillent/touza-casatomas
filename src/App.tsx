@@ -1,78 +1,22 @@
-import { Suspense, useState, useEffect, type ComponentType } from "react";
+import { Suspense, type ComponentType } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { ClientOnly, type RouteRecord } from "vite-react-ssg";
+import type { RouteRecord } from "vite-react-ssg";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import ErrorBoundary from "./components/ui/error-boundary";
 import PageTransition from "./components/PageTransition";
 import SmoothScroll from "./components/SmoothScroll";
 import CookieConsent from "./components/CookieConsent";
+import MobileReserveCTA from "./components/MobileReserveCTA";
 
 const queryClient = new QueryClient();
 
-// Premium loading screen
-const PremiumLoader = ({ onComplete }: { onComplete: () => void }) => {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          setTimeout(onComplete, 400);
-          return 100;
-        }
-        return prev + 2;
-      });
-    }, 30);
-    return () => clearInterval(timer);
-  }, [onComplete]);
-
-  return (
-    <motion.div
-      className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center"
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-    >
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="font-serif text-4xl md:text-6xl font-bold tracking-wider text-primary mb-8"
-      >
-        TOUZA
-      </motion.span>
-      <div className="w-48 h-px bg-white/10 rounded-full overflow-hidden">
-        <motion.div
-          className="h-full bg-primary/60"
-          style={{ width: `${progress}%` }}
-          transition={{ duration: 0.1 }}
-        />
-      </div>
-    </motion.div>
-  );
-};
-
-// El loader es una intro 100% de cliente. Va dentro de <ClientOnly> para que
-// NO se prerenderice (si no, el overlay negro fixed taparía el contenido en el
-// HTML estático). sessionStorage es seguro aquí porque solo corre en cliente.
-const PremiumLoaderGate = () => {
-  const [showLoader, setShowLoader] = useState(() => !sessionStorage.getItem("touza-loaded"));
-
-  const handleLoaderComplete = () => {
-    setShowLoader(false);
-    sessionStorage.setItem("touza-loaded", "1");
-  };
-
-  return (
-    <AnimatePresence>
-      {showLoader && <PremiumLoader onComplete={handleLoaderComplete} />}
-    </AnimatePresence>
-  );
-};
+// La intro "PremiumLoader" (overlay negro de ~1,9 s: 50 ticks × 30 ms + 400 ms)
+// se ha eliminado: todo visitante nuevo desde Google veía pantalla negra antes
+// del hero, lo que hundía el LCP y disparaba el rebote en móvil.
 
 // Fallback para navegaciones lazy
 const PageLoader = () => (
@@ -95,7 +39,6 @@ const RootLayout = () => {
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              <ClientOnly>{() => <PremiumLoaderGate />}</ClientOnly>
               <AnimatePresence mode="wait">
                 <PageTransition key={location.pathname}>
                   <Suspense fallback={<PageLoader />}>
@@ -103,6 +46,9 @@ const RootLayout = () => {
                   </Suspense>
                 </PageTransition>
               </AnimatePresence>
+              {/* Fuera de <PageTransition>: su transform de framer-motion crearía
+                  un containing block y la barra `fixed` dejaría de anclarse al viewport. */}
+              <MobileReserveCTA />
               <CookieConsent />
             </TooltipProvider>
           </SmoothScroll>
@@ -129,6 +75,10 @@ export const routes: RouteRecord[] = [
       { path: "galeria", lazy: lazyRoute(() => import("./pages/Galeria")) },
       { path: "reservado", lazy: lazyRoute(() => import("./pages/Reservado")) },
       { path: "contacto", lazy: lazyRoute(() => import("./pages/Contacto")) },
+      // Ruta literal para que el SSG prerenderice `404.html` (vite-react-ssg
+      // descarta la ruta "*" al recolectar paths). Vercel sirve ese fichero con
+      // status 404 para cualquier URL que no resuelva en el filesystem.
+      { path: "404", lazy: lazyRoute(() => import("./pages/NotFound")) },
       { path: "*", lazy: lazyRoute(() => import("./pages/NotFound")) },
     ],
   },
