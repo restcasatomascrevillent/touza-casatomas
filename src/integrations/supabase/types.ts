@@ -1775,42 +1775,6 @@ export type Database = {
         }
         Relationships: []
       }
-      noticias_hosteleria: {
-        Row: {
-          categoria: string
-          created_at: string
-          descripcion: string | null
-          enlace: string
-          fecha: string
-          fuente: string
-          id: string
-          titulo: string
-          updated_at: string
-        }
-        Insert: {
-          categoria: string
-          created_at?: string
-          descripcion?: string | null
-          enlace: string
-          fecha?: string
-          fuente: string
-          id?: string
-          titulo: string
-          updated_at?: string
-        }
-        Update: {
-          categoria?: string
-          created_at?: string
-          descripcion?: string | null
-          enlace?: string
-          fecha?: string
-          fuente?: string
-          id?: string
-          titulo?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       novedades: {
         Row: {
           activo: boolean | null
