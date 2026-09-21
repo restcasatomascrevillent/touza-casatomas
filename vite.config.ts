@@ -2,7 +2,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 
 import { VitePWA } from "vite-plugin-pwa";
 import { loadEnv } from "vite";
@@ -30,7 +29,6 @@ export default defineConfig(({ mode }) => ({
     react(),
     // Trae la carta de Supabase en build y la expone en `virtual:touza/carta`.
     cartaSSG(),
-    mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
       // robots.txt ya no está en public/: lo genera el build (ver ssgOptions).
