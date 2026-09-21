@@ -44,6 +44,7 @@ const mockPlatoA: PlatoTouza = {
   imagen_url: "https://example.com/croquetas.jpg",
   categoria: "tapas",
   alergenos_oficiales: ["gluten", "leche"],
+  alergenos_notas: "Elaboradas con leche entera de vaca",
 };
 
 const mockPlatoB: PlatoTouza = {
@@ -54,6 +55,7 @@ const mockPlatoB: PlatoTouza = {
   imagen_url: null,       // sin imagen → debe usar placeholder
   categoria: "tapas",
   alergenos_oficiales: null,
+  alergenos_notas: null,
 };
 
 // ---------------------------------------------------------------------------
@@ -179,6 +181,28 @@ describe("usePlatosTouza", () => {
     expect(chain.eq).toHaveBeenCalledWith("touza", true);
     expect(chain.order).toHaveBeenCalledWith("orden", { ascending: true });
   });
+
+  // Regresión del hallazgo de la auditoría §3 T1: `alergenos_oficiales` se
+  // pedía a Supabase pero `transformPlatosToUI` no lo mapeaba, así que nunca
+  // llegaba a pintarse. Este test fija en el SELECT los dos campos de
+  // alérgenos para que una futura edición no los quite sin darse cuenta.
+  it("pide alergenos_oficiales y alergenos_notas en el SELECT", async () => {
+    const chain = mockSupabaseChain({ data: [], error: null });
+
+    const qc = buildQueryClient();
+    const { result } = renderHook(() => usePlatosTouza(), {
+      wrapper: wrapper(qc),
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(chain.select).toHaveBeenCalledWith(
+      expect.stringContaining("alergenos_oficiales")
+    );
+    expect(chain.select).toHaveBeenCalledWith(
+      expect.stringContaining("alergenos_notas")
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -226,5 +250,32 @@ describe("transformPlatosToUI", () => {
 
   it("retorna [] cuando se pasa array vacío", () => {
     expect(transformPlatosToUI([])).toEqual([]);
+  });
+
+  // Núcleo del arreglo de la auditoría §3 T1: `alergenos_oficiales` ahora se
+  // mapea a etiquetas legibles, pasando por el vocabulario compartido con
+  // `casa-tomas-story` (@/lib/alergenos) — "leche" es sinónimo de "lacteos".
+  it("mapea alergenos_oficiales a etiquetas legibles, normalizando sinónimos", () => {
+    const result = transformPlatosToUI([mockPlatoA]);
+    expect(result[0].alergenos).toEqual(["Gluten", "Lácteos"]);
+  });
+
+  it("mapea alergenos_notas cuando trae texto", () => {
+    const result = transformPlatosToUI([mockPlatoA]);
+    expect(result[0].alergenosNota).toBe("Elaboradas con leche entera de vaca");
+  });
+
+  // Criterio legal explícito: sin `alergenos_oficiales` no se dice "sin
+  // alérgenos", se dice que NO CONSTA. `alergenos: []` es la señal que usa
+  // Carta.tsx para pintar el aviso — nunca se inventa una lista vacía como
+  // si significara "sin alérgenos declarados".
+  it("devuelve alergenos: [] cuando alergenos_oficiales es null (no consta, no 'sin alérgenos')", () => {
+    const result = transformPlatosToUI([mockPlatoB]);
+    expect(result[0].alergenos).toEqual([]);
+  });
+
+  it("devuelve alergenosNota: null cuando alergenos_notas es null", () => {
+    const result = transformPlatosToUI([mockPlatoB]);
+    expect(result[0].alergenosNota).toBeNull();
   });
 });

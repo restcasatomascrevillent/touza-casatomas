@@ -60,6 +60,7 @@ vi.mock("framer-motion", () => ({
 import Carta from "../Carta";
 import * as usePlatosModule from "@/hooks/usePlatos";
 import * as useCoctelesModule from "@/hooks/useCocteles";
+import type { CoctelUI } from "@/hooks/useCocteles";
 import * as useVinosModule from "@/hooks/useVinos";
 import * as useBebidasModule from "@/hooks/useBebidas";
 
@@ -146,6 +147,8 @@ describe("Carta — sección Tapas", () => {
         price: "7,50€",
         image: "https://example.com/croquetas.jpg",
         categoria: "tapas",
+        alergenos: [],
+        alergenosNota: null,
       },
       {
         id: "2",
@@ -154,6 +157,8 @@ describe("Carta — sección Tapas", () => {
         price: "5,00€",
         image: "/placeholder.svg",
         categoria: "tapas",
+        alergenos: [],
+        alergenosNota: null,
       },
     ];
 
@@ -172,6 +177,64 @@ describe("Carta — sección Tapas", () => {
     expect(screen.getByText("7,50€")).toBeInTheDocument();
   });
 
+  it("muestra las etiquetas de alérgenos de un plato cuando constan", () => {
+    const tapas = [
+      {
+        id: "1",
+        name: "Croquetas de jamón",
+        description: "Suaves croquetas caseras",
+        price: "7,50€",
+        image: "https://example.com/croquetas.jpg",
+        categoria: "tapas",
+        alergenos: ["Gluten", "Lácteos"],
+        alergenosNota: "Elaboradas con leche entera",
+      },
+    ];
+
+    vi.mocked(usePlatosModule.usePlatosTouza).mockReturnValue({
+      data: tapas as any,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as any);
+    vi.mocked(usePlatosModule.transformPlatosToUI).mockReturnValue(tapas);
+
+    renderCarta();
+
+    expect(screen.getByText("Gluten")).toBeInTheDocument();
+    expect(screen.getByText("Lácteos")).toBeInTheDocument();
+    expect(screen.getByText("Elaboradas con leche entera")).toBeInTheDocument();
+    // Con alérgenos declarados no debe verse el aviso de "no consta".
+    expect(screen.queryByText(/sin información de alérgenos/i)).not.toBeInTheDocument();
+  });
+
+  it("muestra el aviso de 'no consta' (no 'sin alérgenos') cuando el plato no tiene alergenos_oficiales", () => {
+    const tapas = [
+      {
+        id: "1",
+        name: "Croquetas de jamón",
+        description: "Suaves croquetas caseras",
+        price: "7,50€",
+        image: "https://example.com/croquetas.jpg",
+        categoria: "tapas",
+        alergenos: [],
+        alergenosNota: null,
+      },
+    ];
+
+    vi.mocked(usePlatosModule.usePlatosTouza).mockReturnValue({
+      data: tapas as any,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as any);
+    vi.mocked(usePlatosModule.transformPlatosToUI).mockReturnValue(tapas);
+
+    renderCarta();
+
+    expect(screen.getByText(/sin información de alérgenos/i)).toBeInTheDocument();
+  });
+
   it("muestra /placeholder.svg cuando imagen_url de un plato es null", () => {
     const tapas = [
       {
@@ -181,6 +244,8 @@ describe("Carta — sección Tapas", () => {
         price: "5,00€",
         image: "/placeholder.svg",
         categoria: "tapas",
+        alergenos: [],
+        alergenosNota: null,
       },
     ];
 
@@ -222,6 +287,8 @@ describe("Carta — sección Tapas", () => {
         price: "7,50€",
         image: "img.jpg",
         categoria: "tapas",
+        alergenos: [],
+        alergenosNota: null,
       },
     ];
 
@@ -236,6 +303,73 @@ describe("Carta — sección Tapas", () => {
     renderCarta();
 
     expect(screen.getByText("Tapea con tu Cóctel")).toBeInTheDocument();
+  });
+});
+
+describe("Carta — alérgenos en cócteles", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAllHooksIdle();
+
+    vi.mocked(usePlatosModule.usePlatosTouza).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as any);
+    vi.mocked(usePlatosModule.transformPlatosToUI).mockReturnValue([]);
+  });
+
+  // La pestaña "Cócteles" es la activa por defecto (activeMainCategory
+  // inicial), así que esta rejilla es la que sale en el HTML prerenderizado.
+  // Es el caso que usa la auditoría para verificar el arreglo: hoy hay 0
+  // platos de Touza, pero sí hay cócteles con datos reales.
+  const mockCoctel = (overrides: Partial<CoctelUI> = {}): CoctelUI => ({
+    id: "c1",
+    name: "Negroni Touza",
+    category: "clasicos",
+    base: "gin",
+    price: "9,50€",
+    description: "Nuestra versión del clásico",
+    ingredients: ["Ginebra", "Campari", "Vermut rojo"],
+    image: "https://example.com/negroni.jpg",
+    alergenos: [],
+    alergenosNota: null,
+    ...overrides,
+  });
+
+  it("muestra las etiquetas de alérgenos de un cóctel cuando constan", () => {
+    vi.mocked(useCoctelesModule.useCocteles).mockReturnValue({
+      data: [{}] as any,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as any);
+    vi.mocked(useCoctelesModule.transformCoctelesToUI).mockReturnValue([
+      mockCoctel({ alergenos: ["Sulfitos", "Lácteos"] }),
+    ]);
+
+    renderCarta();
+
+    expect(screen.getByText("Negroni Touza")).toBeInTheDocument();
+    expect(screen.getByText("Sulfitos")).toBeInTheDocument();
+    expect(screen.getByText("Lácteos")).toBeInTheDocument();
+    expect(screen.queryByText(/sin información de alérgenos/i)).not.toBeInTheDocument();
+  });
+
+  it("muestra el aviso de 'no consta' cuando el cóctel no tiene alergenos_oficiales", () => {
+    vi.mocked(useCoctelesModule.useCocteles).mockReturnValue({
+      data: [{}] as any,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as any);
+    vi.mocked(useCoctelesModule.transformCoctelesToUI).mockReturnValue([mockCoctel()]);
+
+    renderCarta();
+
+    expect(screen.getByText("Negroni Touza")).toBeInTheDocument();
+    expect(screen.getByText(/sin información de alérgenos/i)).toBeInTheDocument();
   });
 });
 

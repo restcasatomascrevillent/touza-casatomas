@@ -64,7 +64,7 @@ async function traerCarta(base, key) {
       base,
       key,
       "Platos",
-      "select=id,nombre,descripcion,precio_eur,imagen_url,categoria,alergenos_oficiales&activado=eq.true&touza=eq.true&order=orden.asc",
+      "select=id,nombre,descripcion,precio_eur,imagen_url,categoria,alergenos_oficiales,alergenos_notas&activado=eq.true&touza=eq.true&order=orden.asc",
     ),
   ]);
 

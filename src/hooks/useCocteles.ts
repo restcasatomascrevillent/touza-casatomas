@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
+import { datosAlergenos, etiquetasAlergenos } from '@/lib/alergenos';
 
 export interface Coctel {
   id: string;
@@ -12,6 +13,8 @@ export interface Coctel {
   base: string | null;
   ingredientes: string | null;
   orden: number | null;
+  alergenos_oficiales: unknown;
+  alergenos_notas: string | null;
 }
 
 export interface CoctelUI {
@@ -23,6 +26,10 @@ export interface CoctelUI {
   description: string;
   ingredients: string[];
   image: string;
+  /** Etiquetas legibles ("Gluten", "Sulfitos"...). [] si no consta el dato. */
+  alergenos: string[];
+  /** Texto libre de `alergenos_notas`, o null si no hay. Nunca certifica. */
+  alergenosNota: string | null;
 }
 
 export const useCocteles = (soloTouza: boolean = true) => {
@@ -60,14 +67,21 @@ export const useCocteles = (soloTouza: boolean = true) => {
 export const transformCoctelesToUI = (cocteles: Coctel[] | undefined): CoctelUI[] => {
   if (!cocteles) return [];
 
-  return cocteles.map(c => ({
-    id: c.id,
-    name: c.nombre || '',
-    category: c.categoria || 'autor',
-    base: c.base || 'all',
-    price: c.precio_eur ? `${c.precio_eur.toFixed(2).replace('.', ',')}€` : '',
-    description: c.descripcion || '',
-    ingredients: c.ingredientes?.split(', ') || [],
-    image: c.imagen_url || '',
-  }));
+  return cocteles.map(c => {
+    // Mismo vocabulario que `casa-tomas-story` (@/lib/alergenos): "frutos_cascara"
+    // del panel y "frutos de cáscara" de la BD son el mismo alérgeno.
+    const datos = datosAlergenos(c);
+    return {
+      id: c.id,
+      name: c.nombre || '',
+      category: c.categoria || 'autor',
+      base: c.base || 'all',
+      price: c.precio_eur ? `${c.precio_eur.toFixed(2).replace('.', ',')}€` : '',
+      description: c.descripcion || '',
+      ingredients: c.ingredientes?.split(', ') || [],
+      image: c.imagen_url || '',
+      alergenos: etiquetasAlergenos(datos),
+      alergenosNota: datos.notas,
+    };
+  });
 };

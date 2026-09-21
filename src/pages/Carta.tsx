@@ -11,6 +11,7 @@ import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCo
 import { useVinos, transformVinosToUI } from "@/hooks/useVinos";
 import { useBebidas, transformBebidasToUI } from "@/hooks/useBebidas";
 import { usePlatosTouza, transformPlatosToUI } from "@/hooks/usePlatos";
+import { AVISO_SIN_ALERGENOS } from "@/lib/alergenos";
 import { Skeleton } from "@/components/ui/skeleton";
 import Seo from "@/components/Seo";
 import { OptimizedImage } from "@/components/ui/optimized-image";
@@ -284,6 +285,22 @@ const Carta = () => {
                     </div>
                     <h3 className="font-serif text-base md:text-lg text-white group-hover:text-primary transition-colors leading-tight mb-1">{cocktail.name}</h3>
                     <p className="text-white/30 text-sm line-clamp-2 font-light">{cocktail.description}</p>
+                    {cocktail.alergenos.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {cocktail.alergenos.map((alergeno) => (
+                          <span
+                            key={alergeno}
+                            className="px-2 py-0.5 rounded-full border border-white/10 text-[10px] text-white/50 font-light uppercase tracking-wide"
+                          >
+                            {alergeno}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-[10px] text-destructive uppercase tracking-wide font-light">
+                        {AVISO_SIN_ALERGENOS}
+                      </p>
+                    )}
                   </motion.div>
                 ))}
               </div>
@@ -382,6 +399,25 @@ const Carta = () => {
                     <div>
                       <h3 className="font-serif text-lg text-white mb-1">{tapa.name}</h3>
                       <p className="text-white/30 text-sm font-light">{tapa.description}</p>
+                      {tapa.alergenos.length > 0 ? (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {tapa.alergenos.map((alergeno) => (
+                            <span
+                              key={alergeno}
+                              className="px-2 py-0.5 rounded-full border border-white/10 text-[10px] text-white/50 font-light uppercase tracking-wide"
+                            >
+                              {alergeno}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-[10px] text-destructive uppercase tracking-wide font-light">
+                          {AVISO_SIN_ALERGENOS}
+                        </p>
+                      )}
+                      {tapa.alergenosNota && (
+                        <p className="mt-1 text-[10px] italic text-destructive/90">{tapa.alergenosNota}</p>
+                      )}
                     </div>
                     <span className="text-primary font-medium ml-4">{tapa.price}</span>
                   </div>
@@ -427,6 +463,23 @@ const Carta = () => {
                         </span>
                       ))}
                     </div>
+                  </div>
+                  <div className="mt-6">
+                    <h4 className="text-xs uppercase tracking-widest text-white/30 mb-3">Alérgenos</h4>
+                    {selectedCocktail.alergenos.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCocktail.alergenos.map((alergeno, i) => (
+                          <span key={i} className="px-3 py-1 rounded-full border border-white/10 text-sm text-white/60 font-light">
+                            {alergeno}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-destructive">{AVISO_SIN_ALERGENOS}</p>
+                    )}
+                    {selectedCocktail.alergenosNota && (
+                      <p className="mt-2 text-xs italic text-destructive/90">{selectedCocktail.alergenosNota}</p>
+                    )}
                   </div>
                   <div className="flex items-center justify-between pt-8 mt-8 border-t border-white/5">
                     <span className="text-xs text-white/30">Base: <span className="text-white/60 capitalize">{selectedCocktail.base}</span></span>

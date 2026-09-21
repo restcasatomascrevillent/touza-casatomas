@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
+import { datosAlergenos, etiquetasAlergenos } from '@/lib/alergenos';
 
 export interface PlatoTouza {
   id: string;
@@ -10,6 +11,7 @@ export interface PlatoTouza {
   imagen_url: string | null;
   categoria: string | null;
   alergenos_oficiales: any;
+  alergenos_notas: string | null;
 }
 
 export interface PlatoTouzaUI {
@@ -19,6 +21,10 @@ export interface PlatoTouzaUI {
   price: string;
   image: string;
   categoria: string;
+  /** Etiquetas legibles ("Gluten", "Lácteos"...). [] si no consta el dato. */
+  alergenos: string[];
+  /** Texto libre de `alergenos_notas`, o null si no hay. Nunca certifica. */
+  alergenosNota: string | null;
 }
 
 /**
@@ -49,7 +55,7 @@ export const usePlatosTouza = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('Platos')
-        .select('id, nombre, descripcion, precio_eur, imagen_url, categoria, alergenos_oficiales')
+        .select('id, nombre, descripcion, precio_eur, imagen_url, categoria, alergenos_oficiales, alergenos_notas')
         .eq('activado', true)
         .eq('touza', true)
         .order('orden', { ascending: true });
@@ -72,12 +78,19 @@ export const usePlatosTouza = () => {
 export const transformPlatosToUI = (platos: PlatoTouza[] | undefined): PlatoTouzaUI[] => {
   if (!platos) return [];
 
-  return platos.map(p => ({
-    id: p.id,
-    name: p.nombre || '',
-    description: p.descripcion || '',
-    price: p.precio_eur ? `${p.precio_eur.toFixed(2).replace('.', ',')}€` : '',
-    image: p.imagen_url || '/placeholder.svg',
-    categoria: p.categoria || '',
-  }));
+  return platos.map(p => {
+    // Mismo vocabulario que `casa-tomas-story` (@/lib/alergenos): "frutos_cascara"
+    // del panel y "frutos de cáscara" de la BD son el mismo alérgeno.
+    const datos = datosAlergenos(p);
+    return {
+      id: p.id,
+      name: p.nombre || '',
+      description: p.descripcion || '',
+      price: p.precio_eur ? `${p.precio_eur.toFixed(2).replace('.', ',')}€` : '',
+      image: p.imagen_url || '/placeholder.svg',
+      categoria: p.categoria || '',
+      alergenos: etiquetasAlergenos(datos),
+      alergenosNota: datos.notas,
+    };
+  });
 };
