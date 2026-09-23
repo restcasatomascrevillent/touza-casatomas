@@ -8,8 +8,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
-import { useVinos, transformVinosToUI } from "@/hooks/useVinos";
-import { useBebidas, transformBebidasToUI } from "@/hooks/useBebidas";
+import { useVinos, useVinosRestantes, transformVinosToUI, type VinoUI } from "@/hooks/useVinos";
+import { agruparVinosPorTipo } from "@/lib/vinos-carta";
+import { useBebidas, transformBebidasToUI, type BebidaUI } from "@/hooks/useBebidas";
 import { usePlatosTouza, transformPlatosToUI } from "@/hooks/usePlatos";
 import { AVISO_SIN_ALERGENOS } from "@/lib/alergenos";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,10 +35,24 @@ interface GenericDrink {
   image?: string;
 }
 
-const mainCategories = [
+// CHAMPAGNES y CAVAS Y OTROS ESPUMOSOS son las dos únicas categorías de
+// Vinos sin denominación de origen (no llevan "—"), así que siguen pidiendo
+// su propia pestaña fija con useVinos(categoria). Todo lo demás (tintos,
+// blancos...) se pide de una vez con useVinosRestantes excluyendo estas dos,
+// y se agrupa en pestañas dinámicas — ver gruposVino más abajo.
+const CATEGORIAS_VINO_FIJAS = ["CHAMPAGNES", "CAVAS Y OTROS ESPUMOSOS"];
+
+// Pestañas que no dependen de datos: cócteles, los dos vinos sin
+// denominación y las bebidas. Las pestañas de vino con denominación
+// (Blancos, Tintos...) se insertan entre "cavas" y "cervezas" en tabsCarta,
+// derivadas de gruposVino para que una categoría nueva en el admin no vuelva
+// a quedarse sin pestaña.
+const mainCategoriesAntesDeVinos = [
   { id: "cocteles", name: "Cócteles" },
   { id: "champagne", name: "Champagne" },
   { id: "cavas", name: "Cavas" },
+];
+const mainCategoriesDespuesDeVinos = [
   { id: "cervezas", name: "Cervezas" },
   { id: "copas", name: "Copas de Vino" },
   { id: "whiskies", name: "Whiskies" },
@@ -68,12 +83,32 @@ const Carta = () => {
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
+  // El filtro secundario (pills bajo el buscador) cambia de significado según
+  // la pestaña activa: categoría de cóctel, o denominación de vino. Si no se
+  // reinicia al cambiar de pestaña, un filtro elegido en "Tintos" (p.ej.
+  // "Rioja") se arrastraría a "Blancos" y no encajaría con ninguna
+  // denominación de esa pestaña, dejando la lista vacía.
+  useEffect(() => { setSelectedCategory("all"); }, [activeMainCategory]);
+
   const { data: coctelesData, isLoading: loadingCocteles } = useCocteles();
   const cocktailsData = useMemo(() => transformCoctelesToUI(coctelesData), [coctelesData]);
   const { data: champagnesRaw, isLoading: loadingChampagnes } = useVinos('CHAMPAGNES');
   const { data: cavasRaw, isLoading: loadingCavas } = useVinos('CAVAS Y OTROS ESPUMOSOS');
   const champagneData = useMemo(() => transformVinosToUI(champagnesRaw), [champagnesRaw]);
   const cavasData = useMemo(() => transformVinosToUI(cavasRaw), [cavasRaw]);
+  // Resto de vinos con denominación de origen (tintos, blancos...): una sola
+  // consulta para todo, agrupada por tipo real de los datos en vez de
+  // categorías escritas a mano. Ver src/lib/vinos-carta.ts.
+  const { data: vinosRestoRaw } = useVinosRestantes(CATEGORIAS_VINO_FIJAS);
+  const gruposVino = useMemo(() => agruparVinosPorTipo(vinosRestoRaw ?? []), [vinosRestoRaw]);
+  const tabsCarta = useMemo(
+    () => [
+      ...mainCategoriesAntesDeVinos,
+      ...gruposVino.map((grupo) => ({ id: grupo.id, name: grupo.etiqueta })),
+      ...mainCategoriesDespuesDeVinos,
+    ],
+    [gruposVino]
+  );
   const { data: cervezasRaw, isLoading: loadingCervezas } = useBebidas('Cervezas');
   const { data: copasRaw, isLoading: loadingCopas } = useBebidas('Copas');
   const { data: whiskiesRaw, isLoading: loadingWhiskies } = useBebidas('Whiskies');
@@ -115,6 +150,49 @@ const Carta = () => {
     if (!searchTerm) return items;
     return items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
   };
+
+  // Grupo de vino (Blancos, Tintos...) que corresponde a la pestaña activa,
+  // si la activa es una de vino con denominación. `undefined` en cualquier
+  // otra pestaña (cócteles, champagne, cavas, cervezas, copas, whiskies).
+  const grupoVinoActivo = useMemo(
+    () => gruposVino.find((grupo) => grupo.id === activeMainCategory),
+    [gruposVino, activeMainCategory]
+  );
+
+  // Pills bajo el buscador: categorías de cóctel en "Cócteles", denominación
+  // de origen en una pestaña de vino con más de una denominación, nada en el
+  // resto (igual que hoy en Champagne, Cavas, Cervezas...).
+  const subFilterOptions = useMemo(() => {
+    if (activeMainCategory === "cocteles") return cocktailCategories;
+    if (grupoVinoActivo && grupoVinoActivo.denominaciones.length > 1) {
+      return [
+        { id: "all", name: "Todos" },
+        ...grupoVinoActivo.denominaciones.map((denom) => ({ id: denom.id, name: denom.etiqueta })),
+      ];
+    }
+    return [];
+  }, [activeMainCategory, grupoVinoActivo]);
+
+  // Datos de la pestaña "genérica" activa (todo lo que no es cócteles):
+  // champagne/cavas/cervezas/copas/whiskies son fijos; una pestaña de vino
+  // con denominación se resuelve contra grupoVinoActivo y, si hay una
+  // denominación concreta seleccionada, se filtra a esa.
+  const activeDrinkData = useMemo<(VinoUI | BebidaUI)[]>(() => {
+    switch (activeMainCategory) {
+      case "champagne": return champagneData;
+      case "cavas": return cavasData;
+      case "cervezas": return cervezasData;
+      case "copas": return copasData;
+      case "whiskies": return whiskiesData;
+      default:
+        if (!grupoVinoActivo) return [];
+        if (selectedCategory === "all") return grupoVinoActivo.vinos;
+        return (
+          grupoVinoActivo.denominaciones.find((denom) => denom.id === selectedCategory)?.vinos ??
+          grupoVinoActivo.vinos
+        );
+    }
+  }, [activeMainCategory, champagneData, cavasData, cervezasData, copasData, whiskiesData, grupoVinoActivo, selectedCategory]);
 
   const containerVars = {
     hidden: { opacity: 0 },
@@ -196,7 +274,7 @@ const Carta = () => {
           <div className="flex justify-start md:justify-center min-w-max">
             <Tabs value={activeMainCategory} onValueChange={setActiveMainCategory}>
               <TabsList className="bg-transparent p-0 gap-1">
-                {mainCategories.map((cat) => (
+                {tabsCarta.map((cat) => (
                   <TabsTrigger
                     key={cat.id}
                     value={cat.id}
@@ -232,9 +310,9 @@ const Carta = () => {
             )}
           </div>
 
-          {activeMainCategory === "cocteles" && (
+          {subFilterOptions.length > 0 && (
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-              {cocktailCategories.map(cat => (
+              {subFilterOptions.map(cat => (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
@@ -316,15 +394,13 @@ const Carta = () => {
                 (activeMainCategory === "cervezas" && loadingCervezas) ||
                 (activeMainCategory === "copas" && loadingCopas) ||
                 (activeMainCategory === "whiskies" && loadingWhiskies)
+                // Blancos/Tintos no necesitan su propia condición aquí: al
+                // derivarse de gruposVino, esas pestañas solo existen (y por
+                // tanto solo se pueden seleccionar) una vez que sus datos ya
+                // han llegado — ver tabsCarta.
               ) ? <DrinksSkeleton /> : null}
 
-              {filterBySearch(
-                activeMainCategory === "champagne" ? champagneData :
-                  activeMainCategory === "cavas" ? cavasData :
-                    activeMainCategory === "cervezas" ? cervezasData :
-                      activeMainCategory === "copas" ? copasData :
-                        whiskiesData
-              ).map((drink, index) => (
+              {filterBySearch(activeDrinkData).map((drink, index) => (
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}

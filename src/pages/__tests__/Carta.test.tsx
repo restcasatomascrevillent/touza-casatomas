@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import React from "react";
@@ -104,6 +104,11 @@ function mockAllHooksIdle() {
     isLoading: false,
   } as any);
   vi.mocked(useVinosModule.transformVinosToUI).mockReturnValue([]);
+
+  vi.mocked(useVinosModule.useVinosRestantes).mockReturnValue({
+    data: undefined,
+    isLoading: false,
+  } as any);
 
   vi.mocked(useBebidasModule.useBebidas).mockReturnValue({
     data: undefined,
@@ -405,5 +410,120 @@ describe("Carta — estructura general", () => {
   it("renderiza el campo de búsqueda", () => {
     renderCarta();
     expect(screen.getByPlaceholderText("Buscar...")).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Regresión: antes de este cambio, Carta.tsx solo pedía las categorías de
+// Vinos "CHAMPAGNES" y "CAVAS Y OTROS ESPUMOSOS" (escritas a mano). Cualquier
+// otra categoría —tintos, blancos...— no tenía pestaña donde caer y
+// desaparecía de la carta aunque estuviera marcada touza=true, activado=true.
+// ---------------------------------------------------------------------------
+describe("Carta — vinos con denominación de origen (Blancos/Tintos)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAllHooksIdle();
+
+    vi.mocked(usePlatosModule.usePlatosTouza).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as any);
+    vi.mocked(usePlatosModule.transformPlatosToUI).mockReturnValue([]);
+  });
+
+  function mockVino(overrides: Record<string, unknown> = {}) {
+    return {
+      id: "vino-1",
+      nombre: "Vino de prueba",
+      descripcion: null,
+      precio_eur: 20,
+      categoria: "VINOS TINTOS — RIBERA DEL DUERO",
+      ubicacion_region: null,
+      ubicacion_pais: null,
+      denominacion_origen: null,
+      featured: false,
+      touza: true,
+      restaurante: null,
+      orden: "1",
+      ...overrides,
+    };
+  }
+
+  it("no añade pestañas de vino nuevas cuando useVinosRestantes no devuelve datos (mismo comportamiento que antes)", () => {
+    renderCarta();
+    expect(screen.queryByText("Blancos")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tintos")).not.toBeInTheDocument();
+  });
+
+  it("deriva pestañas 'Blancos' y 'Tintos' de categorías reales, y cada una muestra sus propios vinos", () => {
+    vi.mocked(useVinosModule.useVinosRestantes).mockReturnValue({
+      data: [
+        mockVino({ id: "t1", nombre: "Pesus", categoria: "VINOS TINTOS — RIBERA DEL DUERO" }),
+        mockVino({ id: "b1", nombre: "Martín Códax", categoria: "VINOS BLANCOS — ALBARIÑO (RÍAS BAIXAS)" }),
+      ],
+      isLoading: false,
+    } as any);
+    // agruparVinosPorTipo llama a transformVinosToUI de verdad (no es lo que
+    // se está probando aquí): se reemplaza el mock automático del módulo por
+    // una implementación equivalente para que el nombre llegue a pantalla.
+    vi.mocked(useVinosModule.transformVinosToUI).mockImplementation(
+      (vinos) =>
+        (vinos ?? []).map((v) => ({
+          id: v.id as string,
+          name: v.nombre as string,
+          price: `${v.precio_eur}€`,
+          featured: false,
+        })) as never
+    );
+
+    renderCarta();
+
+    expect(screen.getByText("Blancos")).toBeInTheDocument();
+    expect(screen.getByText("Tintos")).toBeInTheDocument();
+
+    // "Cócteles" es la pestaña activa por defecto: el tinto aún no se ve.
+    expect(screen.queryByText("Pesus")).not.toBeInTheDocument();
+
+    // Radix activa TabsTrigger en onMouseDown (no en onClick), igual que en
+    // el navegador un click real dispara mousedown antes que click.
+    fireEvent.mouseDown(screen.getByText("Tintos"));
+    expect(screen.getByText("Pesus")).toBeInTheDocument();
+    expect(screen.queryByText("Martín Códax")).not.toBeInTheDocument();
+
+    fireEvent.mouseDown(screen.getByText("Blancos"));
+    expect(screen.getByText("Martín Códax")).toBeInTheDocument();
+    expect(screen.queryByText("Pesus")).not.toBeInTheDocument();
+  });
+
+  it("dentro de una pestaña de vino, filtra por denominación de origen al elegir un filtro", () => {
+    vi.mocked(useVinosModule.useVinosRestantes).mockReturnValue({
+      data: [
+        mockVino({ id: "t1", nombre: "Pesus", categoria: "VINOS TINTOS — RIBERA DEL DUERO" }),
+        mockVino({ id: "t2", nombre: "Muga Reserva", categoria: "VINOS TINTOS — RIOJA" }),
+      ],
+      isLoading: false,
+    } as any);
+    vi.mocked(useVinosModule.transformVinosToUI).mockImplementation(
+      (vinos) =>
+        (vinos ?? []).map((v) => ({
+          id: v.id as string,
+          name: v.nombre as string,
+          price: `${v.precio_eur}€`,
+          featured: false,
+        })) as never
+    );
+
+    renderCarta();
+    fireEvent.mouseDown(screen.getByText("Tintos"));
+
+    // Con "Todos" (estado inicial del filtro) se ven las dos denominaciones.
+    expect(screen.getByText("Pesus")).toBeInTheDocument();
+    expect(screen.getByText("Muga Reserva")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Ribera del Duero"));
+    expect(screen.getByText("Pesus")).toBeInTheDocument();
+    expect(screen.queryByText("Muga Reserva")).not.toBeInTheDocument();
   });
 });
