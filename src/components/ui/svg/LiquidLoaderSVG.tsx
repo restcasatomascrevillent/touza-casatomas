@@ -5,6 +5,13 @@ interface LiquidLoaderSVGProps {
     className?: string;
 }
 
+const BLOB = [
+    "M50,15 C69,15 85,31 85,50 C85,69 69,85 50,85 C31,85 15,69 15,50 C15,31 31,15 50,15 Z",
+    "M50,15 C75,25 85,40 85,50 C85,75 60,85 50,85 C25,85 15,60 15,50 C15,25 25,25 50,15 Z",
+    "M50,12 C72,12 88,28 88,50 C88,72 72,88 50,88 C28,88 12,72 12,50 C12,28 28,12 50,12 Z",
+    "M50,15 C69,15 85,31 85,50 C85,69 69,85 50,85 C31,85 15,69 15,50 C15,31 31,15 50,15 Z",
+];
+
 export const LiquidLoaderSVG = ({ className }: LiquidLoaderSVGProps) => {
     return (
         <div className={cn("flex flex-col items-center justify-center min-h-[40vh] gap-6", className)}>
@@ -27,13 +34,11 @@ export const LiquidLoaderSVG = ({ className }: LiquidLoaderSVGProps) => {
                 <motion.path
                     fill="currentColor"
                     filter="url(#liquidGlow)"
+                    // `initial` con el primer keyframe: sin él framer-motion pinta un
+                    // primer frame con d="undefined" (ver HeroBackgroundSVG.tsx).
+                    initial={{ d: BLOB[0] }}
                     animate={{
-                        d: [
-                            "M50,15 C69,15 85,31 85,50 C85,69 69,85 50,85 C31,85 15,69 15,50 C15,31 31,15 50,15 Z",
-                            "M50,15 C75,25 85,40 85,50 C85,75 60,85 50,85 C25,85 15,60 15,50 C15,25 25,25 50,15 Z",
-                            "M50,12 C72,12 88,28 88,50 C88,72 72,88 50,88 C28,88 12,72 12,50 C12,28 28,12 50,12 Z",
-                            "M50,15 C69,15 85,31 85,50 C85,69 69,85 50,85 C31,85 15,69 15,50 C15,31 31,15 50,15 Z"
-                        ],
+                        d: BLOB,
                         scale: [1, 1.05, 0.95, 1],
                         rotate: [0, 90, 180, 360],
                     }}
