@@ -42,6 +42,47 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       // robots.txt ya no está en public/: lo genera el build (ver ssgOptions).
       includeAssets: ['favicon.ico'],
+      // Precache mínimo. Antes el SW precacheaba TODO el build en la primera
+      // visita a cualquier ruta (6 HTML + 21 chunks JS, ~440 KB brotli, incluido
+      // el chunk de three.js que el móvil nunca usa), y tras cada deploy volvía
+      // a bajar todo lo que cambiaba. Eso se paga en Fast Data Transfer de
+      // Vercel. Ahora solo se precachea CSS + iconos; el JS y las imágenes se
+      // cachean en runtime *cuando la página los usa* (ya los ha descargado, así
+      // que no cuesta bytes extra), y los HTML con NetworkFirst.
+      workbox: {
+        globPatterns: ['**/*.css'], // favicon.ico entra por includeAssets
+        // Con SSG cada ruta tiene su propio HTML: no hay fallback de SPA
+        // (además index.html ya no está en el precache).
+        navigateFallback: null,
+        // Borra cachés de precache de versiones antiguas de Workbox. Las
+        // entradas del precache actual que ya no están en el manifest las
+        // elimina Workbox al activar el SW nuevo (libera los ~440 KB viejos).
+        cleanupOutdatedCaches: true,
+        runtimeCaching: [
+          {
+            // Ficheros con hash (inmutables): JS, CSS e imágenes AVIF/WebP.
+            urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/assets/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'touza-assets',
+              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30, purgeOnQuotaError: true },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
+            // HTML prerenderizado: siempre red primero (contenido fresco tras
+            // deploy); la copia en caché solo sirve sin conexión.
+            urlPattern: ({ request, sameOrigin }) => sameOrigin && request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'touza-pages',
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 10 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+        ],
+      },
       manifest: {
         name: 'Touza Cocktail Bar',
         short_name: 'Touza',

@@ -1,6 +1,6 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshTransmissionMaterial, Environment, Stars } from "@react-three/drei";
+import { Float, MeshTransmissionMaterial, Environment, Lightformer, Stars } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from "three";
 
@@ -44,7 +44,7 @@ const BackgroundParticles = () => {
 
 const Scene3D = () => {
     return (
-        <div className="absolute inset-0 z-[0] opacity-70 pointer-events-none">
+        <div className="absolute inset-0 z-[0] opacity-70 pointer-events-none animate-in fade-in duration-1000">
             <Canvas
                 camera={{ position: [0, 0, 5], fov: 45 }}
                 gl={{ alpha: true, antialias: true }}
@@ -55,7 +55,20 @@ const Scene3D = () => {
                 <pointLight position={[-10, -10, -5]} intensity={0.5} color="#4a90e2" />
                 <BackgroundParticles />
                 <FloatingCrystal />
-                <Environment preset="city" blur={0.8} />
+                {/*
+                  Entorno procedural (sin red). Antes era `preset="city"`, que
+                  descarga un HDR de raw.githack.com: la CSP de vercel.json
+                  (connect-src 'self' https://*.supabase.co) lo bloquea, el
+                  loader lanza, y Scene3DErrorBoundary tiraba la escena entera
+                  (se pagaban ~193 KB de three.js para no pintar nada). Los
+                  Lightformer se renderizan a un cubemap una sola vez (frames=1).
+                */}
+                <Environment resolution={128} frames={1}>
+                    <Lightformer intensity={2} position={[0, 5, -9]} scale={[10, 10, 1]} />
+                    <Lightformer intensity={1.2} rotation-y={Math.PI / 2} position={[-6, 1, -1]} scale={[20, 1, 1]} />
+                    <Lightformer intensity={1.2} rotation-y={-Math.PI / 2} position={[6, 1, 0]} scale={[20, 1, 1]} />
+                    <Lightformer form="ring" color="#D4A574" intensity={3} scale={2} position={[-4, 2, 5]} target={[0, 0, 0]} />
+                </Environment>
             </Canvas>
         </div>
     );
