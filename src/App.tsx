@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
+import { Analytics } from "@vercel/analytics/react";
 import ErrorBoundary from "./components/ui/error-boundary";
 import PageTransition from "./components/PageTransition";
 import SmoothScroll from "./components/SmoothScroll";
@@ -50,6 +51,11 @@ const RootLayout = () => {
                   un containing block y la barra `fixed` dejaría de anclarse al viewport. */}
               <MobileReserveCTA />
               <CookieConsent />
+              {/* Vercel Web Analytics (sin cookies). Renderiza `null` y solo inyecta
+                  el script en un useEffect → no afecta al HTML del SSG. El script
+                  sigue los cambios de history (react-router): cada navegación en
+                  cliente cuenta como page view. */}
+              <Analytics />
             </TooltipProvider>
           </SmoothScroll>
         </QueryClientProvider>
