@@ -22,7 +22,16 @@ export default defineConfig(({ mode }) => ({
     onFinished: async (dir: string) => {
       const env = loadEnv(mode, process.cwd(), "VITE_");
       const { generarSitemapYRobots } = await import("./scripts/generar-sitemap.mjs");
-      await generarSitemapYRobots(dir, env.VITE_SITE_URL || "https://touzabar.es");
+      // OJO: este respaldo debe coincidir con el de `src/lib/site.ts`. Son dos
+      // porque aquel corre en el bundle (`import.meta.env`) y este en Node
+      // (`loadEnv`), y no pueden compartir módulo. El dominio real está sin
+      // decidir; mientras tanto se usa la URL de Vercel, que existe. Antes
+      // caía en `https://touzabar.es`, que no resuelve, y el sitemap listaba
+      // 5 URLs de un dominio inexistente aunque el HTML ya fuera correcto.
+      await generarSitemapYRobots(
+        dir,
+        env.VITE_SITE_URL || "https://touza-restaurant-website.vercel.app",
+      );
     },
   },
   plugins: [
