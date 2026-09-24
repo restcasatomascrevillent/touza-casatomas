@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 // Barra fija de conversión en móvil: llamar o reservar sin hacer scroll.
 // Se renderiza también en el HTML del SSG (no depende de efectos ni de scroll).
-const HIDE_ON_PATHS = ["/reservado", "/contacto", "/404"];
+const HIDE_ON_PATHS = ["/reservado", "/contacto", "/404", "/reserva/respuesta"];
 const PHONE_HREF = "tel:+34966782000";
 
 const MobileReserveCTA = () => {

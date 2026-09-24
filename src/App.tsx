@@ -81,6 +81,11 @@ export const routes: RouteRecord[] = [
       { path: "galeria", lazy: lazyRoute(() => import("./pages/Galeria")) },
       { path: "reservado", lazy: lazyRoute(() => import("./pages/Reservado")) },
       { path: "contacto", lazy: lazyRoute(() => import("./pages/Contacto")) },
+      // Página de los enlaces de los correos de reserva (Supabase sirve el HTML
+      // de sus funciones como text/plain, así que la sirve la web). `noindex`;
+      // el SSG prerenderiza un cascarón vacío: el token se lee en el navegador.
+      // Queda fuera del sitemap porque vive en una subcarpeta (reserva/).
+      { path: "reserva/respuesta", lazy: lazyRoute(() => import("./pages/RespuestaReserva")) },
       // Ruta literal para que el SSG prerenderice `404.html` (vite-react-ssg
       // descarta la ruta "*" al recolectar paths). Vercel sirve ese fichero con
       // status 404 para cualquier URL que no resuelva en el filesystem.
