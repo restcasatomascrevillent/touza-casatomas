@@ -22,8 +22,6 @@ import { loadEnv } from "vite";
 const VIRTUAL_ID = "virtual:touza/carta";
 const RESOLVED_ID = `\0${VIRTUAL_ID}`;
 
-/** Mismas categorías que pide `src/pages/Carta.tsx`. */
-const CATEGORIAS_VINOS = ["CHAMPAGNES", "CAVAS Y OTROS ESPUMOSOS"];
 const CATEGORIAS_BEBIDAS = ["Cervezas", "Copas", "Whiskies"];
 
 /** `vite-react-ssg build` lanza dos builds (cliente + SSR): una sola consulta. */
@@ -48,12 +46,17 @@ async function traerCarta(base, key) {
     // usePlatos.ts. Si divergen, el HTML y lo que refresca React Query dejarían
     // de coincidir y habría parpadeo al hidratar.
     consultar(base, key, "Cocteles", "select=*&activado=eq.true&touza=eq.true&order=orden.asc"),
-    consultar(
-      base,
-      key,
-      "Vinos",
-      `select=*&activado=eq.true&touza=eq.true&categoria=in.(${CATEGORIAS_VINOS.map((c) => `"${c}"`).join(",")})&order=orden.asc`,
-    ),
+    // Sin filtro de categoría a propósito: la tabla Vinos mezcla tipo y
+    // denominación de origen en `categoria` ("VINOS TINTOS — RIBERA DEL
+    // DUERO") y esa lista de denominaciones cambia con la carta. Antes esta
+    // consulta pedía solo CHAMPAGNES y CAVAS Y OTROS ESPUMOSOS —escritas a
+    // mano—, así que los 131 vinos con denominación (tintos, blancos...)
+    // nunca llegaban al HTML prerenderizado ni al JSON-LD, aunque
+    // `agruparVinosPorTipo` (src/lib/vinos-carta.ts) ya sabía agruparlos en
+    // el navegador desde el commit 8f0db1d. Mismo filtro que la unión de
+    // useVinos(categoria) + useVinosRestantes: touza + activado, sin
+    // restringir categoría; mismo orden que useVinosRestantes.
+    consultar(base, key, "Vinos", "select=*&activado=eq.true&touza=eq.true&order=categoria.asc,orden.asc"),
     consultar(
       base,
       key,
@@ -71,6 +74,23 @@ async function traerCarta(base, key) {
   const porCategoria = (filas, categorias) =>
     Object.fromEntries(categorias.map((c) => [c, filas.filter((f) => f.categoria === c)]));
 
+  // A diferencia de bebidas (lista fija), los vinos se agrupan por el valor
+  // real de `categoria` de cada fila, no por una lista escrita a mano —igual
+  // que useVinosRestantes en el navegador—, para que una denominación nueva
+  // en el admin tenga dónde caer sin tocar este script. Esto solo guarda la
+  // instantánea en bruto por categoría: el reparto en tipo → denominación lo
+  // hace `agruparVinosPorTipo` (src/lib/vinos-carta.ts) cuando el propio
+  // build renderiza `<Carta/>` vía SSR de Vite —ese módulo TypeScript se
+  // carga tal cual, sin reimplementar aquí su lógica.
+  const porCategoriaReal = (filas) => {
+    const resultado = {};
+    for (const fila of filas) {
+      if (!fila.categoria) continue;
+      (resultado[fila.categoria] ??= []).push(fila);
+    }
+    return resultado;
+  };
+
   // Mejor romper el build que publicar —y que Google indexe— una carta vacía.
   if (cocteles.length === 0) {
     throw new Error(
@@ -82,7 +102,7 @@ async function traerCarta(base, key) {
   return {
     generadoEn: new Date().toISOString(),
     cocteles,
-    vinos: porCategoria(vinos, CATEGORIAS_VINOS),
+    vinos: porCategoriaReal(vinos),
     bebidas: porCategoria(bebidas, CATEGORIAS_BEBIDAS),
     // `Platos.touza` es false en las 128 filas de la tabla → esto viene vacío
     // a propósito. Ver el comentario de src/hooks/usePlatos.ts.

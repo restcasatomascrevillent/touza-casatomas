@@ -9,7 +9,7 @@ import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
 import { useVinos, useVinosRestantes, transformVinosToUI, type VinoUI } from "@/hooks/useVinos";
-import { agruparVinosPorTipo } from "@/lib/vinos-carta";
+import { agruparVinosPorTipo, capitalizarEtiqueta } from "@/lib/vinos-carta";
 import { useBebidas, transformBebidasToUI, type BebidaUI } from "@/hooks/useBebidas";
 import { usePlatosTouza, transformPlatosToUI } from "@/hooks/usePlatos";
 import { AVISO_SIN_ALERGENOS } from "@/lib/alergenos";
@@ -99,8 +99,30 @@ const Carta = () => {
   // Resto de vinos con denominación de origen (tintos, blancos...): una sola
   // consulta para todo, agrupada por tipo real de los datos en vez de
   // categorías escritas a mano. Ver src/lib/vinos-carta.ts.
+  //
+  // `useVinosRestantes` no tiene instantánea de build propia (no siembra con
+  // `initialData`, a diferencia de useVinos/useCocteles/useBebidas/usePlatos
+  // — ver el comentario en su definición), así que en el primer render
+  // —tanto en Node durante `vite-react-ssg build` como en el navegador antes
+  // de que resuelva su fetch— `vinosRestoRaw` viene `undefined`. Sin más,
+  // `gruposVino` saldría `[]` y las pestañas Blancos/Tintos no existirían en
+  // el HTML prerenderizado (el bug que arregla este cambio). `vinosRestoSSG`
+  // cubre ese hueco con la instantánea de `CARTA_SSG.vinos` —ahora con TODAS
+  // las categorías reales, no solo las dos fijas, ver
+  // scripts/carta-ssg-plugin.mjs— para que el primer render, en Node y en el
+  // navegador, ya tenga los mismos datos; en cuanto `useVinosRestantes`
+  // resuelve su fetch real, `gruposVino` se recalcula con esos datos frescos.
+  const vinosRestoSSG = useMemo(() => {
+    if (!CARTA_SSG) return undefined;
+    return Object.entries(CARTA_SSG.vinos)
+      .filter(([categoria]) => !CATEGORIAS_VINO_FIJAS.includes(categoria))
+      .flatMap(([, vinosDeCategoria]) => vinosDeCategoria);
+  }, []);
   const { data: vinosRestoRaw } = useVinosRestantes(CATEGORIAS_VINO_FIJAS);
-  const gruposVino = useMemo(() => agruparVinosPorTipo(vinosRestoRaw ?? []), [vinosRestoRaw]);
+  const gruposVino = useMemo(
+    () => agruparVinosPorTipo(vinosRestoRaw ?? vinosRestoSSG ?? []),
+    [vinosRestoRaw, vinosRestoSSG]
+  );
   const tabsCarta = useMemo(
     () => [
       ...mainCategoriesAntesDeVinos,
@@ -127,10 +149,23 @@ const Carta = () => {
   // prerenderizado y el de la hidratación sean idénticos.
   const schemaCarta = useMemo(() => {
     if (!CARTA_SSG) return undefined;
+    // Blancos, Tintos y cualquier otra denominación: una sección de Menu por
+    // cada categoría real de CARTA_SSG.vinos que no sea Champagnes/Cavas
+    // (esas dos ya tienen su sección fija justo debajo, con su nombre
+    // legible de siempre). Reutiliza capitalizarEtiqueta (src/lib/vinos-carta.ts)
+    // para el nombre de sección en vez de mostrar la categoría en bruto de
+    // la base de datos ("VINOS TINTOS — RIBERA DEL DUERO").
+    const seccionesVinoResto = Object.entries(CARTA_SSG.vinos)
+      .filter(([categoria]) => !CATEGORIAS_VINO_FIJAS.includes(categoria))
+      .map(([categoria, vinosDeCategoria]) => ({
+        nombre: capitalizarEtiqueta(categoria),
+        items: vinosDeCategoria,
+      }));
     return menuSchema([
       { nombre: "Cócteles", items: CARTA_SSG.cocteles },
       { nombre: "Champagnes", items: CARTA_SSG.vinos["CHAMPAGNES"] ?? [] },
       { nombre: "Cavas y otros espumosos", items: CARTA_SSG.vinos["CAVAS Y OTROS ESPUMOSOS"] ?? [] },
+      ...seccionesVinoResto,
       { nombre: "Cervezas", items: CARTA_SSG.bebidas["Cervezas"] ?? [] },
       { nombre: "Copas de vino", items: CARTA_SSG.bebidas["Copas"] ?? [] },
       { nombre: "Whiskies", items: CARTA_SSG.bebidas["Whiskies"] ?? [] },
