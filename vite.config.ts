@@ -32,6 +32,11 @@ export default defineConfig(({ mode }) => ({
         dir,
         env.VITE_SITE_URL || "https://touza-restaurant-website.vercel.app",
       );
+      // vite-react-ssg necesita dist/.vite/{manifest,ssr-manifest}.json para
+      // prerenderizar, pero ya ha terminado: si se quedan, Vercel los publica
+      // (~120 KB, legibles por cualquiera en /.vite/…) sin que nada los use.
+      const { rm } = await import("node:fs/promises");
+      await rm(path.join(dir, ".vite"), { recursive: true, force: true });
     },
   },
   plugins: [
@@ -83,6 +88,10 @@ export default defineConfig(({ mode }) => ({
           },
         ],
       },
+      // Único manifest del sitio: el plugin genera /manifest.webmanifest e
+      // inyecta su <link rel="manifest">. No añadas otro en index.html ni en
+      // public/: había un public/manifest.json duplicado enlazado antes que
+      // este, y el navegador usaba ese (el primero).
       manifest: {
         name: 'Touza Cocktail Bar',
         short_name: 'Touza',

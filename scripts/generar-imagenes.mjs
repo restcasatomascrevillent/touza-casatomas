@@ -21,8 +21,30 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dirOrigen = path.join(raiz, "src/assets/originales");
 const dirDestino = path.join(raiz, "src/assets/img");
 
-/** Anchos objetivo. Nunca se amplía por encima del original. */
-const ANCHOS = [640, 1024, 1600];
+/**
+ * Anchos objetivo. Nunca se amplía por encima del original.
+ *
+ * 1200 existe por los móviles de DPR 3 (360–390 px × 3 ≈ 1080–1170 px): con
+ * `sizes="100vw"` saltaban a la de 1600 (~1,5–1,8× los bytes) aunque 1200 ya
+ * cubre su densidad. Ahorra Fast Data Transfer sin cambio visible.
+ */
+const ANCHOS = [640, 1024, 1200, 1600];
+
+/**
+ * Recortes verticales para dirección de arte (`<source media>`).
+ *
+ * El hero de la portada es apaisado (3:2) y en un móvil vertical se pinta con
+ * `object-cover` a pantalla completa: solo se ve la franja central (~30 % del
+ * ancho) y el resto se descarga para nada. El recorte centrado 1280×1708 (≈3:4)
+ * contiene esa franja entera en cualquier pantalla con proporción ≤ 2:3 (todo
+ * móvil en vertical), así que con `object-cover` centrado se ve el mismo
+ * encuadre, con más resolución útil y menos bytes.
+ * OJO: `left` debe dejar el recorte centrado — (2560 − 1280) / 2 = 640 — o el
+ * encuadre se desplaza respecto al de escritorio.
+ */
+const RECORTES = [
+  { origen: "touza-2.webp", nombre: "touza-2-movil", left: 640, top: 0, width: 1280, height: 1708, anchos: [600, 900] },
+];
 
 /** Imagen usada como og:image (1200×630 es el tamaño canónico de Open Graph). */
 const OG_ORIGEN = "touza-2.webp";
@@ -51,11 +73,27 @@ async function main() {
     }
   }
 
+  for (const r of RECORTES) {
+    const entrada = path.join(dirOrigen, r.origen);
+    dimensiones[r.nombre] = { width: r.width, height: r.height };
+    for (const ancho of r.anchos) {
+      const base = sharp(entrada)
+        .extract({ left: r.left, top: r.top, width: r.width, height: r.height })
+        .resize({ width: ancho, withoutEnlargement: true });
+      await base.clone().webp({ quality: 78 }).toFile(path.join(dirDestino, `${r.nombre}-${ancho}.webp`));
+      await base.clone().avif({ quality: 55 }).toFile(path.join(dirDestino, `${r.nombre}-${ancho}.avif`));
+      console.log(`  ${r.nombre}-${ancho}.{webp,avif} (recorte)`);
+    }
+  }
+
   // og:image — JPEG por compatibilidad: varios rastreadores sociales aún no
   // resuelven AVIF/WebP. Va a public/ para tener URL estable sin hash.
+  // Calidad 48 (antes 82): 159 KB → ~78 KB. Solo se ve como miniatura en las
+  // tarjetas sociales, donde la diferencia no se aprecia. Se descarga en cada
+  // vista previa de enlace (WhatsApp, Facebook…) y cuenta como Fast Data Transfer.
   await sharp(path.join(dirOrigen, OG_ORIGEN))
     .resize({ width: 1200, height: 630, fit: "cover", position: "centre" })
-    .jpeg({ quality: 82, mozjpeg: true })
+    .jpeg({ quality: 48, mozjpeg: true })
     .toFile(path.join(raiz, "public/og-image.jpg"));
   console.log("  public/og-image.jpg (1200×630)");
 

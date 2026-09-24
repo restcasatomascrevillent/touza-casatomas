@@ -15,6 +15,13 @@ interface OptimizedImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElem
     sizes?: string;
     /** LCP o above-the-fold: carga ansiosa, alta prioridad y sin fundido. */
     priority?: boolean;
+    /**
+     * Dirección de arte: variante (p. ej. un recorte vertical) que el navegador
+     * usa cuando se cumple `media`. Va antes que las <source> normales, así que
+     * gana cuando aplica. Solo tiene sentido si la variante contiene todo lo
+     * que `object-cover` deja ver en ese caso; si no, cambia el encuadre.
+     */
+    variante?: { imagen: ImagenResponsive; media: string; sizes: string };
 }
 
 export const OptimizedImage = ({
@@ -26,6 +33,7 @@ export const OptimizedImage = ({
     height,
     sizes = "100vw",
     priority = false,
+    variante,
     ...props
 }: OptimizedImageProps) => {
     const url = imagen?.src ?? src ?? "";
@@ -68,6 +76,12 @@ export const OptimizedImage = ({
             {/* `contents` saca la <picture> del layout: el <img> queda como hijo
                 directo del contenedor, exactamente igual que antes. */}
             <picture className="contents">
+                {variante?.imagen.avif && (
+                    <source type="image/avif" media={variante.media} srcSet={variante.imagen.avif} sizes={variante.sizes} />
+                )}
+                {variante?.imagen.webp && (
+                    <source type="image/webp" media={variante.media} srcSet={variante.imagen.webp} sizes={variante.sizes} />
+                )}
                 {imagen?.avif && <source type="image/avif" srcSet={imagen.avif} sizes={sizes} />}
                 {imagen?.webp && <source type="image/webp" srcSet={imagen.webp} sizes={sizes} />}
                 <img

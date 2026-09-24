@@ -397,8 +397,8 @@ const Reservado = () => {
                     {/* <picture> con `contents`: el <img> sigue siendo hijo
                         directo del contenedor, misma maquetación que antes. */}
                     <picture className="contents">
-                      <source type="image/avif" srcSet={image.avif} sizes="(min-width: 768px) 33vw, 100vw" />
-                      <source type="image/webp" srcSet={image.webp} sizes="(min-width: 768px) 33vw, 100vw" />
+                      <source type="image/avif" srcSet={image.avif} sizes="(min-width: 768px) 33vw, calc(100vw - 3rem)" />
+                      <source type="image/webp" srcSet={image.webp} sizes="(min-width: 768px) 33vw, calc(100vw - 3rem)" />
                       <img
                         src={image.src}
                         width={image.width}

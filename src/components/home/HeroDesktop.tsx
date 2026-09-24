@@ -2,7 +2,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
-import { IMAGENES } from "@/assets/imagenes";
+import { HERO_VARIANTE_MOVIL, IMAGENES } from "@/assets/imagenes";
 import { lazy, Suspense, useRef } from "react";
 import { HeroBackgroundSVG } from "@/components/ui/svg/HeroBackgroundSVG";
 import { Scene3DErrorBoundary } from "@/components/3d/Scene3DErrorBoundary";
@@ -45,6 +45,7 @@ const HeroDesktop = () => {
             alt="Bar ambiente oscuro y elegante"
             className="w-full h-[100dvh] object-cover opacity-60"
             sizes="100vw"
+            variante={HERO_VARIANTE_MOVIL}
             priority={true}
           />
         </motion.div>

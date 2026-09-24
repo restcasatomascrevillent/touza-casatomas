@@ -74,6 +74,11 @@ function construir(nombre: string): ImagenResponsive {
 export const IMAGENES = {
   /** Interior, apaisada. Hero de la portada, og:image y `image` del JSON-LD. */
   interior: construir("touza-2"),
+  /**
+   * Recorte central ≈3:4 de `interior` para el hero en móvil vertical (ver
+   * RECORTES en scripts/generar-imagenes.mjs). Mismo encuadre, menos bytes.
+   */
+  interiorMovil: construir("touza-2-movil"),
   /** Barra, vertical. Hero de /carta y showcase "Cócteles de Autor". */
   barra: construir("touza-5"),
   /** El Reservado, vertical. */
@@ -85,6 +90,25 @@ export const IMAGENES = {
   /** Detalle de decoración, vertical. Showcase "El Reservado". */
   decoracion: construir("touza-10"),
 } satisfies Record<string, ImagenResponsive>;
+
+/**
+ * Hero de la portada en pantallas verticales (móvil). Se pasa a HeroDesktop Y
+ * a HeroMobile: el HTML prerenderizado siempre trae HeroDesktop (en SSG
+ * `useIsMobile()` es false), así que si solo lo llevara HeroMobile el móvil
+ * bajaría las dos imágenes.
+ *
+ * - `media`: el recorte es ≈3:4 y la caja ocupa todo el viewport (100dvh ≥
+ *   alto del viewport de las media queries), así que con proporción ≤ 2:3 el
+ *   recorte siempre cubre lo que `object-cover` deja ver → mismo encuadre.
+ * - `sizes="300px"` NO es el ancho real (≈75vh): es un presupuesto para que
+ *   DPR 3 elija la de 900 y DPR ≤ 2 la de 600. Ambas dan más píxeles útiles
+ *   que la apaisada de 1600/1024 que se usaba antes, pesando ~40 % menos.
+ */
+export const HERO_VARIANTE_MOVIL = {
+  imagen: IMAGENES.interiorMovil,
+  media: "(max-aspect-ratio: 2/3)",
+  sizes: "300px",
+};
 
 /**
  * Envuelve una URL externa (Unsplash, Supabase Storage) con la misma forma,

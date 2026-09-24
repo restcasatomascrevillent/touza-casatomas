@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
-import { IMAGENES } from "@/assets/imagenes";
+import { HERO_VARIANTE_MOVIL, IMAGENES } from "@/assets/imagenes";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -17,6 +17,7 @@ const HeroMobile = () => {
           alt="Bar ambiente oscuro y elegante"
           className="w-full h-full object-cover opacity-50 absolute inset-0"
           sizes="100vw"
+          variante={HERO_VARIANTE_MOVIL}
           priority={true}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black pointer-events-none" />

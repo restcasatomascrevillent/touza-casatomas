@@ -56,7 +56,7 @@ const ShowcaseMobile = ({
           imagen={imagen}
           alt={title}
           className="w-full h-full object-cover"
-          sizes="100vw"
+          sizes="calc(100vw - 2.5rem)"
         />
       </motion.div>
 
