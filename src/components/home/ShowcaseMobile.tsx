@@ -25,14 +25,14 @@ const ShowcaseMobile = ({
   label = "Touza Experience",
 }: ShowcaseMobileProps) => {
   return (
-    <section className="py-12 px-5">
+    <section className="py-8 px-5">
       {/* Label */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-30px" }}
         transition={{ duration: 0.5, ease: appleEase }}
-        className="flex flex-col items-center gap-2 mb-5"
+        className="flex flex-col items-center gap-2 mb-4"
       >
         <span className="text-primary text-[11px] tracking-[0.3em] uppercase font-medium">
           {label}
@@ -50,7 +50,7 @@ const ShowcaseMobile = ({
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, margin: "-30px" }}
         transition={{ duration: 0.6, ease: appleEase }}
-        className="aspect-[3/4] rounded-2xl overflow-hidden mb-6"
+        className="aspect-[3/4] rounded-2xl overflow-hidden mb-5"
       >
         <OptimizedImage
           imagen={imagen}
@@ -75,7 +75,7 @@ const ShowcaseMobile = ({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.05, ease: appleEase }}
-        className="text-white/70 text-[15px] font-light leading-relaxed mb-6"
+        className="text-white/70 text-[15px] font-light leading-relaxed mb-5"
       >
         {description}
       </motion.p>
@@ -91,7 +91,7 @@ const ShowcaseMobile = ({
         </Link>
       </Button>
 
-      <div className="mt-10 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="mt-8 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     </section>
   );
 };

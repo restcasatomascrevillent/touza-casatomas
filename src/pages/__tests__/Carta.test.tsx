@@ -58,6 +58,7 @@ vi.mock("framer-motion", () => ({
 // Imports bajo test (DESPUÉS de los vi.mock)
 // ---------------------------------------------------------------------------
 import Carta from "../Carta";
+import { AVISO_ALERGENOS_CARTA } from "@/lib/alergenos";
 import * as usePlatosModule from "@/hooks/usePlatos";
 import * as useCoctelesModule from "@/hooks/useCocteles";
 import type { CoctelUI } from "@/hooks/useCocteles";
@@ -213,7 +214,12 @@ describe("Carta — sección Tapas", () => {
     expect(screen.queryByText(/sin información de alérgenos/i)).not.toBeInTheDocument();
   });
 
-  it("muestra el aviso de 'no consta' (no 'sin alérgenos') cuando el plato no tiene alergenos_oficiales", () => {
+  // El aviso de "no consta" ya NO se pinta bajo cada tarjeta: con 13 cócteles
+  // sin alérgenos declarados eran 13 bloques idénticos de tres líneas en una
+  // rejilla de dos columnas. Ahora hay UN aviso por carta (visible en todas las
+  // pestañas, que es lo que exige el Reglamento UE 1169/2011 para lo que se
+  // prepara al momento) y el detalle por cóctel sigue en su diálogo.
+  it("no repite el aviso de alérgenos en la tarjeta del plato; lo cubre el aviso único de la carta", () => {
     const tapas = [
       {
         id: "1",
@@ -237,7 +243,10 @@ describe("Carta — sección Tapas", () => {
 
     renderCarta();
 
-    expect(screen.getByText(/sin información de alérgenos/i)).toBeInTheDocument();
+    // La tarjeta no lleva su propio bloque de "no consta"...
+    expect(screen.queryByText(/sin información de alérgenos/i)).not.toBeInTheDocument();
+    // ...pero el aviso sigue a la vista una sola vez, en la cabecera de la carta.
+    expect(screen.getByText(AVISO_ALERGENOS_CARTA)).toBeInTheDocument();
   });
 
   it("muestra /placeholder.svg cuando imagen_url de un plato es null", () => {
@@ -362,7 +371,7 @@ describe("Carta — alérgenos en cócteles", () => {
     expect(screen.queryByText(/sin información de alérgenos/i)).not.toBeInTheDocument();
   });
 
-  it("muestra el aviso de 'no consta' cuando el cóctel no tiene alergenos_oficiales", () => {
+  it("no repite el aviso de alérgenos en la tarjeta del cóctel; lo cubre el aviso único de la carta", () => {
     vi.mocked(useCoctelesModule.useCocteles).mockReturnValue({
       data: [{}] as any,
       isLoading: false,
@@ -374,7 +383,8 @@ describe("Carta — alérgenos en cócteles", () => {
     renderCarta();
 
     expect(screen.getByText("Negroni Touza")).toBeInTheDocument();
-    expect(screen.getByText(/sin información de alérgenos/i)).toBeInTheDocument();
+    expect(screen.queryByText(/sin información de alérgenos/i)).not.toBeInTheDocument();
+    expect(screen.getByText(AVISO_ALERGENOS_CARTA)).toBeInTheDocument();
   });
 });
 

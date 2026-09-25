@@ -28,3 +28,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Capturas de la auditoría móvil (16 MB). Material de revisión, no código:
+# se puede borrar la carpeta entera cuando ya no haga falta.
+.auditoria-movil/

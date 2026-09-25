@@ -23,9 +23,9 @@ const contactItems = [
 
 const VisitUs = () => {
   return (
-    <section className="py-16 md:py-32 bg-black text-white">
+    <section className="py-12 md:py-32 bg-black text-white">
       <div className="max-w-5xl mx-auto px-5 md:px-6">
-        <div className="text-center mb-12 md:mb-20">
+        <div className="text-center mb-8 md:mb-20">
           <motion.span
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -40,7 +40,7 @@ const VisitUs = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: appleEase }}
-            className="font-serif text-3xl md:text-6xl text-white mb-4 md:mb-6"
+            className="font-serif text-3xl md:text-6xl text-white mb-3 md:mb-6"
           >
             Visítanos
           </motion.h2>
@@ -55,7 +55,7 @@ const VisitUs = () => {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-16 relative">
           {/* Vertical separators desktop */}
           <div className="hidden md:block absolute top-8 bottom-8 left-1/3 w-px bg-white/5" />
           <div className="hidden md:block absolute top-8 bottom-8 right-1/3 w-px bg-white/5" />
@@ -69,10 +69,10 @@ const VisitUs = () => {
               transition={{ duration: 0.5, delay: index * 0.08, ease: appleEase }}
               className="text-center"
             >
-              <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-full bg-white/5 flex items-center justify-center">
+              <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-3 md:mb-6 rounded-full bg-white/5 flex items-center justify-center">
                 <item.icon className="w-5 h-5 md:w-6 md:h-6 text-white/50" />
               </div>
-              <h4 className="font-serif text-lg md:text-xl text-white mb-2 md:mb-3">{item.title}</h4>
+              <h4 className="font-serif text-lg md:text-xl text-white mb-1 md:mb-3">{item.title}</h4>
               {item.lines.map((line, i) => (
                 <p key={i} className="text-white/45 text-sm md:text-base font-light leading-relaxed">{line}</p>
               ))}
@@ -85,7 +85,7 @@ const VisitUs = () => {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2, ease: appleEase }}
-          className="flex justify-center gap-3 md:gap-4 mt-12 md:mt-16"
+          className="flex justify-center gap-3 md:gap-4 mt-8 md:mt-16"
         >
           <a
             href="mailto:info@touzabar.es"

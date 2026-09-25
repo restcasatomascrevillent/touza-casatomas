@@ -297,3 +297,23 @@ export const etiquetasAlergenos = (datos: DatosAlergenos): string[] =>
  * importa legalmente, así que nunca se rellena este hueco con una suposición.
  */
 export const AVISO_SIN_ALERGENOS = "Sin información de alérgenos — consulte al personal";
+
+/**
+ * Aviso de alérgenos a nivel de CARTA: se pinta UNA vez por página, no una
+ * vez por tarjeta.
+ *
+ * Antes, cada cóctel y cada tapa sin `alergenos_oficiales` pintaba
+ * `AVISO_SIN_ALERGENOS` bajo su tarjeta. Con los 13 cócteles actuales (todos
+ * con la casilla vacía) eso eran 13 bloques de tres líneas en una rejilla de
+ * dos columnas: ~56 px por tarjeta, ~336 px de la página en móvil, repitiendo
+ * trece veces el mismo texto.
+ *
+ * El aviso NO desaparece: el Reglamento UE 1169/2011 permite dar la
+ * información de alérgenos de palabra en lo que se prepara al momento
+ * SIEMPRE QUE haya un aviso visible de que puede pedirse. Esta línea es ese
+ * aviso visible, fija en la cabecera de la carta y presente en todas las
+ * pestañas. El detalle por cóctel sigue estando en su diálogo, con
+ * `AVISO_SIN_ALERGENOS` cuando no consta.
+ */
+export const AVISO_ALERGENOS_CARTA =
+  "Información de alérgenos: consúltanos antes de pedir y te informamos de cada elaboración.";

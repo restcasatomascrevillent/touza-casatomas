@@ -8,8 +8,13 @@ import { HERO_VARIANTE_MOVIL, IMAGENES } from "@/assets/imagenes";
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
 const HeroMobile = () => {
+  // pb-24 (y no pb-10): la barra fija de "Llamar / Reservar"
+  // (MobileReserveCTA) ocupa los ~81 px inferiores del viewport. Con pb-10 los
+  // dos botones del hero caían JUSTO DEBAJO de esa barra y no se veían en la
+  // primera pantalla. El alto del hero no cambia (sigue 100dvh); solo sube su
+  // contenido para dejar libre la franja de la barra.
   return (
-    <section className="relative h-[100dvh] flex items-end justify-center overflow-hidden pb-10 px-5">
+    <section className="relative h-[100dvh] flex items-end justify-center overflow-hidden pb-24 px-5">
       {/* Background image — static on mobile for perf */}
       <div className="absolute inset-0 z-0 bg-black">
         <OptimizedImage
@@ -71,7 +76,7 @@ const HeroMobile = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5, duration: 0.8 }}
-          className="mt-6 flex flex-col items-center"
+          className="mt-4 flex flex-col items-center"
         >
           <motion.div
             animate={{ y: [0, 6, 0] }}

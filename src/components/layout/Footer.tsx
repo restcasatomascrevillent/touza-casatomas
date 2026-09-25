@@ -17,20 +17,20 @@ const Footer = () => {
   return (
     <>
       {/* Pre-footer CTA */}
-      <section className="bg-black py-16 md:py-24 text-center px-5 md:px-6">
+      <section className="bg-black py-10 md:py-24 text-center px-5 md:px-6">
         <motion.div
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1, ease: appleEase }}
-          className="h-px bg-primary/40 max-w-xl mx-auto mb-10 md:mb-16"
+          className="h-px bg-primary/40 max-w-xl mx-auto mb-6 md:mb-16"
         />
         <motion.h3
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3, ease: appleEase }}
-          className="font-serif text-3xl md:text-6xl text-white mb-5 md:mb-6"
+          className="font-serif text-3xl md:text-6xl text-white mb-4 md:mb-6"
         >
           Reserva tu experiencia
         </motion.h3>
@@ -50,8 +50,8 @@ const Footer = () => {
       </section>
 
       <footer className="bg-black border-t border-white/5">
-        <div className="max-w-6xl mx-auto px-5 md:px-6 py-12 md:py-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
+        <div className="max-w-6xl mx-auto px-5 md:px-6 py-10 md:py-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16">
             {/* Brand */}
             <div>
               <Link to="/" className="inline-block">
@@ -67,10 +67,10 @@ const Footer = () => {
 
             {/* Links */}
             <div>
-              <h4 className="text-white/50 text-xs tracking-[0.2em] uppercase mb-4 md:mb-6">
+              <h4 className="text-white/50 text-xs tracking-[0.2em] uppercase mb-3 md:mb-6">
                 Explora
               </h4>
-              <ul className="space-y-3 md:space-y-4">
+              <ul className="space-y-2 md:space-y-4">
                 {footerLinks.map((link) => (
                   <li key={link.path}>
                     <Link
@@ -86,10 +86,10 @@ const Footer = () => {
 
             {/* Contact + Social */}
             <div>
-              <h4 className="text-white/50 text-xs tracking-[0.2em] uppercase mb-4 md:mb-6">
+              <h4 className="text-white/50 text-xs tracking-[0.2em] uppercase mb-3 md:mb-6">
                 Contacto
               </h4>
-              <div className="space-y-2 md:space-y-3 text-white/40 text-sm font-light mb-6 md:mb-8">
+              <div className="space-y-1.5 md:space-y-3 text-white/40 text-sm font-light mb-5 md:mb-8">
                 <p>C/ San Vicente, 14</p>
                 <p>03330 Crevillente, Alicante</p>
                 <a href="tel:966782000" className="block active:text-white/70">966 782 000</a>
@@ -117,7 +117,7 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-white/5">
+          <div className="mt-8 md:mt-16 pt-5 md:pt-8 border-t border-white/5">
             <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 text-xs text-white/25 font-light">
               <p>© {currentYear} Touza Cocktail Bar</p>
               <p>

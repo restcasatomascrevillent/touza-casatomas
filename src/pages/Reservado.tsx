@@ -281,7 +281,7 @@ const Reservado = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: appleEase }}
-                className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
+                className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
               >
                 Espacio exclusivo
               </motion.span>
@@ -301,10 +301,10 @@ const Reservado = () => {
         </section>
 
         {/* Features */}
-        <section className="py-20 md:py-32 bg-black">
+        <section className="py-12 md:py-32 bg-black">
           <div className="max-w-5xl mx-auto px-6">
             <div className={cn(
-              "grid gap-8 md:gap-16",
+              "grid gap-x-5 gap-y-8 md:gap-16",
               isMobile ? "grid-cols-2" : "grid-cols-4"
             )}>
               {features.map((feature, index) => (
@@ -316,7 +316,7 @@ const Reservado = () => {
                   key={index}
                   className="text-center"
                 >
-                  <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-white/5 flex items-center justify-center">
+                  <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-3 md:mb-5 rounded-full bg-white/5 flex items-center justify-center">
                     <feature.icon className="w-6 h-6 text-white/50" />
                   </div>
                   <h3 className="font-serif text-lg text-white mb-2">{feature.title}</h3>
@@ -328,15 +328,15 @@ const Reservado = () => {
         </section>
 
         {/* Gallery */}
-        <section className="py-20 md:py-32 bg-background">
+        <section className="py-12 md:py-32 bg-background">
           <div className="max-w-6xl mx-auto px-6">
-            <div className="text-center mb-12 md:mb-16">
+            <div className="text-center mb-8 md:mb-16">
               <motion.span
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.6, ease: appleEase }}
-                className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
+                className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
               >
                 Descubre el espacio
               </motion.span>
@@ -414,7 +414,7 @@ const Reservado = () => {
               </div>
             )}
 
-            <div className="text-center mt-10">
+            <div className="text-center mt-8 md:mt-10">
               <Button
                 asChild
                 variant="outline"
@@ -427,15 +427,15 @@ const Reservado = () => {
         </section>
 
         {/* Form */}
-        <section className="py-20 md:py-32 bg-black">
+        <section className="py-12 md:py-32 bg-black">
           <div className="max-w-2xl mx-auto px-6">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8 md:mb-12">
               <motion.span
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.6, ease: appleEase }}
-                className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
+                className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
               >
                 Reserva tu espacio
               </motion.span>
@@ -468,9 +468,9 @@ const Reservado = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6, ease: appleEase }}
               onSubmit={handleSubmit}
-              className="space-y-5"
+              className="space-y-4 md:space-y-5"
             >
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-4 md:gap-5 md:grid-cols-2">
                 <div>
                   <label htmlFor="nombre" className="block text-xs text-white/40 uppercase tracking-wider mb-2">Nombre *</label>
                   <Input id="nombre" name="nombre" type="text" required autoComplete="name" value={formData.nombre} onChange={handleChange}
@@ -483,7 +483,7 @@ const Reservado = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-5">
                 <div>
                   <label htmlFor="telefono" className="block text-xs text-white/40 uppercase tracking-wider mb-2">Teléfono *</label>
                   <Input id="telefono" name="telefono" type="tel" required autoComplete="tel" inputMode="tel" value={formData.telefono} onChange={handleChange}

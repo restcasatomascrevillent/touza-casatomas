@@ -90,14 +90,14 @@ const Galeria = () => {
       {/* Hero */}
       <section className={cn(
         "bg-black overflow-hidden",
-        isMobile ? "pt-28 pb-12 px-6" : "pt-40 pb-24"
+        isMobile ? "pt-24 pb-8 px-6" : "pt-40 pb-24"
       )}>
         <div className="max-w-4xl mx-auto text-center">
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, ease: appleEase }}
-            className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
+            className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
           >
             Descubre
           </motion.span>
@@ -107,7 +107,7 @@ const Galeria = () => {
             transition={{ duration: 0.8, ease: appleEase }}
             className={cn(
               "font-serif font-bold text-white",
-              isMobile ? "text-4xl mb-4" : "text-7xl lg:text-8xl mb-6"
+              isMobile ? "text-4xl mb-3" : "text-7xl lg:text-8xl mb-6"
             )}
           >
             Galería

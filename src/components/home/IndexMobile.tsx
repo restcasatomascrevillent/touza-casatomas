@@ -27,13 +27,13 @@ const IndexMobile = () => {
       <HeroMobile />
 
       {/* Philosophy — simple fade, no scroll-reveal on mobile */}
-      <section className="py-16 px-5">
+      <section className="py-10 px-5">
         <motion.span
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, ease: appleEase }}
-          className="text-primary text-[11px] tracking-[0.3em] uppercase mb-4 block font-medium text-center"
+          className="text-primary text-[11px] tracking-[0.3em] uppercase mb-3 block font-medium text-center"
         >
           Filosofía
         </motion.span>

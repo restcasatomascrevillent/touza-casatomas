@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Search, Wine, Beer, Martini, GlassWater, Sparkles, X } from "lucide-react";
+import { Search, Wine, Beer, Martini, GlassWater, Sparkles, X, Info } from "lucide-react";
 import { motion, AnimatePresence, Transition } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { useVinos, useVinosRestantes, transformVinosToUI, type VinoUI } from "@/
 import { agruparVinosPorTipo, capitalizarEtiqueta } from "@/lib/vinos-carta";
 import { useBebidas, transformBebidasToUI, type BebidaUI } from "@/hooks/useBebidas";
 import { usePlatosTouza, transformPlatosToUI } from "@/hooks/usePlatos";
-import { AVISO_SIN_ALERGENOS } from "@/lib/alergenos";
+import { AVISO_ALERGENOS_CARTA, AVISO_SIN_ALERGENOS } from "@/lib/alergenos";
 import { Skeleton } from "@/components/ui/skeleton";
 import Seo from "@/components/Seo";
 import { OptimizedImage } from "@/components/ui/optimized-image";
@@ -250,9 +250,12 @@ const Carta = () => {
       />
 
       {/* Hero */}
+      {/* En móvil el héroe baja de 60vh a 46vh: esta es la página de la carta,
+          y con 60vh la primera bebida caía a 725 px del inicio (casi una
+          pantalla entera por debajo del pliegue). En escritorio no cambia. */}
       <section className={cn(
         "relative overflow-hidden",
-        isMobile ? "h-[60vh]" : "h-[80vh]"
+        isMobile ? "h-[46vh]" : "h-[80vh]"
       )}>
         <motion.div
           initial={{ scale: 1.05, opacity: 0 }}
@@ -329,8 +332,8 @@ const Carta = () => {
       </div>
 
       {/* Search + Filters */}
-      <div className="max-w-6xl mx-auto py-8 px-6">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-10">
+      <div className="max-w-6xl mx-auto py-5 px-6 md:py-8">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-4 md:mb-8">
           <div className="relative w-full md:w-80 group">
             <Input
               placeholder="Buscar..."
@@ -365,6 +368,15 @@ const Carta = () => {
           )}
         </div>
 
+        {/* Aviso de alérgenos de toda la carta. Sustituye al bloque que antes
+            se repetía bajo CADA tarjeta de cóctel y de tapa. Vive aquí, fuera
+            del condicional de pestaña, para que se vea en todas (cócteles,
+            vinos, cervezas...). Ver AVISO_ALERGENOS_CARTA en lib/alergenos.ts. */}
+        <p className="mb-6 flex items-start gap-2 text-[11px] font-light leading-relaxed text-white/40 md:mb-8 md:text-xs">
+          <Info className="mt-[2px] h-3.5 w-3.5 flex-shrink-0 text-white/30" aria-hidden="true" />
+          <span>{AVISO_ALERGENOS_CARTA}</span>
+        </p>
+
         <div className="min-h-[50vh]">
           {/* Cocktails Grid */}
           {activeMainCategory === "cocteles" && (
@@ -398,7 +410,11 @@ const Carta = () => {
                     </div>
                     <h3 className="font-serif text-base md:text-lg text-white group-hover:text-primary transition-colors leading-tight mb-1">{cocktail.name}</h3>
                     <p className="text-white/30 text-sm line-clamp-2 font-light">{cocktail.description}</p>
-                    {cocktail.alergenos.length > 0 ? (
+                    {/* Solo las etiquetas reales. El "no consta" ya no se pinta
+                        aquí (eran 13 bloques idénticos en la rejilla): vive una
+                        vez en la cabecera de la carta y, por cóctel, en su
+                        diálogo de detalle. */}
+                    {cocktail.alergenos.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1">
                         {cocktail.alergenos.map((alergeno) => (
                           <span
@@ -409,10 +425,6 @@ const Carta = () => {
                           </span>
                         ))}
                       </div>
-                    ) : (
-                      <p className="mt-2 text-[10px] text-destructive uppercase tracking-wide font-light">
-                        {AVISO_SIN_ALERGENOS}
-                      </p>
                     )}
                   </motion.div>
                 ))}
@@ -442,7 +454,7 @@ const Carta = () => {
                   viewport={{ once: true, margin: "-30px" }}
                   transition={{ duration: 0.5, delay: index * 0.04, ease: appleEase }}
                   key={drink.id}
-                  className="flex justify-between items-center py-5 border-b border-white/5 group"
+                  className="flex justify-between items-center gap-4 py-3.5 md:py-5 border-b border-white/5 group"
                 >
                   <div>
                     <h3 className="font-serif text-lg text-white group-hover:text-primary transition-colors duration-300">{drink.name}</h3>
@@ -460,14 +472,14 @@ const Carta = () => {
 
       {/* Tapas Section */}
       {(loadingPlatos || tapasData.length > 0) && (
-        <section className="py-20 bg-white/[0.02] mt-16">
-          <div className="max-w-6xl mx-auto px-6 text-center mb-12">
+        <section className="py-12 md:py-20 bg-white/[0.02] mt-8 md:mt-16">
+          <div className="max-w-6xl mx-auto px-6 text-center mb-8 md:mb-12">
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.7, ease: appleEase }}
-              className="font-serif text-3xl md:text-4xl text-white mb-4"
+              className="font-serif text-3xl md:text-4xl text-white mb-3 md:mb-4"
             >
               Tapea con tu Cóctel
             </motion.h2>
@@ -510,7 +522,7 @@ const Carta = () => {
                     <div>
                       <h3 className="font-serif text-lg text-white mb-1">{tapa.name}</h3>
                       <p className="text-white/30 text-sm font-light">{tapa.description}</p>
-                      {tapa.alergenos.length > 0 ? (
+                      {tapa.alergenos.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1">
                           {tapa.alergenos.map((alergeno) => (
                             <span
@@ -521,10 +533,6 @@ const Carta = () => {
                             </span>
                           ))}
                         </div>
-                      ) : (
-                        <p className="mt-2 text-[10px] text-destructive uppercase tracking-wide font-light">
-                          {AVISO_SIN_ALERGENOS}
-                        </p>
                       )}
                       {tapa.alergenosNota && (
                         <p className="mt-1 text-[10px] italic text-destructive/90">{tapa.alergenosNota}</p>

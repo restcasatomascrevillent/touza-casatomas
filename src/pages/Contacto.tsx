@@ -30,7 +30,7 @@ const Contacto = () => {
       {/* Hero - Minimal black */}
       <section className={cn(
         "bg-black overflow-hidden",
-        isMobile ? "pt-28 pb-12 px-6" : "pt-40 pb-24"
+        isMobile ? "pt-24 pb-8 px-6" : "pt-40 pb-24"
       )}>
         <div className="max-w-4xl mx-auto text-center">
           <motion.span
@@ -56,16 +56,16 @@ const Contacto = () => {
       </section>
 
       {/* Contact info */}
-      <section className="py-16 md:py-32 bg-background">
+      <section className="py-10 md:py-32 bg-background">
         <div className="max-w-3xl mx-auto px-6">
           <h2 className={cn(
-            "font-serif font-bold text-foreground mb-10",
+            "font-serif font-bold text-foreground mb-6 md:mb-10",
             isMobile ? "text-2xl" : "text-4xl"
           )}>
             Encuéntranos
           </h2>
 
-          <div className="space-y-8 mb-12">
+          <div className="space-y-6 md:space-y-8 mb-10 md:mb-12">
             {contactInfo.map((item, index) => (
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
@@ -103,7 +103,7 @@ const Contacto = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: 0.3, ease: appleEase }}
-            className="flex gap-3 mb-10"
+            className="flex gap-3 mb-8 md:mb-10"
           >
             <a href="https://www.instagram.com/touzabar/" target="_blank" rel="noopener noreferrer"
               className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all duration-300"
