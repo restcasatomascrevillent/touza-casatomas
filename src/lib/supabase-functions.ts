@@ -65,3 +65,52 @@ export async function leerCuerpo(response: Response): Promise<unknown> {
     return texto;
   }
 }
+
+/**
+ * Los dos fallos que el visitante tiene que poder distinguir.
+ *
+ *  - `sin_red`:  el dispositivo no tiene conexión. Ahí sí vale pedirle que la
+ *                compruebe.
+ *  - `servidor`: lo que ha fallado es lo NUESTRO (5xx, CORS, la función caída,
+ *                un cuerpo ilegible). Nunca se le echa la culpa al visitante:
+ *                se le dice que el fallo es nuestro y se le da el teléfono.
+ */
+export type TipoFallo = "sin_red" | "servidor";
+
+/**
+ * `navigator.onLine`, leído sin romper el prerender del SSG (allí no existe
+ * `navigator`) y sin fiarse de él más de lo que aguanta:
+ *
+ *  - `false` es FIABLE: el navegador solo lo pone cuando el sistema dice que no
+ *    hay ninguna ruta de red.
+ *  - `true` NO garantiza internet (wifi de hotel sin salida, portal cautivo,
+ *    DNS roto), así que por sí solo no sirve para culpar a nadie.
+ *
+ * Ante la duda devuelve `true`, de modo que el fallo se clasifica como NUESTRO.
+ * El error caro es el contrario: decirle "comprueba tu conexión" a quien la
+ * tiene perfecta mientras el servidor está caído — ese cliente se va a otro
+ * sitio. Al revés no se pierde nada: a quien de verdad no tenga red, decirle
+ * que el fallo es nuestro y darle el teléfono no le quita ninguna salida (la
+ * voz del móvil funciona sin datos).
+ */
+export function estaEnLinea(): boolean {
+  if (typeof navigator === "undefined" || typeof navigator.onLine !== "boolean") return true;
+  return navigator.onLine;
+}
+
+/**
+ * Decide qué cara del fallo se le cuenta al visitante.
+ *
+ * `status`:
+ *   - `> 0` → HUBO respuesta HTTP. Entonces la red del visitante funciona por
+ *     definición (han llegado bytes desde nuestro host), así que el fallo es
+ *     NUESTRO sin discusión. Fiabilidad: total.
+ *   - `0` → `fetch` lanzó sin llegar a producir respuesta: red caída, DNS, TLS
+ *     o CORS (que es lo que enseña el navegador cuando la Edge Function muere
+ *     al arrancar y ni contesta al `OPTIONS`). Único caso ambiguo; se desempata
+ *     con `navigator.onLine`.
+ */
+export function clasificarFallo(status: number, enLinea: boolean = estaEnLinea()): TipoFallo {
+  if (status > 0) return "servidor";
+  return enLinea ? "servidor" : "sin_red";
+}

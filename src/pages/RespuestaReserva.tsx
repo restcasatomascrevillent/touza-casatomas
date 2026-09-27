@@ -9,9 +9,11 @@ import {
   leerToken,
   llamarEnlace,
   textosEstado,
+  textosSinConexion,
   type RespuestaEnlace,
   type Tono,
 } from "@/lib/respuesta-reserva";
+import { type TipoFallo } from "@/lib/supabase-functions";
 
 /**
  * /reserva/respuesta?token=... — página de los botones "Aceptar" / "Rechazar"
@@ -26,7 +28,10 @@ type Fase =
   | { tipo: "cargando" }
   | { tipo: "sin_token" }
   | { tipo: "lista"; respuesta: RespuestaEnlace; enviando: boolean }
-  | { tipo: "sin_conexion"; reintentar: "consultar" | "ejecutar" };
+  // `fallo` decide de quién es la culpa en el mensaje: solo si el dispositivo
+  // no tiene red se le pide al visitante que la compruebe. En cualquier otro
+  // caso (5xx, CORS, la función caída) el fallo es NUESTRO y se dice así.
+  | { tipo: "sin_conexion"; reintentar: "consultar" | "ejecutar"; fallo: TipoFallo };
 
 const PHONE_HREF = "tel:+34966782000";
 const PHONE_DISPLAY = "966 782 000";
@@ -58,7 +63,8 @@ const RespuestaReserva = () => {
       setFase({ tipo: "lista", respuesta: await llamarEnlace("consultar", token), enviando: false });
     } catch (e) {
       if (!(e instanceof ErrorConexion)) console.error("[respuesta-reserva]", e);
-      setFase({ tipo: "sin_conexion", reintentar: "consultar" });
+      const fallo = e instanceof ErrorConexion ? e.tipo : "servidor";
+      setFase({ tipo: "sin_conexion", reintentar: "consultar", fallo });
     }
   }, []);
 
@@ -70,7 +76,8 @@ const RespuestaReserva = () => {
       setFase({ tipo: "lista", respuesta: await llamarEnlace("ejecutar", token), enviando: false });
     } catch (e) {
       if (!(e instanceof ErrorConexion)) console.error("[respuesta-reserva]", e);
-      setFase({ tipo: "sin_conexion", reintentar: "ejecutar" });
+      const fallo = e instanceof ErrorConexion ? e.tipo : "servidor";
+      setFase({ tipo: "sin_conexion", reintentar: "ejecutar", fallo });
     }
   }, []);
 
@@ -124,15 +131,13 @@ const RespuestaReserva = () => {
               />
             ) : fase.tipo === "sin_conexion" ? (
               <>
+                {/* Título y párrafos salen de `textosSinConexion`: solo se le
+                    pide comprobar la conexión cuando de verdad no tiene red;
+                    si el fallo es nuestro se dice y se le da el teléfono. */}
                 <Estado
                   tituloRef={tituloRef}
                   tono="aviso"
-                  titulo="No hemos podido conectar"
-                  parrafos={[
-                    fase.reintentar === "ejecutar"
-                      ? "No sabemos si tu respuesta ha llegado. Vuelve a intentarlo: si ya estaba registrada, te lo diremos."
-                      : "Comprueba tu conexión e inténtalo de nuevo.",
-                  ]}
+                  {...textosSinConexion(fase.fallo, fase.reintentar, telTexto)}
                 />
                 <Button
                   className="mt-6 w-full h-14 rounded-2xl bg-white text-black hover:bg-white/90 text-base font-medium"

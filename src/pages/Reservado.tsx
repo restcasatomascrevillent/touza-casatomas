@@ -42,11 +42,19 @@ const galleryImages = [IMAGENES.reservado, IMAGENES.mesaPrivada, IMAGENES.barra]
 const TELEFONO_TEXTO = "966 782 000";
 const TELEFONO_HREF = "tel:+34966782000";
 
-const TEXTOS_RECHAZO: TextosRechazo = {
+// Exportado a propósito: así los tests guardan ESTE copy, el que ve el
+// cliente, y no una copia suya que puede envejecer por su cuenta (la regresión
+// de "comprueba tu conexión" es justo la que hay que vigilar aquí).
+export const TEXTOS_RECHAZO: TextosRechazo = {
   title: "No hemos podido enviar tu solicitud",
+  offlineTitle: "Parece que te has quedado sin conexión",
   close: "Cerrar",
   invalidMessage: "Falta algún dato o tiene un formato incorrecto. Revisa el formulario e inténtalo de nuevo.",
-  errorMessage: "No hemos podido conectar con el sistema de reservas. Comprueba tu conexión e inténtalo de nuevo.",
+  // El fallo de hoy: esto decía "Comprueba tu conexión", que es mentira
+  // cuando lo que se ha caído es la función, y encima le echaba la culpa al
+  // cliente. El `errorMessage` solo se usa ya cuando el fallo es NUESTRO.
+  errorMessage: "El fallo es nuestro, no tuyo: tu solicitud no ha llegado a registrarse.",
+  offlineMessage: "Tu solicitud no ha salido porque se ha perdido la conexión.",
   fallbackMessage: "No ha sido posible procesar tu solicitud en este momento.",
   exits: {
     call: `Llámanos al ${TELEFONO_TEXTO} y te ayudamos directamente.`,
@@ -55,6 +63,7 @@ const TEXTOS_RECHAZO: TextosRechazo = {
     otherDate: "Prueba con otra fecha.",
     guests: "Ajusta el número de personas e inténtalo de nuevo.",
     checkForm: "Revisa los datos del formulario e inténtalo de nuevo.",
+    offline: `Vuelve a enviarla cuando la recuperes. Si te corre prisa, llámanos al ${TELEFONO_TEXTO}.`,
     retryOrCall: `Inténtalo de nuevo en unos minutos o llámanos al ${TELEFONO_TEXTO}.`,
   },
 };
@@ -162,8 +171,12 @@ const Reservado = () => {
 
       setRechazo(interpretarRechazoReserva(response.status, cuerpo, TEXTOS_RECHAZO));
     } catch (err) {
-      // Ni siquiera hubo respuesta (red caída, CORS). Se representa con
-      // status 0 para que el mensaje sea el de "reintenta o llama".
+      // Ni siquiera hubo respuesta (red caída, DNS, CORS — esto último es lo
+      // que ve el navegador cuando la Edge Function muere al arrancar y no
+      // contesta ni al OPTIONS de preflight). Se representa con status 0, el
+      // único caso ambiguo: aquí es donde `navigator.onLine` (4º parámetro,
+      // que se calcula solo) decide si el mensaje culpa a la red del cliente
+      // o asume que el fallo es nuestro. Por defecto, nuestro.
       console.error("Error al enviar la solicitud de El Reservado:", err);
       setRechazo(interpretarRechazoReserva(0, null, TEXTOS_RECHAZO));
     } finally {
@@ -225,7 +238,7 @@ const Reservado = () => {
             <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
               <AlertCircle className="w-9 h-9 text-amber-400" />
             </div>
-            <DialogTitle className="text-2xl font-serif">{TEXTOS_RECHAZO.title}</DialogTitle>
+            <DialogTitle className="text-2xl font-serif">{rechazo?.titulo ?? TEXTOS_RECHAZO.title}</DialogTitle>
             <DialogDescription asChild>
               <div className="text-base space-y-3 text-white/60">
                 {rechazo && (

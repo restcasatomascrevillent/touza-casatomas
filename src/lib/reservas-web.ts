@@ -15,6 +15,7 @@
  * éxito es 201. `if (!response.ok) throw` se comería ese cuerpo — hay que
  * leerlo siempre, también en 4xx/409/403.
  */
+import { clasificarFallo, type TipoFallo } from "@/lib/supabase-functions";
 
 /** Nombre de la salida que se le ofrece al visitante tras un rechazo. */
 export type SalidaRechazo =
@@ -24,15 +25,20 @@ export type SalidaRechazo =
   | "otherDate"
   | "guests"
   | "checkForm"
+  | "offline"
   | "retryOrCall";
 
 export type TextosRechazo = {
   title: string;
+  /** Título cuando el visitante no tiene red: el único caso en que el problema NO es nuestro. */
+  offlineTitle: string;
   close: string;
   /** 400: entrada malformada, la función NO manda `mensaje`. */
   invalidMessage: string;
-  /** 5xx o fallo de red. */
+  /** 5xx, CORS o función caída: el fallo es NUESTRO, jamás de la red del visitante. */
   errorMessage: string;
+  /** El dispositivo no tiene conexión: la solicitud no ha salido del móvil. */
+  offlineMessage: string;
   /** Rechazo sin `mensaje` legible por cualquier otro motivo. */
   fallbackMessage: string;
   exits: Record<SalidaRechazo, string>;
@@ -41,6 +47,11 @@ export type TextosRechazo = {
 export type RechazoReserva = {
   /** `motivo` tal cual viene de la función, o `null` si no venía. */
   motivo: string | null;
+  /**
+   * Título del aviso. Ya no puede ser fijo: el caso sin red necesita otro
+   * ("te has quedado sin conexión" vs. "no hemos podido enviar tu solicitud").
+   */
+  titulo: string;
   /** Lo que se le enseña al visitante. Se prioriza el `mensaje` del servidor. */
   mensaje: string;
   /** Qué puede hacer a continuación. */
@@ -83,11 +94,15 @@ function salidaPorEstado(status: number): SalidaRechazo {
  * Traduce una respuesta no-201 de `/crear` a título + mensaje + salida.
  *
  * `status` 0 representa "ni siquiera hubo respuesta" (fallo de red o de CORS).
+ * `fallo` distingue los dos únicos casos que el visitante tiene que poder
+ * separar; por defecto lo decide `clasificarFallo` (ver supabase-functions.ts).
+ * Se deja inyectable para poder probar ambas caras sin tocar `navigator`.
  */
 export function interpretarRechazoReserva(
   status: number,
   cuerpo: unknown,
   textos: TextosRechazo,
+  fallo: TipoFallo = clasificarFallo(status),
 ): RechazoReserva {
   const objeto =
     cuerpo && typeof cuerpo === "object" && !Array.isArray(cuerpo)
@@ -99,6 +114,12 @@ export function interpretarRechazoReserva(
     typeof objeto?.mensaje === "string" && objeto.mensaje.trim() ? objeto.mensaje.trim() : null;
 
   const salida = (motivo && SALIDA_POR_MOTIVO[motivo]) || salidaPorEstado(status);
+
+  // Sin red: el ÚNICO caso en que la culpa no es nuestra. Con `status === 0`
+  // no hay cuerpo del servidor, así que no hay `mensaje` que priorizar.
+  if (status === 0 && fallo === "sin_red") {
+    return { motivo, titulo: textos.offlineTitle, mensaje: textos.offlineMessage, salida: textos.exits.offline };
+  }
 
   let mensaje: string;
   if (mensajeServidor) {
@@ -114,5 +135,5 @@ export function interpretarRechazoReserva(
     mensaje = textos.fallbackMessage;
   }
 
-  return { motivo, mensaje, salida: textos.exits[salida] };
+  return { motivo, titulo: textos.title, mensaje, salida: textos.exits[salida] };
 }

@@ -18,7 +18,7 @@
  *
  * Gotcha SSG: nada de `window` a nivel de módulo (se importa en el prerender).
  */
-import { FUNCTIONS_BASE_URL, leerCuerpo } from "@/lib/supabase-functions";
+import { clasificarFallo, FUNCTIONS_BASE_URL, leerCuerpo, type TipoFallo } from "@/lib/supabase-functions";
 
 export const ENLACE_CONSULTAR_URL = `${FUNCTIONS_BASE_URL}/emails-reserva/enlace/consultar`;
 export const ENLACE_EJECUTAR_URL = `${FUNCTIONS_BASE_URL}/emails-reserva/enlace/ejecutar`;
@@ -117,7 +117,18 @@ export function normalizarRespuesta(x: unknown): RespuestaEnlace | null {
   };
 }
 
-export class ErrorConexion extends Error {}
+/**
+ * Fallo al hablar con la función. Lleva el tipo de fallo porque la página tiene
+ * que contar cosas distintas: si el dispositivo no tiene red, se le pide que la
+ * compruebe; si lo que se ha caído es lo nuestro (5xx, CORS, la función muerta),
+ * se asume la culpa y se le da el teléfono. Por defecto `servidor`: ante la duda
+ * el fallo es NUESTRO, nunca del visitante.
+ */
+export class ErrorConexion extends Error {
+  constructor(message: string, readonly tipo: TipoFallo = "servidor") {
+    super(message);
+  }
+}
 
 /**
  * Llama a la función. Lanza `ErrorConexion` si no hay respuesta útil (red
@@ -139,10 +150,15 @@ export async function llamarEnlace(
       referrerPolicy: "no-referrer",
     });
   } catch {
-    throw new ErrorConexion("sin_conexion");
+    // `fetch` lanzó sin respuesta: red caída, DNS, TLS o CORS (lo que enseña el
+    // navegador cuando la función muere al arrancar y ni contesta al OPTIONS).
+    // Solo aquí hay ambigüedad, y la desempata `navigator.onLine`.
+    throw new ErrorConexion("sin_conexion", clasificarFallo(0));
   }
   const respuesta = normalizarRespuesta(await leerCuerpo(response));
-  if (!respuesta) throw new ErrorConexion(`respuesta_invalida_${response.status}`);
+  // Llegó respuesta y no vale: el fallo es nuestro sin discusión (han llegado
+  // bytes desde nuestro host, así que la red del visitante funciona).
+  if (!respuesta) throw new ErrorConexion(`respuesta_invalida_${response.status}`, "servidor");
   return respuesta;
 }
 
@@ -170,6 +186,36 @@ export function formatearFecha(iso: string): string {
   const fecha = new Date(Date.UTC(a, mes - 1, dia));
   if (Number.isNaN(fecha.getTime()) || fecha.getUTCMonth() !== mes - 1) return iso;
   return `${DIAS[fecha.getUTCDay()]}, ${dia} de ${MESES[mes - 1]} de ${a}`;
+}
+
+/**
+ * Textos del fallo de conexión de la página de respuesta. `telefono` es el
+ * número ya formateado para leer (el mismo que se enseña al pie de la tarjeta).
+ */
+export function textosSinConexion(
+  fallo: TipoFallo,
+  reintentar: "consultar" | "ejecutar",
+  telefono: string,
+): { titulo: string; parrafos: string[] } {
+  if (fallo === "sin_red") {
+    return {
+      titulo: "Parece que te has quedado sin conexión",
+      parrafos: [
+        reintentar === "ejecutar"
+          ? "No sabemos si tu respuesta ha llegado. En cuanto recuperes la conexión, vuelve a intentarlo: si ya estaba registrada, te lo diremos."
+          : "En cuanto la recuperes, vuelve a intentarlo.",
+      ],
+    };
+  }
+  return {
+    titulo: "No es cosa tuya: el fallo es nuestro",
+    parrafos: [
+      reintentar === "ejecutar"
+        ? "No sabemos si tu respuesta ha llegado. Vuelve a intentarlo: si ya estaba registrada, te lo diremos."
+        : "No hemos podido cargar tu reserva ahora mismo.",
+      `Si sigue sin funcionar, llámanos al ${telefono} y lo resolvemos en un momento.`,
+    ],
+  };
 }
 
 export type Tono = "neutro" | "exito" | "aviso" | "peligro";

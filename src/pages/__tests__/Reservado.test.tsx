@@ -55,7 +55,8 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 // Import bajo test
 // ---------------------------------------------------------------------------
-import Reservado from "../Reservado";
+import Reservado, { TEXTOS_RECHAZO } from "../Reservado";
+import { interpretarRechazoReserva } from "@/lib/reservas-web";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -99,6 +100,21 @@ function jsonResponse(status: number, body: unknown): Response {
 }
 
 const TEXTO_RECHAZO_TITULO = "No hemos podido enviar tu solicitud";
+const TEXTO_OFFLINE_TITULO = "Parece que te has quedado sin conexión";
+
+/**
+ * Sustituye `navigator.onLine` y devuelve cómo restaurarlo. jsdom lo deja en
+ * `true`, que es el caso del bug (red buena, servidor caído); el `false` hay
+ * que forzarlo.
+ */
+function forzarOnLine(valor: boolean): () => void {
+  const original = Object.getOwnPropertyDescriptor(navigator, "onLine");
+  Object.defineProperty(navigator, "onLine", { value: valor, configurable: true });
+  return () => {
+    if (original) Object.defineProperty(navigator, "onLine", original);
+    else delete (navigator as unknown as Record<string, unknown>).onLine;
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -322,7 +338,11 @@ describe("Reservado — envío al circuito de solicitud (reservas-web)", () => {
     expect((screen.getByLabelText(/nombre/i) as HTMLInputElement).value).toBe("María García");
   });
 
-  it("un fallo de red (sin respuesta) muestra el diálogo de aviso, no una pantalla en blanco", async () => {
+  it("un `Failed to fetch` con red buena (CORS / función caída) asume el fallo como NUESTRO y no manda al cliente a mirar su wifi", async () => {
+    // Este es el fallo que tumbó el formulario durante horas: la Edge Function
+    // se desplegó muerta y ni contestaba al OPTIONS de preflight, así que el
+    // navegador lanzaba `TypeError: Failed to fetch` (sin status). Antes se
+    // traducía a "Comprueba tu conexión": mentira, y encima culpando al cliente.
     vi.mocked(fetch).mockRejectedValue(new TypeError("Failed to fetch"));
 
     renderReservado();
@@ -332,9 +352,87 @@ describe("Reservado — envío al circuito de solicitud (reservas-web)", () => {
     await waitFor(() => {
       expect(screen.getByText(TEXTO_RECHAZO_TITULO)).toBeInTheDocument();
     });
-    expect(
-      screen.getByText(/no hemos podido conectar con el sistema de reservas/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(TEXTOS_RECHAZO.errorMessage)).toBeInTheDocument();
+    // La salida útil: el teléfono, no una revisión del router del cliente.
+    expect(screen.getByText(TEXTOS_RECHAZO.exits.retryOrCall)).toBeInTheDocument();
+    expect(screen.queryByText(/comprueba tu conexión/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(TEXTO_OFFLINE_TITULO)).not.toBeInTheDocument();
+  });
+
+  it("el mismo `Failed to fetch` SIN red sí habla de la conexión del visitante", async () => {
+    const restaurar = forzarOnLine(false);
+    try {
+      vi.mocked(fetch).mockRejectedValue(new TypeError("Failed to fetch"));
+
+      renderReservado();
+      rellenarCamposObligatorios();
+      fireEvent.submit(screen.getByLabelText(/nombre/i).closest("form")!);
+
+      await waitFor(() => {
+        expect(screen.getByText(TEXTO_OFFLINE_TITULO)).toBeInTheDocument();
+      });
+      expect(screen.getByText(TEXTOS_RECHAZO.offlineMessage)).toBeInTheDocument();
+      expect(screen.getByText(TEXTOS_RECHAZO.exits.offline)).toBeInTheDocument();
+      // No se usa el título genérico: el problema aquí no es nuestro.
+      expect(screen.queryByText(TEXTO_RECHAZO_TITULO)).not.toBeInTheDocument();
+    } finally {
+      restaurar();
+    }
+  });
+
+  it("un 500 del servidor no culpa nunca a la red del cliente, aunque el navegador diga que no hay red", async () => {
+    // Hubo respuesta HTTP: han llegado bytes desde nuestro host, así que la red
+    // del visitante funciona por definición. `onLine` no tiene voto aquí.
+    const restaurar = forzarOnLine(false);
+    try {
+      vi.mocked(fetch).mockResolvedValue(jsonResponse(500, {}));
+
+      renderReservado();
+      rellenarCamposObligatorios();
+      fireEvent.submit(screen.getByLabelText(/nombre/i).closest("form")!);
+
+      await waitFor(() => {
+        expect(screen.getByText(TEXTO_RECHAZO_TITULO)).toBeInTheDocument();
+      });
+      expect(screen.getByText(TEXTOS_RECHAZO.errorMessage)).toBeInTheDocument();
+      expect(screen.queryByText(TEXTO_OFFLINE_TITULO)).not.toBeInTheDocument();
+    } finally {
+      restaurar();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// El copy de verdad, el que ve el cliente (por eso se importa de la página en
+// vez de recrearlo aquí: una copia del copy envejece sola).
+// ---------------------------------------------------------------------------
+describe("interpretarRechazoReserva — de quién es la culpa", () => {
+  it("sin red: título y mensaje de offline, y la salida ofrece reenviar o llamar", () => {
+    const r = interpretarRechazoReserva(0, null, TEXTOS_RECHAZO, "sin_red");
+    expect(r.titulo).toBe(TEXTOS_RECHAZO.offlineTitle);
+    expect(r.mensaje).toBe(TEXTOS_RECHAZO.offlineMessage);
+    expect(r.salida).toBe(TEXTOS_RECHAZO.exits.offline);
+  });
+
+  it("fallo nuestro: asume la culpa, ofrece el teléfono y NO menciona la conexión del cliente", () => {
+    const r = interpretarRechazoReserva(0, null, TEXTOS_RECHAZO, "servidor");
+    expect(r.titulo).toBe(TEXTOS_RECHAZO.title);
+    expect(r.mensaje).toBe(TEXTOS_RECHAZO.errorMessage);
+    expect(r.salida).toBe(TEXTOS_RECHAZO.exits.retryOrCall);
+    // Guardia contra la regresión exacta de hoy.
+    expect(r.mensaje.toLowerCase()).not.toContain("conexión");
+    expect(r.salida).toContain("966 782 000");
+  });
+
+  it("un rechazo normal del servidor sigue mandando su propio mensaje y el título genérico", () => {
+    const r = interpretarRechazoReserva(
+      403,
+      { ok: false, motivo: "no_disponible", mensaje: "No ha sido posible formalizar la solicitud." },
+      TEXTOS_RECHAZO,
+    );
+    expect(r.titulo).toBe(TEXTOS_RECHAZO.title);
+    expect(r.mensaje).toBe("No ha sido posible formalizar la solicitud.");
+    expect(r.salida).toBe(TEXTOS_RECHAZO.exits.call);
   });
 });
 
