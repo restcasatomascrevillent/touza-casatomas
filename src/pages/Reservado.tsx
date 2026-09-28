@@ -210,7 +210,11 @@ const Reservado = () => {
                         : "Nuestro equipo revisará la disponibilidad de El Reservado para la fecha y hora indicadas."}
                       {" "}Si hiciera falta, te propondremos una hora alternativa antes de confirmar nada.
                     </p>
-                    <p>Te hemos enviado un correo confirmando que la hemos recibido, y te escribiremos en breve para cerrar los detalles.</p>
+                    {/* El acuse por correo ya no existe (se eliminó del backend):
+                        esto es lo ÚNICO que el cliente tiene hasta que el
+                        restaurante conteste, así que no puede prometer un correo
+                        inmediato ni mandarle a mirar una bandeja vacía. */}
+                    <p>Este aviso es tu único acuse de recibo: ahora no te llegará ningún correo. Te escribiremos cuando el restaurante confirme la reserva.</p>
                     <p className="text-sm text-white/40">
                       ¿Prefieres hablarlo directamente? Llámanos al{" "}
                       <a href={TELEFONO_HREF} className="text-primary underline underline-offset-2">{TELEFONO_TEXTO}</a>.
