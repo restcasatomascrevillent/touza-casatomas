@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Phone, MapPin, Clock, Mail, Instagram, Facebook, ExternalLink } from "lucide-react";
+import { Phone, MapPin, Clock, Mail, Instagram, Facebook, ExternalLink, Navigation } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
 import { canonical } from "@/lib/site";
@@ -49,7 +49,7 @@ const Contacto = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background" />
         </div>
         <div className="absolute inset-0 z-10 flex items-end px-6 pb-10 md:pb-16">
-          <div className="max-w-4xl mx-auto w-full text-center">
+          <div className="max-w-4xl mx-auto w-full text-center text-shadow">
             <span
               style={{ animationDelay: "0.1s" }}
               className="entrada-hero text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
@@ -75,39 +75,70 @@ const Contacto = () => {
       {/* En escritorio, datos a la izquierda y mapa a la derecha (antes una
           sola columna estrecha con el mapa debajo). En móvil, igual que antes. */}
       <section className="py-10 md:py-24 lg:py-32 bg-background">
-        <div className="max-w-6xl mx-auto px-6 grid gap-10 lg:grid-cols-12 lg:gap-16 lg:items-start">
+        <div className="max-w-6xl mx-auto px-5 md:px-6 grid gap-10 lg:grid-cols-12 lg:gap-16 lg:items-start">
           <div className="lg:col-span-5">
+            {/* Acciones rápidas en el móvil. En Contacto no está la barra fija
+                "Llamar / Reservar" (sería redundante con la página), así que
+                lo que más se busca aquí desde un teléfono va arriba y a un
+                toque: llamar, llegar y escribir. */}
+            <nav aria-label="Acciones rápidas" className="grid grid-cols-3 gap-2 mb-10 lg:hidden">
+              {[
+                { href: "tel:+34966782000", icono: Phone, texto: "Llamar", externo: false },
+                { href: URL_MAPS, icono: Navigation, texto: "Cómo llegar", externo: true },
+                { href: "mailto:info@touzabar.es", icono: Mail, texto: "Escribir", externo: false },
+              ].map((accion) => (
+                <a
+                  key={accion.texto}
+                  href={accion.href}
+                  target={accion.externo ? "_blank" : undefined}
+                  rel={accion.externo ? "noopener noreferrer" : undefined}
+                  className="flex flex-col items-center justify-center gap-2 min-h-[4.75rem] rounded-2xl bg-white/[0.04] ring-1 ring-inset ring-white/10 text-white/85 text-[13px] font-medium active:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <accion.icono className="w-5 h-5 text-primary" aria-hidden="true" />
+                  {accion.texto}
+                </a>
+              ))}
+            </nav>
+
             <h2 className="font-serif font-bold text-foreground mb-6 md:mb-10 text-3xl md:text-5xl">
               Encuéntranos
             </h2>
 
-            <div className="space-y-6 md:space-y-8 mb-10 md:mb-12">
-              {contactInfo.map((item, index) => (
-                <Reveal
-                  delay={index * 0.08}
-                  key={item.title}
-                  className="flex items-start gap-5"
-                >
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                    <item.icon className="w-5 h-5 text-primary" aria-hidden="true" />
-                  </div>
-                  <div className="pt-1">
-                    <h3 className="text-sm text-foreground font-medium mb-1">{item.title}</h3>
+            {/* Cada fila con enlace es entera pulsable (antes solo el texto,
+                de 32 px de alto). */}
+            <div className="space-y-2 md:space-y-4 mb-10 md:mb-12 -mx-3">
+              {contactInfo.map((item, index) => {
+                const contenido = (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                      <item.icon className="w-5 h-5 text-primary" aria-hidden="true" />
+                    </div>
+                    <div className="pt-1 min-w-0">
+                      <h3 className="text-sm text-foreground font-medium mb-1">{item.title}</h3>
+                      <p className="text-white/75 group-hover:text-primary whitespace-pre-line text-base font-light transition-colors duration-300">
+                        {item.content}
+                      </p>
+                    </div>
+                  </>
+                );
+                const fila = "flex items-start gap-5 rounded-2xl px-3 py-3";
+                return (
+                  <Reveal delay={index * 0.08} key={item.title}>
                     {item.link ? (
                       <a
                         href={item.link}
                         target={item.link.startsWith("http") ? "_blank" : undefined}
                         rel={item.link.startsWith("http") ? "noopener noreferrer" : undefined}
-                        className="inline-block py-1 text-white/75 hover:text-primary underline-offset-4 hover:underline transition-colors duration-300 whitespace-pre-line text-base font-light rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        className={`group ${fila} hover:bg-white/[0.03] active:bg-white/[0.06] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
                       >
-                        {item.content}
+                        {contenido}
                       </a>
                     ) : (
-                      <p className="text-white/75 whitespace-pre-line text-base font-light">{item.content}</p>
+                      <div className={fila}>{contenido}</div>
                     )}
-                  </div>
-                </Reveal>
-              ))}
+                  </Reveal>
+                );
+              })}
             </div>
 
             {/* Social */}

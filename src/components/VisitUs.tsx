@@ -37,7 +37,7 @@ const VisitUs = () => {
         <div className="text-center mb-8 md:mb-20">
           <Reveal
             as="span"
-            className="text-primary text-[11px] md:text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
+            className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
           >
             Contacto
           </Reveal>
@@ -57,17 +57,21 @@ const VisitUs = () => {
           </Reveal>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-16 relative">
+        {/* En el móvil, lista compacta (icono a la izquierda, texto
+            alineado): antes eran tres bloques centrados y apilados, con mucho
+            aire y los enlaces de 31 px de alto. Desde md, tres columnas. */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-16 relative max-w-sm mx-auto md:max-w-none">
           {/* Vertical separators desktop */}
           <div className="hidden md:block absolute top-8 bottom-8 left-1/3 w-px bg-white/5" />
           <div className="hidden md:block absolute top-8 bottom-8 right-1/3 w-px bg-white/5" />
 
           {contactItems.map((item, index) => (
-            <Reveal key={item.title} delay={index * 0.08} className="text-center">
-              <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-3 md:mb-6 rounded-full bg-white/5 flex items-center justify-center">
+            <Reveal key={item.title} delay={index * 0.08} className="flex items-start gap-4 text-left md:block md:text-center">
+              <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 md:mx-auto md:mb-6 rounded-full bg-white/5 flex items-center justify-center">
                 <item.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" aria-hidden="true" />
               </div>
-              <h3 className="font-serif text-lg md:text-xl text-white mb-1 md:mb-3">{item.title}</h3>
+              <div className="min-w-0 pt-0.5 md:pt-0">
+              <h3 className="font-serif text-lg md:text-xl text-white md:mb-3">{item.title}</h3>
               {item.lines.map((line) =>
                 line.href ? (
                   <a
@@ -76,14 +80,15 @@ const VisitUs = () => {
                     aria-label={line.label}
                     target={line.href.startsWith("http") ? "_blank" : undefined}
                     rel={line.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                    className="block py-1 whitespace-pre-line text-white/70 hover:text-primary text-sm md:text-base font-light leading-relaxed underline-offset-4 hover:underline transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="flex min-h-11 items-center md:block md:min-h-0 py-1 whitespace-pre-line text-white/75 hover:text-primary text-[15px] md:text-base font-light leading-relaxed underline-offset-4 hover:underline transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     {line.text}
                   </a>
                 ) : (
-                  <p key={line.text} className="text-white/70 text-sm md:text-base font-light leading-relaxed">{line.text}</p>
+                  <p key={line.text} className="text-white/75 text-[15px] md:text-base font-light leading-relaxed">{line.text}</p>
                 )
               )}
+              </div>
             </Reveal>
           ))}
         </div>

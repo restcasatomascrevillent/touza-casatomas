@@ -81,13 +81,13 @@ describe("Contacto — renderizado", () => {
 
   it("el enlace de teléfono tiene href=tel correcto", () => {
     renderContacto();
-    const telLink = screen.getByRole("link", { name: "966 782 000" });
+    const telLink = screen.getByRole("link", { name: /966 782 000/ });
     expect(telLink.getAttribute("href")).toBe("tel:+34966782000");
   });
 
   it("el enlace de email tiene href=mailto correcto", () => {
     renderContacto();
-    const mailLink = screen.getByRole("link", { name: "info@touzabar.es" });
+    const mailLink = screen.getByRole("link", { name: /info@touzabar.es/ });
     expect(mailLink.getAttribute("href")).toBe("mailto:info@touzabar.es");
   });
 
@@ -129,6 +129,15 @@ describe("Contacto — renderizado", () => {
     renderContacto();
     expect(screen.getByTitle("Ubicación Touza")).toBeInTheDocument();
     localStorage.removeItem("touza_cookie_consent");
+  });
+
+  it("en el móvil, acciones rápidas para llamar, llegar y escribir", () => {
+    renderContacto();
+    const acciones = screen.getByRole("navigation", { name: /acciones rápidas/i });
+    const enlaces = Array.from(acciones.querySelectorAll("a")).map((a) => a.getAttribute("href"));
+    expect(enlaces[0]).toBe("tel:+34966782000");
+    expect(enlaces[1]).toContain("google.com/maps");
+    expect(enlaces[2]).toBe("mailto:info@touzabar.es");
   });
 
   it("muestra el encabezado 'Encuéntranos'", () => {
