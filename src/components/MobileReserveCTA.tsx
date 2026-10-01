@@ -24,7 +24,7 @@ const MobileReserveCTA = () => {
       {/* Reserva espacio al final del documento para que la barra no tape el footer */}
       <div aria-hidden="true" className="h-[var(--barra-movil)] lg:hidden" />
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden h-[var(--barra-movil)] bg-black/90 backdrop-blur-2xl shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] safe-bottom">
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden h-[var(--barra-movil)] bg-black/90 backdrop-blur-2xl shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] safe-bottom safe-x">
         {/* En tablet y en horizontal, dos botones de 400 px cada uno pesaban
             demasiado: se quedan en una columna centrada. */}
         <div className="flex gap-2 px-4 py-2 h-[4.5rem] max-w-md mx-auto">

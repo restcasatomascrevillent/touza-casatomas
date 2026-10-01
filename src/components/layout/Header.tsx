@@ -81,7 +81,7 @@ const Header = () => {
     <header
       ref={headerRef}
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        "safe-x fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled
           ? "bg-black/80 backdrop-blur-2xl border-b border-white/5 py-3"
           : "bg-transparent py-5",
@@ -189,7 +189,7 @@ const Header = () => {
                     </ul>
                   </nav>
 
-                  <div className="px-6 pt-5 pb-6 border-t border-white/5 safe-bottom space-y-4">
+                  <div className="px-6 pt-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] border-t border-white/5 space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <Button
                         asChild

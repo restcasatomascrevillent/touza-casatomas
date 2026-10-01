@@ -42,7 +42,7 @@ const CookieConsent = () => {
               : "bottom-0 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
           )}
         >
-          <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center gap-3 md:gap-8">
+          <div className="safe-x max-w-6xl mx-auto flex flex-col md:flex-row md:items-center gap-3 md:gap-8">
             {/* Antes: "Al navegar aceptas su uso" (consentimiento implícito, que
                 no vale con el RGPD si además hay botón de rechazar) y un
                 "Más información" con href="#" que solo subía al principio. */}

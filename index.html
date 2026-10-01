@@ -3,7 +3,11 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- viewport-fit=cover: sin él, en iOS env(safe-area-inset-*) vale 0 y la
+       barra fija "Llamar / Reservar" quedaba encima del indicador de inicio.
+       Los márgenes laterales del notch en horizontal se compensan en
+       index.css (body y elementos fijos con .safe-x). -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="author" content="Touza Cocktail Bar" />
   <meta name="theme-color" content="#D4A574" />
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
