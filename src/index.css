@@ -497,16 +497,6 @@
     padding-right: env(safe-area-inset-right, 0px);
   }
 
-  /* Iconos de la barra fija del móvil: por debajo de 360 px se esconden para
-     que "Cómo llegar" quepa entero. Va en CSS porque las variantes
-     `max-[...]`/`min-[...]` de Tailwind no se generan en este proyecto (la
-     pantalla `apaisado` de tailwind.config.ts no es un ancho simple). */
-  @media (max-width: 359.98px) {
-    .icono-estrecho {
-      display: none;
-    }
-  }
-
   /* Alto de pantalla mínimo para heroes. `svh` es el viewport con la barra
      del navegador desplegada: el hero no cambia de alto al hacer scroll
      (`dvh` sí, y la foto da saltos). `vh` queda de respaldo. */

@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
+import plugin from "tailwindcss/plugin";
 
 export default {
   darkMode: ["class"],
@@ -14,12 +15,6 @@ export default {
       },
     },
     extend: {
-      screens: {
-        // Móvil en horizontal (o cualquier pantalla muy baja): el ancho ya es
-        // de tablet (md), pero solo hay ~400 px de alto. Va después de los
-        // anchos, así que sus clases ganan a las de `md:`/`lg:`.
-        apaisado: { raw: "(orientation: landscape) and (max-height: 500px)" },
-      },
       fontFamily: {
         serif: ["Cormorant Garamond", "serif"],
         sans: ["Montserrat", "sans-serif"],
@@ -134,5 +129,24 @@ export default {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [
+    tailwindcssAnimate,
+    // Variante `apaisado:` — móvil en horizontal (o cualquier pantalla muy
+    // baja): el ancho ya es de tablet (md), pero solo hay ~400 px de alto.
+    //
+    // Va como variante de plugin y NO como pantalla `raw` en `theme.screens`:
+    // una pantalla que no sea un ancho simple hace que Tailwind 3 deje de
+    // generar las variantes `min-[…]`/`max-[…]` en todo el proyecto.
+    //
+    // Pero Tailwind emite las variantes de plugins ANTES que las de pantalla
+    // (`sm:`…`2xl:`), así que por orden perderían contra `md:`/`lg:`, que
+    // también se cumplen en horizontal. El `:root &` sube la especificidad un
+    // nivel para que `apaisado:` siga ganando. Consecuencias: al combinarla
+    // con otras variantes, `apaisado:` va la primera (`apaisado:hover:…`, no
+    // `hover:apaisado:…`), y gana también a `hover:`/`focus:` sin pantalla
+    // sobre la misma propiedad.
+    plugin(({ addVariant }) => {
+      addVariant("apaisado", "@media (orientation: landscape) and (max-height: 500px) { :root & }");
+    }),
+  ],
 } satisfies Config;
