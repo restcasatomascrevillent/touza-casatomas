@@ -488,8 +488,6 @@ describe("Carta — vinos con denominación de origen (Blancos/Tintos)", () => {
       ubicacion_pais: null,
       denominacion_origen: null,
       featured: false,
-      touza: true,
-      restaurante: null,
       orden: "1",
       ...overrides,
     };

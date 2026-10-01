@@ -19,8 +19,6 @@ function vino(categoria: string | null, overrides: Partial<Vino> = {}): Vino {
     ubicacion_pais: null,
     denominacion_origen: null,
     featured: false,
-    touza: true,
-    restaurante: null,
     orden: String(contador),
     ...overrides,
   };

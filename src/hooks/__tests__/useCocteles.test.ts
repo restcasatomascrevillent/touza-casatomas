@@ -3,6 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement } from "react";
 import { useCocteles, transformCoctelesToUI, type Coctel } from "../useCocteles";
+import { COLUMNAS_COCTELES } from "@/lib/carta-consultas.mjs";
 
 // ---------------------------------------------------------------------------
 // Mock del cliente Supabase
@@ -143,7 +144,7 @@ describe("useCocteles", () => {
     );
   });
 
-  it("consulta la tabla 'Cocteles' pidiendo select('*') y filtrando activado=true y touza=true por defecto", async () => {
+  it("consulta la tabla 'Cocteles' pidiendo solo las columnas que usa la web y filtrando activado=true y touza=true por defecto", async () => {
     const chain = mockSupabaseChain({ data: [], error: null });
 
     const qc = buildQueryClient();
@@ -154,10 +155,13 @@ describe("useCocteles", () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(supabase.from).toHaveBeenCalledWith("Cocteles");
-    // select('*') ya trae alergenos_oficiales/alergenos_notas: no hace falta
-    // listar columnas a mano aquí (a diferencia del SELECT explícito de
-    // Platos en usePlatos.ts, que sí tuvo que ampliarse).
-    expect(chain.select).toHaveBeenCalledWith("*");
+    // Columnas explícitas (src/lib/carta-consultas.mjs), no `*`: las
+    // traducciones no se usan y engordaban la instantánea del build. Deben
+    // incluir lo que leen transformCoctelesToUI, datosAlergenos y el JSON-LD.
+    expect(chain.select).toHaveBeenCalledWith(COLUMNAS_COCTELES);
+    for (const columna of ["nombre", "descripcion", "precio_eur", "imagen_url", "ingredientes", "alergenos_oficiales", "alergenos_notas"]) {
+      expect(COLUMNAS_COCTELES.split(",")).toContain(columna);
+    }
     expect(chain.eq).toHaveBeenCalledWith("activado", true);
     expect(chain.eq).toHaveBeenCalledWith("touza", true);
     expect(chain.order).toHaveBeenCalledWith("orden", { ascending: true });

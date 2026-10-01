@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
+import { COLUMNAS_COCTELES } from '@/lib/carta-consultas.mjs';
 import { datosAlergenos, etiquetasAlergenos } from '@/lib/alergenos';
 
 export interface Coctel {
@@ -38,7 +39,7 @@ export const useCocteles = (soloTouza: boolean = true) => {
     queryFn: async () => {
       let query = supabase
         .from('Cocteles')
-        .select('*')
+        .select(COLUMNAS_COCTELES)
         .eq('activado', true)
         .order('orden', { ascending: true });
 
@@ -53,7 +54,7 @@ export const useCocteles = (soloTouza: boolean = true) => {
         throw new Error('No se pudieron cargar los cócteles. Por favor, intenta de nuevo.');
       }
 
-      return data as Coctel[];
+      return data as unknown as Coctel[];
     },
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),

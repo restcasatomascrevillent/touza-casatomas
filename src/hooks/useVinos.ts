@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
+import { COLUMNAS_VINOS, ordenarVinos } from '@/lib/carta-consultas.mjs';
 
 export interface Vino {
   id: string;
@@ -12,8 +13,7 @@ export interface Vino {
   ubicacion_pais: string | null;
   denominacion_origen: string | null;
   featured: boolean | null;
-  touza: boolean | null;
-  restaurante: boolean | null;
+  /** TEXTO en la tabla ("0" en casi todas las filas): ver `ordenarVinos`. */
   orden: string | null;
 }
 
@@ -33,10 +33,14 @@ export const useVinos = (categoria: string, soloTouza: boolean = true) => {
     queryFn: async () => {
       let query = supabase
         .from('Vinos')
-        .select('*')
+        .select(COLUMNAS_VINOS)
         .eq('categoria', categoria)
         .eq('activado', true)
-        .order('orden', { ascending: true });
+        // Desempate estable en la base de datos; el orden definitivo (con
+        // `orden` como número) lo pone ordenarVinos, igual que en el build.
+        .order('orden', { ascending: true, nullsFirst: false })
+        .order('nombre', { ascending: true })
+        .order('id', { ascending: true });
 
       if (soloTouza) {
         query = query.eq('touza', true);
@@ -49,7 +53,7 @@ export const useVinos = (categoria: string, soloTouza: boolean = true) => {
         throw new Error('No se pudieron cargar los vinos. Por favor, intenta de nuevo.');
       }
 
-      return data as Vino[];
+      return ordenarVinos(data as unknown as Vino[]);
     },
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -72,15 +76,13 @@ export const useVinos = (categoria: string, soloTouza: boolean = true) => {
  * traer todo de una vez, `agruparVinosPorTipo` (src/lib/vinos-carta.ts)
  * deriva las pestañas y sus filtros de lo que haya de verdad en la tabla.
  *
- * Ordena por categoría y luego por `orden` para que, incluso antes de
- * agrupar, las filas de una misma categoría ya lleguen juntas y en su orden
- * manual.
+ * Devuelve las filas en el orden de `ordenarVinos` (orden numérico → nombre
+ * → id), el mismo que la instantánea del build: al agrupar por categoría
+ * cada denominación conserva ese orden.
  *
- * Sin instantánea de build: `CATEGORIAS_VINOS` en
- * `scripts/carta-ssg-plugin.mjs` solo trae CHAMPAGNES y CAVAS Y OTROS
- * ESPUMOSOS (son las únicas categorías que pintaba /carta cuando se escribió
- * ese plugin), así que esta consulta no tiene con qué sembrarse y arranca
- * con `isLoading=true` como cualquier dato no precargado — igual que en dev.
+ * Sin `initialData` propio: la instantánea del build guarda los vinos por
+ * categoría y Carta.tsx cubre el primer render con ella (`vinosRestoSSG`)
+ * hasta que esta consulta resuelve.
  */
 export const useVinosRestantes = (excluidas: string[], soloTouza: boolean = true) => {
   return useQuery({
@@ -88,10 +90,12 @@ export const useVinosRestantes = (excluidas: string[], soloTouza: boolean = true
     queryFn: async () => {
       let query = supabase
         .from('Vinos')
-        .select('*')
+        .select(COLUMNAS_VINOS)
         .eq('activado', true)
         .order('categoria', { ascending: true })
-        .order('orden', { ascending: true });
+        .order('orden', { ascending: true, nullsFirst: false })
+        .order('nombre', { ascending: true })
+        .order('id', { ascending: true });
 
       if (soloTouza) {
         query = query.eq('touza', true);
@@ -108,7 +112,7 @@ export const useVinosRestantes = (excluidas: string[], soloTouza: boolean = true
         throw new Error('No se pudieron cargar los vinos. Por favor, intenta de nuevo.');
       }
 
-      return data as Vino[];
+      return ordenarVinos(data as unknown as Vino[]);
     },
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),

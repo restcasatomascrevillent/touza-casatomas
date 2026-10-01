@@ -18,6 +18,13 @@
  * los hooks se comportan como siempre, pidiendo los datos al navegador.
  */
 import { loadEnv } from "vite";
+import {
+  COLUMNAS_BEBIDAS,
+  COLUMNAS_COCTELES,
+  COLUMNAS_VINOS,
+  ORDEN_VINOS_POSTGREST,
+  ordenarVinos,
+} from "../src/lib/carta-consultas.mjs";
 
 const VIRTUAL_ID = "virtual:touza/carta";
 const RESOLVED_ID = `\0${VIRTUAL_ID}`;
@@ -73,7 +80,9 @@ async function traerCarta(base, key) {
     // Mismos filtros y orden que useCocteles.ts / useVinos.ts / useBebidas.ts /
     // usePlatos.ts. Si divergen, el HTML y lo que refresca React Query dejarían
     // de coincidir y habría parpadeo al hidratar.
-    consultar(base, key, "Cocteles", "select=*&activado=eq.true&touza=eq.true&order=orden.asc"),
+    // Columnas y orden de vinos en src/lib/carta-consultas.mjs, compartido
+    // con los hooks (antes `select=*`: ~190 KB de traducciones en el bundle).
+    consultar(base, key, "Cocteles", `select=${COLUMNAS_COCTELES}&activado=eq.true&touza=eq.true&order=orden.asc`),
     // Sin filtro de categoría a propósito: la tabla Vinos mezcla tipo y
     // denominación de origen en `categoria` ("VINOS TINTOS — RIBERA DEL
     // DUERO") y esa lista de denominaciones cambia con la carta. Antes esta
@@ -83,13 +92,19 @@ async function traerCarta(base, key) {
     // `agruparVinosPorTipo` (src/lib/vinos-carta.ts) ya sabía agruparlos en
     // el navegador desde el commit 8f0db1d. Mismo filtro que la unión de
     // useVinos(categoria) + useVinosRestantes: touza + activado, sin
-    // restringir categoría; mismo orden que useVinosRestantes.
-    consultar(base, key, "Vinos", "select=*&activado=eq.true&touza=eq.true&order=categoria.asc,orden.asc"),
+    // restringir categoría; mismo orden que useVinosRestantes, y después
+    // `ordenarVinos` (abajo), como hacen los hooks con lo que refrescan.
+    consultar(
+      base,
+      key,
+      "Vinos",
+      `select=${COLUMNAS_VINOS}&activado=eq.true&touza=eq.true&order=categoria.asc,${ORDEN_VINOS_POSTGREST}`,
+    ),
     consultar(
       base,
       key,
       "Bebidas",
-      `select=*&activado=eq.true&touza=eq.true&categoria=in.(${CATEGORIAS_BEBIDAS.map((c) => `"${c}"`).join(",")})&order=orden.asc`,
+      `select=${COLUMNAS_BEBIDAS}&activado=eq.true&touza=eq.true&categoria=in.(${CATEGORIAS_BEBIDAS.map((c) => `"${c}"`).join(",")})&order=orden.asc`,
     ),
     consultar(
       base,
@@ -111,9 +126,13 @@ async function traerCarta(base, key) {
   // hace `agruparVinosPorTipo` (src/lib/vinos-carta.ts) cuando el propio
   // build renderiza `<Carta/>` vía SSR de Vite —ese módulo TypeScript se
   // carga tal cual, sin reimplementar aquí su lógica.
+  //
+  // Cada categoría, en el orden de `ordenarVinos` (`orden` numérico → nombre
+  // → id): `Vinos.orden` es "0" en todas las filas y, sin desempate, el orden
+  // del HTML prerenderizado y el del refresco del navegador no coincidían.
   const porCategoriaReal = (filas) => {
     const resultado = {};
-    for (const fila of filas) {
+    for (const fila of ordenarVinos(filas)) {
       if (!fila.categoria) continue;
       (resultado[fila.categoria] ??= []).push(fila);
     }

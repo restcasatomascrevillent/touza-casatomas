@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
+import { COLUMNAS_BEBIDAS } from '@/lib/carta-consultas.mjs';
 
 export interface Bebida {
   id: string;
@@ -11,8 +12,6 @@ export interface Bebida {
   tipo: string | null;
   tag: string | null;
   featured: boolean | null;
-  touza: boolean | null;
-  restaurante: boolean | null;
   orden: number | null;
   tamano: string | null;
 }
@@ -33,7 +32,7 @@ export const useBebidas = (categoria: string, soloTouza: boolean = true) => {
     queryFn: async () => {
       let query = supabase
         .from('Bebidas')
-        .select('*')
+        .select(COLUMNAS_BEBIDAS)
         .eq('categoria', categoria)
         .eq('activado', true)
         .order('orden', { ascending: true });
@@ -49,7 +48,7 @@ export const useBebidas = (categoria: string, soloTouza: boolean = true) => {
         throw new Error('No se pudieron cargar las bebidas. Por favor, intenta de nuevo.');
       }
 
-      return data as Bebida[];
+      return data as unknown as Bebida[];
     },
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),

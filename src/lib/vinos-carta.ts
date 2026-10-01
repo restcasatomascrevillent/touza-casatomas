@@ -45,6 +45,9 @@ export function capitalizarEtiqueta(texto: string): string {
     .join(" ");
 }
 
+/** Comparación por código (no `localeCompare`): igual en Node y en cualquier navegador. */
+const compararTexto = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
 /** Slug estable para usar como id de pestaña/filtro y key de React. */
 function idDesde(texto: string): string {
   return (
@@ -95,7 +98,10 @@ export function agruparVinosPorTipo(vinos: Vino[]): TipoVino[] {
   const entradas = Array.from(porTipo.entries()).sort(([tipoA, vinosA], [tipoB, vinosB]) => {
     const iA = ORDEN_TIPOS.indexOf(tipoA.toUpperCase());
     const iB = ORDEN_TIPOS.indexOf(tipoB.toUpperCase());
-    if (iA === -1 && iB === -1) return vinosB.length - vinosA.length;
+    // Desempate por nombre: sin él, dos tipos con los mismos vinos quedaban
+    // en el orden de llegada de las filas, que no es el mismo en la
+    // instantánea del build (agrupada por categoría) que en el navegador.
+    if (iA === -1 && iB === -1) return vinosB.length - vinosA.length || compararTexto(tipoA, tipoB);
     if (iA === -1) return 1;
     if (iB === -1) return -1;
     return iA - iB;
@@ -123,7 +129,8 @@ export function agruparVinosPorTipo(vinos: Vino[]): TipoVino[] {
         const aOtras = /^otras\b/i.test(a.etiqueta);
         const bOtras = /^otras\b/i.test(b.etiqueta);
         if (aOtras !== bOtras) return aOtras ? 1 : -1;
-        return b.vinos.length - a.vinos.length;
+        // Mismo desempate que los tipos: no depender del orden de llegada.
+        return b.vinos.length - a.vinos.length || compararTexto(a.categoria, b.categoria);
       });
 
     const tipoSinPrefijo = tipo.replace(/^VINOS\s+/i, "").trim() || tipo;
