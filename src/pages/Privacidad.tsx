@@ -48,7 +48,7 @@ const Privacidad = () => (
         <dt>Contacto para temas de privacidad</dt>
         <dd>
           <a href={`mailto:${TITULAR.email}`}>{TITULAR.email}</a> ·{" "}
-          <a href={TITULAR.telefonoHref}>{TITULAR.telefono}</a>
+          <a href={TITULAR.telefonoHref} className="whitespace-nowrap">{TITULAR.telefono}</a>
         </dd>
       </dl>
 

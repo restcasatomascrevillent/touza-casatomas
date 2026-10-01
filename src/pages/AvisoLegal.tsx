@@ -37,7 +37,7 @@ const AvisoLegal = () => (
         <dt>Contacto</dt>
         <dd>
           <a href={`mailto:${TITULAR.email}`}>{TITULAR.email}</a> ·{" "}
-          <a href={TITULAR.telefonoHref}>{TITULAR.telefono}</a>
+          <a href={TITULAR.telefonoHref} className="whitespace-nowrap">{TITULAR.telefono}</a>
         </dd>
         <dt>Sitio web</dt>
         <dd>{DOMINIO}</dd>
