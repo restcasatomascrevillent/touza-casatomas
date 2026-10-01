@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Instagram, Facebook } from "lucide-react";
 import Reveal from "@/components/Reveal";
 import { RUTAS_LEGALES } from "@/lib/legal";
@@ -18,10 +18,14 @@ const legalLinks = [
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  // En El Reservado el formulario acaba justo encima: "Solicita El
+  // Reservado" llevaba a la misma página y repetía la llamada a la acción.
+  const enReservado = useLocation().pathname.replace(/\/+$/, "") === "/reservado";
 
   return (
     <>
       {/* Pre-footer CTA */}
+      {!enReservado && (
       <section className="bg-black py-10 md:py-24 text-center px-5 md:px-6">
         {/* <Reveal> y no `whileInView`: este CTA va en el pie de TODAS las
             páginas y el `opacity:0` de framer salía en línea en el HTML del
@@ -40,12 +44,15 @@ const Footer = () => {
           </Link>
         </Reveal>
       </section>
+      )}
 
       <footer className="bg-black border-t border-white/5">
         <div className="max-w-6xl mx-auto px-5 md:px-6 py-10 md:py-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16">
+          {/* En el móvil, Explora y Contacto van en dos columnas (antes, todo
+              apilado: el pie medía casi dos pantallas). */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-8 md:gap-16">
             {/* Brand */}
-            <div>
+            <div className="col-span-2 md:col-span-1">
               <Link to="/" className="inline-block">
                 <span className="font-serif text-2xl font-bold tracking-wider text-primary">
                   TOUZA
@@ -62,12 +69,12 @@ const Footer = () => {
               <h4 className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3 md:mb-6">
                 Explora
               </h4>
-              <ul className="space-y-2 md:space-y-4">
+              <ul className="md:space-y-4">
                 {footerLinks.map((link) => (
                   <li key={link.path}>
                     <Link
                       to={link.path}
-                      className="text-white/65 text-sm font-light hover:text-white active:text-white transition-colors duration-200 py-1.5 inline-block rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      className="text-white/70 text-[15px] md:text-sm font-light hover:text-white active:text-white transition-colors duration-200 inline-flex items-center min-h-11 md:min-h-0 md:py-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       {link.name}
                     </Link>
@@ -81,13 +88,12 @@ const Footer = () => {
               <h4 className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3 md:mb-6">
                 Contacto
               </h4>
-              <div className="space-y-1.5 md:space-y-3 text-white/65 text-sm font-light mb-5 md:mb-8">
-                <p>C/ San Vicente, 14</p>
-                <p>03330 Crevillente, Alicante</p>
+              <div className="space-y-1.5 md:space-y-3 text-white/70 text-[15px] md:text-sm font-light mb-5 md:mb-8">
+                <p className="leading-snug pt-2.5 md:pt-0">C/ San Vicente, 14<br />03330 Crevillente, Alicante</p>
                 {/* Con prefijo internacional, como en el resto de la web: sin él
                     falla al llamar desde un móvil con SIM extranjera. */}
-                <a href="tel:+34966782000" className="inline-block py-1 hover:text-white active:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">966 782 000</a>
-                <a href="mailto:info@touzabar.es" className="block py-1 hover:text-white active:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">info@touzabar.es</a>
+                <a href="tel:+34966782000" className="flex min-h-11 items-center md:inline-block md:min-h-0 md:py-1 hover:text-white active:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">966 782 000</a>
+                <a href="mailto:info@touzabar.es" className="flex min-h-11 items-center md:block md:min-h-0 md:py-1 break-all hover:text-white active:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">info@touzabar.es</a>
               </div>
               <div className="flex gap-3">
                 <a
