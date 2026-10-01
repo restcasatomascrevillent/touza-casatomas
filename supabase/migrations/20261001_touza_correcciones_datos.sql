@@ -64,7 +64,7 @@ update public."Cocteles"
    and imagen_url = 'https://images.unsplash.com/photo-1527761939622-9119094290d4?w=500&h=600&fit=crop';
 
 -- ---------------------------------------------------------------------------
--- PARTE 2 — FOTO DE STOCK QUE NO CORRESPONDE AL CÓCTEL (DECISIÓN HUMANA)
+-- PARTE 2 — FOTO DE STOCK QUE NO CORRESPONDE AL CÓCTEL (aprobada por el dueño el 01/10/2026: relleno TOUZA para ver qué fotos faltan)
 -- ---------------------------------------------------------------------------
 -- Todas las fotos de la tabla son de stock (Unsplash) y cargan (200). Estas
 -- además enseñan OTRA bebida. Quitarlas cambia una foto bonita pero falsa por
@@ -74,43 +74,43 @@ update public."Cocteles"
 -- Pornstar Martini: enseña un vaso bajo de whisky con hielo grande (old
 -- fashioned), no una copa de martini con maracuyá y el chupito de cava.
 --   antes: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=500&h=600&fit=crop'
--- update public."Cocteles" set imagen_url = null, updated_at = now()
---  where id = 'pornstar-martini'
---    and imagen_url = 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=500&h=600&fit=crop';
+update public."Cocteles" set imagen_url = null, updated_at = now()
+ where id = 'pornstar-martini'
+   and imagen_url = 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=500&h=600&fit=crop';
 --
 -- Green Dream (kiwi + manzana verde): enseña un cóctel morado de moras con
 -- naranja deshidratada.
 --   antes: 'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=500&h=600&fit=crop'
--- update public."Cocteles" set imagen_url = null, updated_at = now()
---  where id = 'green-dream'
---    and imagen_url = 'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=500&h=600&fit=crop';
+update public."Cocteles" set imagen_url = null, updated_at = now()
+ where id = 'green-dream'
+   and imagen_url = 'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=500&h=600&fit=crop';
 --
 -- Piña Colada: enseña una copa de martini naranja con hierbabuena (una piña
 -- colada es cremosa y blanca, en vaso alto o hurricane).
 --   antes: 'https://images.unsplash.com/photo-1587223962930-cb7f31384c19?w=500&h=600&fit=crop'
--- update public."Cocteles" set imagen_url = null, updated_at = now()
---  where id = 'pina-colada'
---    and imagen_url = 'https://images.unsplash.com/photo-1587223962930-cb7f31384c19?w=500&h=600&fit=crop';
+update public."Cocteles" set imagen_url = null, updated_at = now()
+ where id = 'pina-colada'
+   and imagen_url = 'https://images.unsplash.com/photo-1587223962930-cb7f31384c19?w=500&h=600&fit=crop';
 --
 -- Colada Virgen: enseña tres copas de martini (roja y verdes) sobre fondo
 -- amarillo; nada que ver con una colada.
 --   antes: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=500&h=600&fit=crop'
--- update public."Cocteles" set imagen_url = null, updated_at = now()
---  where id = 'colada-virgen'
---    and imagen_url = 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=500&h=600&fit=crop';
+update public."Cocteles" set imagen_url = null, updated_at = now()
+ where id = 'colada-virgen'
+   and imagen_url = 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=500&h=600&fit=crop';
 --
 -- Spicy Mango Margarita: enseña una margarita ROJA (de fresa), no de mango.
 --   antes: 'https://images.unsplash.com/photo-1556855810-ac404aa91e85?w=500&h=600&fit=crop'
--- update public."Cocteles" set imagen_url = null, updated_at = now()
---  where id = 'spicy-mango-margarita'
---    and imagen_url = 'https://images.unsplash.com/photo-1556855810-ac404aa91e85?w=500&h=600&fit=crop';
+update public."Cocteles" set imagen_url = null, updated_at = now()
+ where id = 'spicy-mango-margarita'
+   and imagen_url = 'https://images.unsplash.com/photo-1556855810-ac404aa91e85?w=500&h=600&fit=crop';
 --
 -- Ipanema: enseña vasos altos de fresa; la Ipanema es una caipirinha sin
 -- alcohol (lima, azúcar moreno, ginger ale/maracuyá).
 --   antes: 'https://images.unsplash.com/photo-1497534446932-c925b458314e?w=500&h=600&fit=crop'
--- update public."Cocteles" set imagen_url = null, updated_at = now()
---  where id = 'ipanema'
---    and imagen_url = 'https://images.unsplash.com/photo-1497534446932-c925b458314e?w=500&h=600&fit=crop';
+update public."Cocteles" set imagen_url = null, updated_at = now()
+ where id = 'ipanema'
+   and imagen_url = 'https://images.unsplash.com/photo-1497534446932-c925b458314e?w=500&h=600&fit=crop';
 --
 -- (Beso Escarlata —foto ámbar para un cóctel «escarlata»— tiene touza = false
 -- y no se ve en ninguna web: no se toca.)
