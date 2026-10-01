@@ -53,7 +53,7 @@ const FeaturesGrid = () => {
                 <div className="font-serif text-6xl lg:text-7xl text-white mb-4 tabular-nums">
                   <AnimatedNumber value={stat.value} suffix={stat.suffix} />
                 </div>
-                <p className="text-white/40 text-sm tracking-[0.2em] uppercase font-light">{stat.label}</p>
+                <p className="text-white/60 text-sm tracking-[0.2em] uppercase font-light">{stat.label}</p>
               </motion.div>
             );
           })}

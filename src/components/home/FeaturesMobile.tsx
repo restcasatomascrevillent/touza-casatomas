@@ -21,11 +21,11 @@ const FeaturesMobile = () => {
             className="flex items-start gap-4 py-4 border-b border-white/5 last:border-0"
           >
             <div className="w-11 h-11 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
-              <feature.icon className="w-[18px] h-[18px] text-white/50" />
+              <feature.icon className="w-[18px] h-[18px] text-primary" aria-hidden="true" />
             </div>
             <div>
-              <h4 className="font-serif text-base text-white mb-0.5">{feature.title}</h4>
-              <p className="text-white/50 text-[13px] font-light leading-relaxed">{feature.description}</p>
+              <h3 className="font-serif text-base text-white mb-0.5">{feature.title}</h3>
+              <p className="text-white/65 text-sm font-light leading-relaxed">{feature.description}</p>
             </div>
           </motion.div>
         ))}

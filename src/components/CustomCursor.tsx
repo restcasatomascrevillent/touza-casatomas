@@ -10,8 +10,12 @@ const CustomCursor = () => {
     const y = useSpring(0, springConfig);
 
     useEffect(() => {
-        // Hide on touch devices
-        if (window.matchMedia("(pointer: coarse)").matches) return;
+        // Sin cursor propio en táctil ni con "reducir movimiento" (es un
+        // elemento que persigue al ratón con muelle: justo lo que se pide evitar).
+        if (
+            window.matchMedia("(pointer: coarse)").matches ||
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ) return;
 
         setIsVisible(true);
 
@@ -57,6 +61,7 @@ const CustomCursor = () => {
 
     return (
         <motion.div
+            aria-hidden="true"
             className="fixed top-0 left-0 pointer-events-none z-[9999] mix-blend-difference"
             style={{
                 x,

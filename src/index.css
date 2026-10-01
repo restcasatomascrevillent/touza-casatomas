@@ -104,12 +104,30 @@
     /* scroll-behavior: smooth; - Disabled for Lenis */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    /* Barra de scroll fina y oscura en vez de oculta: sin ella, en escritorio
+       no había ninguna pista de cuánto queda de página ni forma de arrastrar. */
+    scrollbar-width: thin;
+    scrollbar-color: hsl(0 0% 28%) transparent;
   }
 
   html::-webkit-scrollbar {
-    display: none;
+    width: 8px;
+  }
+
+  html::-webkit-scrollbar-thumb {
+    background: hsl(0 0% 28%);
+    border-radius: 9999px;
+  }
+
+  html::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Foco visible por defecto en todo lo interactivo (teclado): muchos
+     elementos solo tenían el outline del navegador, invisible sobre negro. */
+  :where(a, button, [role="button"], [role="tab"], input, select, textarea, summary):focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
   }
 
   body {
