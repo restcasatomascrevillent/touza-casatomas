@@ -58,12 +58,23 @@ export const OptimizedImage = ({
     }, [url, priority]);
 
     if (hasError) {
+        // Antes: el texto "Error al cargar imagen" en gris, en medio de la
+        // carta (pasa con fotos de stock caídas, p. ej. la del Clover Club).
+        // Ahora un relleno discreto con la marca, y el `alt` se conserva como
+        // nombre accesible para no perder la descripción.
         return (
             <div
-                className={cn("bg-muted flex items-center justify-center text-muted-foreground text-xs", className)}
+                role="img"
+                aria-label={alt}
+                className={cn(
+                    "flex items-center justify-center bg-gradient-to-br from-white/[0.06] to-white/[0.02]",
+                    className
+                )}
                 style={{ width, height }}
             >
-                Error al cargar imagen
+                <span aria-hidden="true" className="font-serif text-lg tracking-[0.3em] text-primary/40 select-none">
+                    TOUZA
+                </span>
             </div>
         );
     }
