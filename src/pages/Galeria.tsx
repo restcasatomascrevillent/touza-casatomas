@@ -12,10 +12,7 @@ import { canonical } from "@/lib/site";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
-// Sin filtro "El Reservado": no hay ninguna foto real de la sala. Las que
-// lo llevaban eran un mojito, unas botellas de champagne (dos veces, en dos
-// recortes) y la foto de la barra repetida. Se recupera cuando el dueño
-// mande fotos del espacio.
+// Dos filtros: ambiente y cócteles.
 const galleryCategories = [
   { id: "all", name: "Todo" },
   { id: "ambiente", name: "Ambiente" },
@@ -92,7 +89,7 @@ const Galeria = () => {
         keywords={['fotos touza', 'galería cócteles', 'imágenes bar crevillente']}
       />
 
-      {/* Cabecera con foto, como Carta y El Reservado (antes, un bloque negro
+      {/* Cabecera con foto, como Carta (antes, un bloque negro
           con el titular). Foto con priority y sin fundido: es el LCP. */}
       <section className="relative overflow-hidden h-[44vh] min-h-[19rem] md:h-[62vh]">
         <div className="absolute inset-0">

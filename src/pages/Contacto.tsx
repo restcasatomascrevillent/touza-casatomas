@@ -7,8 +7,8 @@ import { useConsentimiento } from "@/lib/consentimiento";
 import Reveal from "@/components/Reveal";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { IMAGENES } from "@/assets/imagenes";
+import { DIRECCION_MAPS, TELEFONO, URL_COMO_LLEGAR } from "@/lib/negocio";
 
-const DIRECCION_MAPS = "C/ San Vicente, 14, 03330 Crevillente, Alicante";
 const URL_MAPS = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DIRECCION_MAPS)}`;
 // Embed clásico por dirección. El anterior llevaba un `pb=` con un place id
 // inventado ("0x4a1234567890abcd") y una marca de tiempo de ejemplo.
@@ -16,7 +16,7 @@ const URL_MAPA_EMBEBIDO = `https://maps.google.com/maps?q=${encodeURIComponent(D
 
 const contactInfo = [
   { icon: MapPin, title: "Dirección", content: "C/ San Vicente, 14\n03330 Crevillente, Alicante", link: URL_MAPS },
-  { icon: Phone, title: "Teléfono", content: "966 782 000", link: "tel:+34966782000" },
+  { icon: Phone, title: "Teléfono", content: TELEFONO.texto, link: TELEFONO.href },
   { icon: Clock, title: "Horario", content: "Jue - Sáb: 20:00 - 02:00\nDom: 18:00 - 00:00", link: null },
   { icon: Mail, title: "Email", content: "info@touzabar.es", link: "mailto:info@touzabar.es" },
 ];
@@ -30,12 +30,12 @@ const Contacto = () => {
     <Layout>
       <Seo
         title="Contacto y Ubicación"
-        description="Contacta con Touza Cocktail Bar en Crevillente. Horarios, ubicación y reservas."
+        description="Contacta con Touza Cocktail Bar en Crevillente: dirección, cómo llegar, horario, teléfono y email."
         canonical={canonical("/contacto")}
-        keywords={['contacto touza', 'ubicación touza', 'reserva mesa', 'horario cocktail bar']}
+        keywords={['contacto touza', 'ubicación touza', 'cómo llegar', 'horario cocktail bar']}
       />
 
-      {/* Cabecera con foto, como Carta y El Reservado (antes, un bloque negro
+      {/* Cabecera con foto, como Carta (antes, un bloque negro
           con el titular). Foto con priority y sin fundido: es el LCP. */}
       <section className="relative overflow-hidden h-[44vh] min-h-[19rem] md:h-[62vh]">
         <div className="absolute inset-0">
@@ -78,13 +78,14 @@ const Contacto = () => {
         <div className="max-w-6xl mx-auto px-5 md:px-6 grid gap-10 lg:grid-cols-12 lg:gap-16 lg:items-start">
           <div className="lg:col-span-5">
             {/* Acciones rápidas en el móvil. En Contacto no está la barra fija
-                "Llamar / Reservar" (sería redundante con la página), así que
-                lo que más se busca aquí desde un teléfono va arriba y a un
+                "Llamar / Cómo llegar" (repetiría estos botones), así que lo
+                que más se busca aquí desde un teléfono va arriba y a un
                 toque: llamar, llegar y escribir. */}
             <nav aria-label="Acciones rápidas" className="grid grid-cols-3 gap-2 mb-10 lg:hidden">
               {[
-                { href: "tel:+34966782000", icono: Phone, texto: "Llamar", externo: false },
-                { href: URL_MAPS, icono: Navigation, texto: "Cómo llegar", externo: true },
+                { href: TELEFONO.href, icono: Phone, texto: "Llamar", externo: false },
+                // Ruta hasta el bar (la misma URL que la barra del móvil y el pie).
+                { href: URL_COMO_LLEGAR, icono: Navigation, texto: "Cómo llegar", externo: true },
                 { href: "mailto:info@touzabar.es", icono: Mail, texto: "Escribir", externo: false },
               ].map((accion) => (
                 <a

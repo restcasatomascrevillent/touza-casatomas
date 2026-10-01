@@ -136,7 +136,7 @@ describe("Contacto — renderizado", () => {
     const acciones = screen.getByRole("navigation", { name: /acciones rápidas/i });
     const enlaces = Array.from(acciones.querySelectorAll("a")).map((a) => a.getAttribute("href"));
     expect(enlaces[0]).toBe("tel:+34966782000");
-    expect(enlaces[1]).toContain("google.com/maps");
+    expect(enlaces[1]).toContain("google.com/maps/dir/");
     expect(enlaces[2]).toBe("mailto:info@touzabar.es");
   });
 

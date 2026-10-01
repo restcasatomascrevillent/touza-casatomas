@@ -11,7 +11,7 @@ import ErrorBoundary from "./components/ui/error-boundary";
 import PageTransition from "./components/PageTransition";
 import SmoothScroll from "./components/SmoothScroll";
 import CookieConsent from "./components/CookieConsent";
-import MobileReserveCTA from "./components/MobileReserveCTA";
+import BarraAccionesMovil from "./components/BarraAccionesMovil";
 import { irArriba } from "./lib/scroll";
 import { SIN_BARRA_MOVIL } from "./lib/barra-movil";
 
@@ -59,7 +59,7 @@ const RootLayout = () => {
               </AnimatePresence>
               {/* Fuera de <PageTransition>: su transform de framer-motion crearía
                   un containing block y la barra `fixed` dejaría de anclarse al viewport. */}
-              <MobileReserveCTA />
+              <BarraAccionesMovil />
               <CookieConsent />
               {/* Vercel Web Analytics (sin cookies). Renderiza `null` y solo inyecta
                   el script en un useEffect → no afecta al HTML del SSG. El script

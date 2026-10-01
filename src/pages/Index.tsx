@@ -26,9 +26,9 @@ const Index = () => {
     <Layout>
       <Seo
         title="Touza - Cocktail Bar Premium en Crevillente"
-        description="Touza es un cocktail bar premium en Crevillente. Disfruta de cócteles artesanales, ambiente único y nuestro espacio privado El Reservado."
+        description="Touza es un cocktail bar premium en Crevillente. Cócteles de autor, champagne, vinos y whisky en un local para alargar la noche."
         canonical={canonical("/")}
-        keywords={["cocktail bar", "crevillente", "cócteles", "premium", "reservado", "eventos"]}
+        keywords={["cocktail bar", "crevillente", "cócteles", "premium", "cócteles de autor", "copas"]}
         schema={barSchema()}
       />
 
@@ -60,15 +60,19 @@ const Index = () => {
         ctaLink="/carta"
       />
 
+      {/* Hasta el 01/10/2026 esta vitrina era "El Reservado". Touza ya no
+          acepta reservas por la web y no hay fotos de esa sala: ahora habla
+          del local con lo que enseñan las fotos (mármol, champagne, la barra)
+          y lo que ya está en la carta, y lleva a la galería. */}
       <Showcase
         indice="02"
-        label="Espacio exclusivo"
-        title="El Reservado"
-        description="Un espacio exclusivo diseñado para la intimidad. Perfecto para celebraciones especiales o simplemente para desconectar del mundo exterior."
-        foto={{ imagen: IMAGENES.champanMesa, alt: "Botellas de champagne y una copa servida sobre una mesa de mármol" }}
+        label="El local"
+        title="Un sitio para quedarse"
+        description="Sofá corrido, mesas de mármol y la barra a la vista: un sitio para pedir otra ronda sin mirar el reloj. Y si hoy no te apetece un cóctel, en la carta también hay champagne, vino y whisky."
+        foto={{ imagen: IMAGENES.champanMesa, alt: "Botellas de champagne y una copa servida sobre una mesa de mármol de Touza" }}
         detalle={{ imagen: IMAGENES.botellas, alt: "Botellas de aperitivo y ron en la barra de Touza" }}
-        ctaText="Solicitar El Reservado"
-        ctaLink="/reservado"
+        ctaText="Ver la galería"
+        ctaLink="/galeria"
         invertido
       />
 

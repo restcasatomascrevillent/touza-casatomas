@@ -21,7 +21,7 @@ const useEfectoDeDiseno = typeof window === "undefined" ? useEffect : useLayoutE
  * Aviso de cookies: tarjeta flotante y compacta.
  *
  * - Móvil (< md): a 12 px de los bordes (más la zona segura), apoyada 8 px
- *   encima de la barra "Llamar / Reservar" donde la hay y sobre el borde de
+ *   encima de la barra "Llamar / Cómo llegar" donde la hay y sobre el borde de
  *   la pantalla donde no. Una línea y dos botones: ~96 px de alto a 360 px
  *   de ancho (antes, una franja de 153 px que tapaba la frase y los botones
  *   del hero en la primera visita).

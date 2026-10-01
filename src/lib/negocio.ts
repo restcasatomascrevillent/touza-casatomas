@@ -50,6 +50,22 @@ export const NEGOCIO = {
   ],
 } as const;
 
+/**
+ * Teléfono de Touza tal y como se muestra y se marca. OJO: el 966 10 78 87
+ * es el de Restaurante Casa Tomás, no el del bar (confirmado por el dueño,
+ * 01/10/2026).
+ */
+export const TELEFONO = {
+  texto: "966 782 000",
+  href: `tel:${NEGOCIO.telefono}`,
+} as const;
+
+/** Dirección para Google Maps, la misma que usa la página de Contacto. */
+export const DIRECCION_MAPS = `${NEGOCIO.calle}, ${NEGOCIO.cp} ${NEGOCIO.localidad}, ${NEGOCIO.region}`;
+
+/** "Cómo llegar": abre Google Maps con la ruta hasta el bar desde donde esté el visitante. */
+export const URL_COMO_LLEGAR = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(DIRECCION_MAPS)}`;
+
 /** `@id` estable para que Menu y Bar queden enlazados en el mismo grafo. */
 export const ID_NEGOCIO = `${SITE_URL}/#bar`;
 

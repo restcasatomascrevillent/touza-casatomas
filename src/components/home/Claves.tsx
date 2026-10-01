@@ -6,8 +6,7 @@ import Reveal from "@/components/Reveal";
  *
  * Solo datos verificables: cinco años de experiencia (confirmado por el
  * dueño), cócteles de autor (la carta) y el horario que publica la web
- * (`lib/negocio.ts`). Se retiraron "Est. 2023" y "200+ cócteles". El
- * Reservado no se repite aquí: tiene su vitrina justo encima.
+ * (`lib/negocio.ts`). Se retiraron "Est. 2023" y "200+ cócteles".
  * Lista editorial con numeración, en vez de tres columnas iguales con icono.
  */
 const claves = [

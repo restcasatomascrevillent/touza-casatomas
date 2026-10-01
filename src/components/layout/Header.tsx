@@ -1,8 +1,9 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Calendar, Phone } from "lucide-react";
+import { Menu, Navigation, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CURVA_CABECERA } from "@/lib/cabecera";
+import { TELEFONO, URL_COMO_LLEGAR } from "@/lib/negocio";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +14,6 @@ const navLinks = [
   { name: "Inicio", path: "/" },
   { name: "Carta", path: "/carta" },
   { name: "Galería", path: "/galeria" },
-  { name: "El Reservado", path: "/reservado" },
   { name: "Contacto", path: "/contacto" },
 ];
 
@@ -139,8 +139,8 @@ const Header = () => {
               </SheetTrigger>
               {/* Menú del móvil a pantalla casi completa: enlaces grandes en
                   serif con su número (el mismo ritmo editorial de la portada),
-                  la sección actual en dorado, y abajo reservar, llamar y el
-                  horario, que es lo que se busca desde un teléfono. Radix ya
+                  la sección actual en dorado, y abajo llamar, cómo llegar y
+                  el horario, que es lo que se busca desde un teléfono. Radix ya
                   atrapa el foco, cierra con Escape y bloquea el scroll. */}
               <SheetContent
                 side="right"
@@ -197,7 +197,7 @@ const Header = () => {
                         variant="outline"
                         className="h-12 rounded-full border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white font-medium text-[15px]"
                       >
-                        <a href="tel:+34966782000" aria-label="Llamar a Touza">
+                        <a href={TELEFONO.href} aria-label={`Llamar a Touza: ${TELEFONO.texto}`}>
                           <Phone className="w-4 h-4 mr-2" aria-hidden="true" />
                           Llamar
                         </a>
@@ -207,10 +207,16 @@ const Header = () => {
                         size="lg"
                         className="h-12 rounded-full bg-white text-black hover:bg-white/90 font-medium text-[15px]"
                       >
-                        <Link to="/reservado" onClick={() => setIsOpen(false)}>
-                          <Calendar className="w-4 h-4 mr-2" aria-hidden="true" />
-                          Reservar
-                        </Link>
+                        <a
+                          href={URL_COMO_LLEGAR}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Cómo llegar a Touza (abre Google Maps)"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <Navigation className="w-4 h-4 mr-2" aria-hidden="true" />
+                          Cómo llegar
+                        </a>
                       </Button>
                     </div>
                     <p className="text-[13px] leading-relaxed text-white/60 font-light text-center">

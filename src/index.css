@@ -53,7 +53,7 @@
     --charcoal-light: 0 0% 12%;
     --cream: 42 25% 95%;
 
-    /* Alto de la barra fija "Llamar / Reservar" del móvil (MobileReserveCTA),
+    /* Alto de la barra fija "Llamar / Cómo llegar" del móvil (BarraAccionesMovil),
        con la zona segura del indicador de inicio del iPhone. La usan el hueco
        que deja al final de la página, el aviso de cookies (que se apoya
        encima) y el hero de la portada (que no pone texto debajo). */

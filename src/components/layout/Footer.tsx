@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Instagram, Facebook } from "lucide-react";
+import { Instagram, Facebook, Navigation } from "lucide-react";
 import Reveal from "@/components/Reveal";
 import { RUTAS_LEGALES } from "@/lib/legal";
+import { NEGOCIO, TELEFONO, URL_COMO_LLEGAR } from "@/lib/negocio";
 
 const footerLinks = [
   { name: "Carta", path: "/carta" },
   { name: "Galería", path: "/galeria" },
-  { name: "El Reservado", path: "/reservado" },
   { name: "Contacto", path: "/contacto" },
 ];
 
@@ -18,30 +18,39 @@ const legalLinks = [
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  // En El Reservado el formulario acaba justo encima: "Solicita El
-  // Reservado" llevaba a la misma página y repetía la llamada a la acción.
-  const enReservado = useLocation().pathname.replace(/\/+$/, "") === "/reservado";
+  // Contacto acaba con la dirección y el mapa justo encima: "Cómo llegar"
+  // repetiría lo que ya está en la página.
+  const enContacto = useLocation().pathname.replace(/\/+$/, "") === "/contacto";
 
   return (
     <>
-      {/* Pre-footer CTA */}
-      {!enReservado && (
+      {/* Pre-footer CTA. Hasta el 01/10/2026 era "Reserva tu experiencia" →
+          El Reservado; Touza ya no acepta reservas por la web, así que invita
+          a venir y lleva a la ruta en Google Maps. */}
+      {!enContacto && (
       <section className="bg-black py-10 md:py-24 text-center px-5 md:px-6">
         {/* <Reveal> y no `whileInView`: este CTA va en el pie de TODAS las
             páginas y el `opacity:0` de framer salía en línea en el HTML del
             SSG, oculto hasta hidratar. La línea dorada crece desde el centro
             (scale 0 → 1; con 1 px de alto, en la práctica es un scaleX). */}
         <Reveal y={0} scale={0} aria-hidden="true" className="h-px bg-primary/40 max-w-xl mx-auto mb-6 md:mb-16" />
-        <Reveal as="h3" y={20} delay={0.3} className="font-serif text-3xl md:text-6xl text-white mb-4 md:mb-6">
-          Reserva tu experiencia
+        <Reveal as="h3" y={20} delay={0.3} className="font-serif text-3xl md:text-6xl text-white mb-3 md:mb-5">
+          Te esperamos en Touza
+        </Reveal>
+        <Reveal as="p" y={0} delay={0.4} className="text-white/65 text-[15px] md:text-lg font-light mb-6 md:mb-8">
+          {NEGOCIO.calle} · {NEGOCIO.localidad}
         </Reveal>
         <Reveal y={0} delay={0.5}>
-          <Link
-            to="/reservado"
-            className="inline-block px-8 md:px-10 py-3.5 md:py-4 border border-white/25 rounded-full text-white/85 hover:text-white hover:border-white/50 active:scale-[0.97] transition-all duration-300 text-base md:text-lg font-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          <a
+            href={URL_COMO_LLEGAR}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Cómo llegar a Touza (abre Google Maps)"
+            className="inline-flex items-center gap-2 px-8 md:px-10 py-3.5 md:py-4 border border-white/25 rounded-full text-white/85 hover:text-white hover:border-white/50 active:scale-[0.97] transition-all duration-300 text-base md:text-lg font-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            Solicita El Reservado
-          </Link>
+            <Navigation className="w-4 h-4 md:w-5 md:h-5" aria-hidden="true" />
+            Cómo llegar
+          </a>
         </Reveal>
       </section>
       )}
@@ -92,7 +101,7 @@ const Footer = () => {
                 <p className="leading-snug pt-2.5 md:pt-0">C/ San Vicente, 14<br />03330 Crevillente, Alicante</p>
                 {/* Con prefijo internacional, como en el resto de la web: sin él
                     falla al llamar desde un móvil con SIM extranjera. */}
-                <a href="tel:+34966782000" className="flex min-h-11 items-center md:inline-block md:min-h-0 md:py-1 hover:text-white active:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">966 782 000</a>
+                <a href={TELEFONO.href} className="flex min-h-11 items-center md:inline-block md:min-h-0 md:py-1 hover:text-white active:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">{TELEFONO.texto}</a>
                 <a href="mailto:info@touzabar.es" className="flex min-h-11 items-center md:block md:min-h-0 md:py-1 break-all hover:text-white active:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">info@touzabar.es</a>
               </div>
               <div className="flex gap-3">

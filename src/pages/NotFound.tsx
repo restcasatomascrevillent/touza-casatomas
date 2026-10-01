@@ -4,11 +4,11 @@ import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
 
 // Salidas útiles desde el 404: antes solo había "Volver al inicio" y ni
-// siquiera cabecera, así que quien llegaba de un enlace roto a la carta o a
-// la reserva tenía que empezar desde la portada.
+// siquiera cabecera, así que quien llegaba de un enlace roto a la carta o al
+// horario tenía que empezar desde la portada.
 const salidas = [
   { to: "/carta", texto: "Ver la carta" },
-  { to: "/reservado", texto: "El Reservado" },
+  { to: "/galeria", texto: "Galería" },
   { to: "/contacto", texto: "Contacto y horario" },
 ];
 

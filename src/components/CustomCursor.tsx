@@ -15,7 +15,7 @@ const CustomCursor = () => {
         // cubre todos los casos (un portátil táctil, un móvil emulado en el
         // navegador de escritorio, una tablet con ratón): el punto aparecía en
         // el móvil y, con `mix-blend-difference`, se veía como un punto negro
-        // sobre el botón blanco "Reservar". Se vuelve a evaluar si cambia la
+        // sobre el botón blanco de la barra fija. Se vuelve a evaluar si cambia la
         // media query, y además solo se pinta tras mover el ratón (antes
         // arrancaba en la esquina 0,0) y se esconde en cuanto llega un toque.
         const raton = window.matchMedia("(hover: hover) and (pointer: fine)");
