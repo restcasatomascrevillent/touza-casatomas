@@ -53,6 +53,12 @@
     --charcoal-light: 0 0% 12%;
     --cream: 42 25% 95%;
 
+    /* Alto de la barra fija "Llamar / Reservar" del móvil (MobileReserveCTA),
+       con la zona segura del indicador de inicio del iPhone. La usan el hueco
+       que deja al final de la página, el aviso de cookies (que se apoya
+       encima) y el hero de la portada (que no pone texto debajo). */
+    --barra-movil: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+
     /* Sidebar */
     --sidebar-background: 0 0% 5%;
     --sidebar-foreground: 42 20% 88%;
@@ -479,11 +485,44 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  /* Alto de pantalla mínimo para heroes. `svh` es el viewport con la barra
+     del navegador desplegada: el hero no cambia de alto al hacer scroll
+     (`dvh` sí, y la foto da saltos). `vh` queda de respaldo. */
+  .alto-pantalla {
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
   /* Entrada del hero en CSS puro: se reproduce con el HTML prerenderizado,
      sin esperar a que hidrate React. `both` mantiene el estado inicial
-     durante el animation-delay (sin parpadeo antes de empezar). */
+     durante el animation-delay (sin parpadeo antes de empezar).
+
+     En móvil la entrada es SOLO de posición, sin fundido: si la animación no
+     avanza (pestaña en segundo plano, ahorro de energía, una captura justo al
+     cargar, un visor que congela los fotogramas) el texto se queda donde
+     está, pero visible. Con el fundido, el primer pantallazo del móvil era
+     solo la foto: ni marca, ni qué es Touza, ni botones. El fundido queda
+     para ≥ md, donde además el hero no es lo único que se ve. */
   .entrada-hero {
-    animation: entrada-hero 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+    animation: entrada-hero-movil 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @media (min-width: 768px) {
+    .entrada-hero {
+      animation-name: entrada-hero;
+      animation-duration: 0.9s;
+      animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+  }
+
+  @keyframes entrada-hero-movil {
+    from {
+      transform: translateY(14px);
+    }
+
+    to {
+      transform: none;
+    }
   }
 
   @keyframes entrada-hero {

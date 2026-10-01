@@ -14,9 +14,13 @@ import { cn } from "@/lib/utils";
  * el HTML estático llevaba a la vez). La composición cambia solo con clases
  * responsive, así que el SSG sirve la buena desde el primer pintado:
  *
- * - Móvil: contenido abajo (al alcance del pulgar), botones a lo ancho y una
- *   pista de scroll en línea. `pb-24` deja libre la franja de la barra fija
- *   "Llamar / Reservar" (MobileReserveCTA).
+ * - Móvil: contenido abajo (al alcance del pulgar) sobre un degradado que lo
+ *   hace legible encima de la foto, y dos botones en una fila. El alto es
+ *   `100svh` (el viewport con la barra del navegador desplegada: no salta al
+ *   hacer scroll, a diferencia de `dvh`) y es un MÍNIMO: en horizontal o con
+ *   la letra del sistema grande el hero crece en vez de recortar el texto.
+ *   El padding inferior deja libre la barra fija "Llamar / Reservar"
+ *   (MobileReserveCTA), con su zona segura (`--barra-movil`).
  * - ≥ md: contenido centrado, titular enorme, botones en fila, ondas doradas
  *   y halo. El parallax y el fundido del contenido con el scroll solo se
  *   activan en el navegador (≥ md y sin reduced-motion); en el HTML y en
@@ -39,14 +43,14 @@ const Hero = () => {
   return (
     <section
       ref={ref}
-      className="relative h-[100dvh] min-h-[34rem] flex items-end justify-center overflow-hidden px-5 pb-24 md:items-center md:px-6 md:pb-0"
+      className="alto-pantalla relative flex items-end justify-center overflow-hidden px-5 pt-28 pb-[calc(var(--barra-movil)+1.75rem)] md:h-[100dvh] md:min-h-[34rem] md:items-center md:px-6 md:pt-0 md:pb-0 apaisado:h-auto apaisado:min-h-[100svh] apaisado:pt-[4.5rem] apaisado:pb-[calc(var(--barra-movil)+1.5rem)]"
     >
       <motion.div style={efectos ? { y } : undefined} className="absolute inset-0 z-0 bg-black">
         <div className="absolute inset-0 md:ken-burns">
           <OptimizedImage
             imagen={IMAGENES.interior}
             alt="Interior de Touza: sofá corrido color mostaza, mesas de mármol y luz cálida"
-            className="w-full h-full object-cover opacity-50 md:opacity-60"
+            className="w-full h-full object-cover opacity-75 md:opacity-60"
             sizes="100vw"
             variante={HERO_VARIANTE_MOVIL}
             priority={true}
@@ -61,7 +65,10 @@ const Hero = () => {
           className="absolute inset-0 pointer-events-none hidden md:block bg-[radial-gradient(ellipse_45%_40%_at_50%_48%,hsl(var(--gold)/0.14),transparent_70%)]"
         />
 
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/40 via-black/20 to-black md:from-black/70 md:via-black/40 md:to-black/90" />
+        {/* En móvil el texto va en la mitad de abajo: la foto se ve viva arriba y
+            se oscurece donde está el texto (antes, foto al 50 % y degradado
+            suave: el conjunto quedaba apagado y el texto, justo). */}
+        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_bottom,rgb(0_0_0/0.55)_0%,rgb(0_0_0/0.05)_22%,rgb(0_0_0/0.35)_45%,rgb(0_0_0/0.85)_68%,hsl(var(--background))_100%)] md:bg-gradient-to-b md:from-black/70 md:via-black/40 md:to-black/90" />
       </motion.div>
 
       {/* Fundido con la sección siguiente: con el parallax la foto baja y
@@ -76,14 +83,14 @@ const Hero = () => {
             pantalla; esta línea es solo visual. */}
         <p
           aria-hidden="true"
-          className="entrada-hero text-white/70 text-[10px] min-[360px]:text-[11px] md:text-xs tracking-[0.3em] md:tracking-[0.5em] uppercase font-light mb-4 md:mb-8"
+          className="entrada-hero text-primary text-xs tracking-[0.32em] md:text-white/70 md:tracking-[0.5em] uppercase font-medium md:font-light mb-3 md:mb-8 apaisado:mb-3"
           style={{ animationDelay: "0.05s" }}
         >
           Cocktail bar · Crevillente
         </p>
 
         <h1
-          className="entrada-hero font-serif font-bold text-white leading-[0.85] tracking-tighter mb-4 md:mb-8 text-[4.25rem] min-[400px]:text-[5rem] sm:text-[7rem] md:text-[8.5rem] lg:text-[10rem] xl:text-[12rem]"
+          className="entrada-hero font-serif font-bold text-white leading-[0.85] tracking-tighter mb-4 md:mb-8 [text-shadow:0_4px_30px_rgb(0_0_0/0.45)] md:[text-shadow:none] text-[4.25rem] min-[400px]:text-[5rem] min-[420px]:text-[5.5rem] sm:text-[7rem] md:text-[8.5rem] lg:text-[10rem] xl:text-[12rem] apaisado:text-[4.5rem] apaisado:mb-3"
           style={{ animationDelay: "0.15s" }}
         >
           TOUZA
@@ -91,21 +98,21 @@ const Hero = () => {
         </h1>
 
         <p
-          className="entrada-hero text-white/80 font-light leading-relaxed mx-auto text-[15px] max-w-[260px] mb-8 md:text-xl md:max-w-lg md:mb-14"
+          className="entrada-hero text-white/85 font-light leading-relaxed mx-auto text-base max-w-[18rem] mb-7 md:text-xl md:text-white/80 md:max-w-lg md:mb-14 apaisado:text-base apaisado:mb-5"
           style={{ textWrap: "balance", animationDelay: "0.3s" }}
         >
           Donde la alquimia de los cócteles se encuentra con la excelencia.
         </p>
 
         <div
-          className="entrada-hero flex flex-col gap-3 w-full md:flex-row md:justify-center md:gap-5 md:w-auto"
+          className="entrada-hero grid grid-cols-2 gap-3 w-full max-w-sm mx-auto md:flex md:max-w-none md:justify-center md:gap-5 md:w-auto"
           style={{ animationDelay: "0.45s" }}
         >
           <Button
             asChild
             size="lg"
             className={cn(
-              "h-[52px] w-full rounded-2xl bg-white text-black hover:bg-white/90 text-[15px] font-medium",
+              "h-12 w-full px-3 rounded-full bg-white text-black hover:bg-white/90 text-[15px] font-medium",
               "transition-all duration-300 active:scale-[0.98]",
               "md:h-14 md:w-auto md:px-10 md:rounded-full md:text-base"
             )}
@@ -117,7 +124,7 @@ const Hero = () => {
             variant="outline"
             size="lg"
             className={cn(
-              "h-[52px] w-full rounded-2xl border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white hover:border-white/40 text-[15px] font-light backdrop-blur-sm",
+              "h-12 w-full px-3 rounded-full border-white/30 bg-black/20 text-white hover:bg-white/10 hover:text-white hover:border-white/50 text-[15px] font-normal backdrop-blur-sm md:border-white/20 md:bg-transparent md:font-light",
               "transition-all duration-300 active:scale-[0.98]",
               "md:h-14 md:w-auto md:px-10 md:rounded-full md:text-base"
             )}
@@ -126,8 +133,10 @@ const Hero = () => {
           </Button>
         </div>
 
-        {/* Pista de scroll hasta lg: en línea, porque abajo está la barra fija. */}
-        <div aria-hidden="true" className="pista-scroll mt-4 flex justify-center md:mt-8 lg:hidden">
+        {/* Pista de scroll en tablet: en línea, porque abajo está la barra fija.
+            En el móvil sobra: la barra ya ocupa ese sitio y el contenido de
+            debajo asoma. */}
+        <div aria-hidden="true" className="pista-scroll mt-8 hidden md:flex justify-center lg:hidden apaisado:hidden">
           <ChevronDown className="oscilar w-5 h-5 text-white/40" />
         </div>
       </motion.div>

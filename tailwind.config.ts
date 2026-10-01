@@ -14,6 +14,12 @@ export default {
       },
     },
     extend: {
+      screens: {
+        // Móvil en horizontal (o cualquier pantalla muy baja): el ancho ya es
+        // de tablet (md), pero solo hay ~400 px de alto. Va después de los
+        // anchos, así que sus clases ganan a las de `md:`/`lg:`.
+        apaisado: { raw: "(orientation: landscape) and (max-height: 500px)" },
+      },
       fontFamily: {
         serif: ["Cormorant Garamond", "serif"],
         sans: ["Montserrat", "sans-serif"],
