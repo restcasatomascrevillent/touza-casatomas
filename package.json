@@ -12,6 +12,7 @@
     "test": "vitest run",
     "typecheck": "tsc -b --force",
     "imagenes": "node scripts/generar-imagenes.mjs",
+    "favicon": "node scripts/generar-favicon.mjs",
     "test:watch": "vitest"
   },
   "dependencies": {
