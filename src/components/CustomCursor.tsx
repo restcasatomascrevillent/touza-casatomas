@@ -10,50 +10,84 @@ const CustomCursor = () => {
     const y = useSpring(0, springConfig);
 
     useEffect(() => {
-        // Sin cursor propio en táctil ni con "reducir movimiento" (es un
-        // elemento que persigue al ratón con muelle: justo lo que se pide evitar).
-        if (
-            window.matchMedia("(pointer: coarse)").matches ||
-            window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ) return;
+        // Solo con ratón de verdad: `(hover: hover) and (pointer: fine)` como
+        // condición POSITIVA. Antes se excluía `(pointer: coarse)`, que no
+        // cubre todos los casos (un portátil táctil, un móvil emulado en el
+        // navegador de escritorio, una tablet con ratón): el punto aparecía en
+        // el móvil y, con `mix-blend-difference`, se veía como un punto negro
+        // sobre el botón blanco "Reservar". Se vuelve a evaluar si cambia la
+        // media query, y además solo se pinta tras mover el ratón (antes
+        // arrancaba en la esquina 0,0) y se esconde en cuanto llega un toque.
+        const raton = window.matchMedia("(hover: hover) and (pointer: fine)");
+        const reducido = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let activo = false;
+        let pintado = false;
 
-        setIsVisible(true);
-
-        const handleMouseMove = (e: MouseEvent) => {
+        // `pointermove` y no `mousemove`: tras un toque, el navegador también
+        // emite eventos de ratón "de compatibilidad" que volvían a pintar el punto.
+        const handleMouseMove = (e: PointerEvent) => {
+            if (e.pointerType !== "mouse") return;
+            if (!pintado) {
+                // Primera aparición: salta a la posición sin el muelle (si
+                // no, cruzaba la pantalla desde la esquina).
+                x.jump(e.clientX);
+                y.jump(e.clientY);
+                pintado = true;
+                setIsVisible(true);
+                return;
+            }
             x.set(e.clientX);
             y.set(e.clientY);
         };
 
+        const handlePointerDown = (e: PointerEvent) => {
+            if (e.pointerType === "mouse") return;
+            pintado = false;
+            setIsVisible(false);
+        };
+
+        const isInteractive = (target: EventTarget | null) =>
+            target instanceof Element &&
+            !!target.closest("a, button, [role='button'], input, textarea, select, [data-interactive]");
+
         const handleMouseOver = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            if (
-                target.closest("a, button, [role='button'], input, textarea, select, [data-interactive]") ||
-                target.tagName === "A" ||
-                target.tagName === "BUTTON"
-            ) {
-                setIsHovering(true);
-            }
+            if (isInteractive(e.target)) setIsHovering(true);
         };
 
         const handleMouseOut = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            if (
-                target.closest("a, button, [role='button'], input, textarea, select, [data-interactive]") ||
-                target.tagName === "A" ||
-                target.tagName === "BUTTON"
-            ) {
-                setIsHovering(false);
-            }
+            if (isInteractive(e.target)) setIsHovering(false);
         };
 
-        window.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseover", handleMouseOver);
-        document.addEventListener("mouseout", handleMouseOut);
+        const encender = () => {
+            if (activo) return;
+            activo = true;
+            window.addEventListener("pointermove", handleMouseMove);
+            window.addEventListener("pointerdown", handlePointerDown);
+            document.addEventListener("mouseover", handleMouseOver);
+            document.addEventListener("mouseout", handleMouseOut);
+        };
 
-        return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
+        const apagar = () => {
+            if (!activo) return;
+            activo = false;
+            pintado = false;
+            window.removeEventListener("pointermove", handleMouseMove);
+            window.removeEventListener("pointerdown", handlePointerDown);
             document.removeEventListener("mouseover", handleMouseOver);
             document.removeEventListener("mouseout", handleMouseOut);
+            setIsVisible(false);
+            setIsHovering(false);
+        };
+
+        const evaluar = () => (raton.matches && !reducido.matches ? encender() : apagar());
+        evaluar();
+        raton.addEventListener("change", evaluar);
+        reducido.addEventListener("change", evaluar);
+
+        return () => {
+            raton.removeEventListener("change", evaluar);
+            reducido.removeEventListener("change", evaluar);
+            apagar();
         };
     }, [x, y]);
 
