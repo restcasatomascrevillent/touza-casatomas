@@ -5,13 +5,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, MotionConfig } from "framer-motion";
 import { Analytics } from "@vercel/analytics/react";
 import ErrorBoundary from "./components/ui/error-boundary";
 import PageTransition from "./components/PageTransition";
 import SmoothScroll from "./components/SmoothScroll";
 import CookieConsent from "./components/CookieConsent";
 import MobileReserveCTA from "./components/MobileReserveCTA";
+import { irArriba } from "./lib/scroll";
 
 const queryClient = new QueryClient();
 
@@ -36,11 +37,19 @@ const RootLayout = () => {
     <div className="min-h-screen bg-background font-sans antialiased">
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
+          {/* reducedMotion="user": con "reducir movimiento" activado en el
+              sistema, framer-motion quita los desplazamientos y escalados
+              (parallax, rebotes infinitos, entradas) y deja solo los fundidos.
+              La regla CSS de index.css solo cubría animaciones CSS. */}
+          <MotionConfig reducedMotion="user">
           <SmoothScroll>
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              <AnimatePresence mode="wait">
+              {/* Al terminar de salir la página anterior (y antes de que entre la
+                  nueva) se vuelve arriba: si no, la página nueva se abría a la
+                  altura de scroll de la anterior. */}
+              <AnimatePresence mode="wait" onExitComplete={irArriba}>
                 <PageTransition key={location.pathname}>
                   <Suspense fallback={<PageLoader />}>
                     <Outlet />
@@ -58,6 +67,7 @@ const RootLayout = () => {
               <Analytics />
             </TooltipProvider>
           </SmoothScroll>
+          </MotionConfig>
         </QueryClientProvider>
       </ErrorBoundary>
     </div>

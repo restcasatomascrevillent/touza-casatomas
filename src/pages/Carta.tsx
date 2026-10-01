@@ -81,8 +81,6 @@ const Carta = () => {
   const [selectedCocktail, setSelectedCocktail] = useState<CoctelUI | null>(null);
   const isMobile = useIsMobile();
 
-  useEffect(() => { window.scrollTo(0, 0); }, []);
-
   // El filtro secundario (pills bajo el buscador) cambia de significado según
   // la pestaña activa: categoría de cóctel, o denominación de vino. Si no se
   // reinicia al cambiar de pestaña, un filtro elegido en "Tintos" (p.ej.
