@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import React from "react";
 
 // ---------------------------------------------------------------------------
@@ -40,7 +40,10 @@ import CookieConsent from "@/components/CookieConsent";
 import AvisoProteccionDatos from "@/components/legal/AvisoProteccionDatos";
 import { TITULAR } from "@/lib/legal";
 
-const enRouter = (el: React.ReactElement) => render(React.createElement(MemoryRouter, null, el));
+// Router de datos (como el de vite-react-ssg): el aviso de cookies lee los
+// `handle` de la ruta con useMatches para saber si hay barra en el móvil.
+const enRouter = (el: React.ReactElement) =>
+  render(React.createElement(RouterProvider, { router: createMemoryRouter([{ path: "*", element: el }]) }));
 
 beforeEach(() => localStorage.clear());
 

@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { alCambiarConsentimiento, guardarConsentimiento, leerConsentimiento } from "@/lib/consentimiento";
 import { RUTAS_LEGALES } from "@/lib/legal";
-import { muestraBarraMovil } from "@/lib/barra-movil";
+import { useBarraMovil } from "@/lib/barra-movil";
 import { cn } from "@/lib/utils";
 
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
-  const conBarra = muestraBarraMovil(useLocation().pathname);
+  const conBarra = useBarraMovil();
 
   useEffect(() => {
     if (!leerConsentimiento()) setVisible(true);

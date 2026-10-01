@@ -13,6 +13,7 @@ import SmoothScroll from "./components/SmoothScroll";
 import CookieConsent from "./components/CookieConsent";
 import MobileReserveCTA from "./components/MobileReserveCTA";
 import { irArriba } from "./lib/scroll";
+import { SIN_BARRA_MOVIL } from "./lib/barra-movil";
 
 const queryClient = new QueryClient();
 
@@ -92,8 +93,10 @@ export const routes: RouteRecord[] = [
       { index: true, lazy: lazyRoute(() => import("./pages/Index")) },
       { path: "carta", lazy: lazyRoute(() => import("./pages/Carta")) },
       { path: "galeria", lazy: lazyRoute(() => import("./pages/Galeria")) },
-      { path: "reservado", lazy: lazyRoute(() => import("./pages/Reservado")) },
-      { path: "contacto", lazy: lazyRoute(() => import("./pages/Contacto")) },
+      // `handle: SIN_BARRA_MOVIL`: sin la barra fija "Llamar / Reservar" del
+      // móvil (ver src/lib/barra-movil.ts). Ya son el destino de esos botones.
+      { path: "reservado", handle: SIN_BARRA_MOVIL, lazy: lazyRoute(() => import("./pages/Reservado")) },
+      { path: "contacto", handle: SIN_BARRA_MOVIL, lazy: lazyRoute(() => import("./pages/Contacto")) },
       // Textos legales (LSSI-CE, RGPD/LOPDGDD y cookies). Datos del titular en
       // src/lib/legal.ts; el pie, el aviso de cookies y el formulario de El
       // Reservado enlazan aquí.
@@ -104,10 +107,16 @@ export const routes: RouteRecord[] = [
       // de sus funciones como text/plain, así que la sirve la web). `noindex`;
       // el SSG prerenderiza un cascarón vacío: el token se lee en el navegador.
       // Queda fuera del sitemap porque vive en una subcarpeta (reserva/).
-      { path: "reserva/respuesta", lazy: lazyRoute(() => import("./pages/RespuestaReserva")) },
+      {
+        path: "reserva/respuesta",
+        handle: SIN_BARRA_MOVIL,
+        lazy: lazyRoute(() => import("./pages/RespuestaReserva")),
+      },
       // Ruta literal para que el SSG prerenderice `404.html` (vite-react-ssg
       // descarta la ruta "*" al recolectar paths). Vercel sirve ese fichero con
       // status 404 para cualquier URL que no resuelva en el filesystem.
+      // Las dos rutas del 404 llevan la barra del móvil (sin `handle`): así
+      // `/404` y una URL inventada se ven igual (ver src/lib/barra-movil.ts).
       { path: "404", lazy: lazyRoute(() => import("./pages/NotFound")) },
       { path: "*", lazy: lazyRoute(() => import("./pages/NotFound")) },
     ],

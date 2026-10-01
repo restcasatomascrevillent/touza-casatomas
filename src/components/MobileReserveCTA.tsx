@@ -1,7 +1,7 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Calendar, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { muestraBarraMovil } from "@/lib/barra-movil";
+import { useBarraMovil } from "@/lib/barra-movil";
 
 // Barra fija de conversión en móvil: llamar o reservar sin hacer scroll.
 // Se renderiza también en el HTML del SSG (no depende de efectos ni de scroll).
@@ -13,11 +13,13 @@ const PHONE_HREF = "tel:+34966782000";
  * aviso de cookies calculados para 76: el final del pie quedaba tapado y el
  * aviso se montaba 5 px sobre los botones. El filete superior es una sombra
  * interior para que no sume alto.
+ *
+ * Si sale o no lo decide la ruta que pinta la página (`handle` en App.tsx),
+ * no la URL: ver src/lib/barra-movil.ts.
  */
 const MobileReserveCTA = () => {
-  const location = useLocation();
-
-  if (!muestraBarraMovil(location.pathname)) return null;
+  const conBarra = useBarraMovil();
+  if (!conBarra) return null;
 
   return (
     <>
