@@ -36,7 +36,7 @@ const CookieConsent = () => {
              de la pantalla (con su zona segura) cuando no. Compacto: con la
              barra debajo, cada línea de más tapa el hero. */
           className={cn(
-            "fixed left-0 right-0 z-[9998] bg-card/95 backdrop-blur-xl border-t border-white/10 px-4 pt-3 md:px-6 md:py-4 lg:bottom-0 lg:pb-4",
+            "fixed left-0 right-0 z-[45] bg-card/95 backdrop-blur-xl border-t border-white/10 px-4 pt-3 md:px-6 md:py-4 lg:bottom-0 lg:pb-4",
             conBarra
               ? "bottom-[var(--barra-movil)] pb-3"
               : "bottom-0 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"

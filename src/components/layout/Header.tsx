@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Calendar } from "lucide-react";
+import { Menu, Calendar, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CURVA_CABECERA } from "@/lib/cabecera";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -92,7 +92,7 @@ const Header = () => {
       <div className="max-w-6xl mx-auto px-6">
         <nav className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="relative z-10" aria-label="Touza, ir al inicio">
+          <Link to="/" className="relative z-10 inline-flex items-center min-h-11" aria-label="Touza, ir al inicio">
             <span className="font-serif text-xl lg:text-2xl font-bold tracking-wider text-primary">
               TOUZA
             </span>
@@ -137,24 +137,29 @@ const Header = () => {
                   <Menu className="w-6 h-6 text-white" />
                 </button>
               </SheetTrigger>
+              {/* Menú del móvil a pantalla casi completa: enlaces grandes en
+                  serif con su número (el mismo ritmo editorial de la portada),
+                  la sección actual en dorado, y abajo reservar, llamar y el
+                  horario, que es lo que se busca desde un teléfono. Radix ya
+                  atrapa el foco, cierra con Escape y bloquea el scroll. */}
               <SheetContent
                 side="right"
-                className="w-full max-w-[320px] bg-black border-l border-white/5 p-0"
+                className="w-full sm:max-w-sm bg-black border-l border-white/5 p-0"
               >
                 <SheetTitle className="sr-only">Menú</SheetTitle>
                 <SheetDescription className="sr-only">Secciones de la web de Touza</SheetDescription>
                 <div className="flex flex-col h-full">
-                  <div className="flex items-center p-6 border-b border-white/5">
-                    <Link to="/" onClick={() => setIsOpen(false)}>
+                  <div className="flex items-center h-[4.5rem] px-6 border-b border-white/5">
+                    <Link to="/" onClick={() => setIsOpen(false)} className="inline-flex items-center min-h-11">
                       <span className="font-serif text-xl font-bold tracking-wider text-primary">
                         TOUZA
                       </span>
                     </Link>
                   </div>
 
-                  <nav className="flex-1 px-4 py-8">
+                  <nav aria-label="Secciones" className="flex-1 overflow-y-auto px-6 py-6">
                     <ul className="space-y-1">
-                      {navLinks.map((link) => {
+                      {navLinks.map((link, i) => {
                         const isActive = location.pathname === link.path;
                         return (
                           <li key={link.path}>
@@ -163,13 +168,20 @@ const Header = () => {
                               aria-current={isActive ? "page" : undefined}
                               onClick={() => setIsOpen(false)}
                               className={cn(
-                                "flex items-center py-4 px-4 text-lg font-light tracking-wide transition-colors duration-200",
-                                isActive
-                                  ? "text-white"
-                                  : "text-white/60 hover:text-white"
+                                "group flex items-baseline gap-4 py-3 min-h-[3.5rem] transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                                isActive ? "text-primary" : "text-white/85 hover:text-white active:text-white"
                               )}
                             >
-                              <span className="font-serif">{link.name}</span>
+                              <span
+                                aria-hidden="true"
+                                className={cn(
+                                  "font-serif text-sm tabular-nums w-6",
+                                  isActive ? "text-primary" : "text-white/35"
+                                )}
+                              >
+                                {String(i + 1).padStart(2, "0")}
+                              </span>
+                              <span className="font-serif text-[2rem] leading-none tracking-wide">{link.name}</span>
                             </Link>
                           </li>
                         );
@@ -177,17 +189,35 @@ const Header = () => {
                     </ul>
                   </nav>
 
-                  <div className="p-6 border-t border-white/5 safe-bottom">
-                    <Button
-                      asChild
-                      size="lg"
-                      className="w-full h-14 bg-white text-black hover:bg-white/90 font-medium text-base rounded-2xl"
-                    >
-                      <Link to="/reservado" onClick={() => setIsOpen(false)}>
-                        <Calendar className="w-5 h-5 mr-3" />
-                        Reservar ahora
-                      </Link>
-                    </Button>
+                  <div className="px-6 pt-5 pb-6 border-t border-white/5 safe-bottom space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        asChild
+                        size="lg"
+                        variant="outline"
+                        className="h-12 rounded-full border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white font-medium text-[15px]"
+                      >
+                        <a href="tel:+34966782000" aria-label="Llamar a Touza">
+                          <Phone className="w-4 h-4 mr-2" aria-hidden="true" />
+                          Llamar
+                        </a>
+                      </Button>
+                      <Button
+                        asChild
+                        size="lg"
+                        className="h-12 rounded-full bg-white text-black hover:bg-white/90 font-medium text-[15px]"
+                      >
+                        <Link to="/reservado" onClick={() => setIsOpen(false)}>
+                          <Calendar className="w-4 h-4 mr-2" aria-hidden="true" />
+                          Reservar
+                        </Link>
+                      </Button>
+                    </div>
+                    <p className="text-[13px] leading-relaxed text-white/60 font-light text-center">
+                      Jue - Sáb: 20:00 - 02:00 · Dom: 18:00 - 00:00
+                      <br />
+                      C/ San Vicente, 14 · Crevillente
+                    </p>
                   </div>
                 </div>
               </SheetContent>
