@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { guardarConsentimiento, leerConsentimiento } from "@/lib/consentimiento";
+import { alCambiarConsentimiento, guardarConsentimiento, leerConsentimiento } from "@/lib/consentimiento";
+import { RUTAS_LEGALES } from "@/lib/legal";
 
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!leerConsentimiento()) setVisible(true);
+    // "Configurar cookies" (/cookies) borra la elección: el aviso vuelve a salir.
+    return alCambiarConsentimiento((valor) => setVisible(valor === null));
   }, []);
 
   const responder = (valor: "accepted" | "rejected") => {
@@ -31,12 +35,16 @@ const CookieConsent = () => {
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center gap-3 md:gap-8">
             {/* Antes: "Al navegar aceptas su uso" (consentimiento implícito, que
                 no vale con el RGPD si además hay botón de rechazar) y un
-                "Más información" con href="#" que solo subía al principio. La
-                página de política de cookies está pendiente (ver
-                docs/auditoria-diseno-2026-10.md); cuando exista, enlazarla aquí. */}
+                "Más información" con href="#" que solo subía al principio. */}
             <p className="text-xs md:text-sm text-white/75 font-light flex-1 leading-relaxed">
               Solo usamos cookies de terceros para el mapa de Google de la página de contacto, y únicamente si las
-              aceptas. Puedes rechazarlas sin que cambie nada más de la web.
+              aceptas. Puedes rechazarlas sin que cambie nada más de la web.{" "}
+              <Link
+                to={RUTAS_LEGALES.cookies}
+                className="text-primary underline underline-offset-4 decoration-primary/40 hover:decoration-primary rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                Más información
+              </Link>
             </p>
             <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
               <button

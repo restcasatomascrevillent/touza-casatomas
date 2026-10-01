@@ -91,6 +91,12 @@ export const routes: RouteRecord[] = [
       { path: "galeria", lazy: lazyRoute(() => import("./pages/Galeria")) },
       { path: "reservado", lazy: lazyRoute(() => import("./pages/Reservado")) },
       { path: "contacto", lazy: lazyRoute(() => import("./pages/Contacto")) },
+      // Textos legales (LSSI-CE, RGPD/LOPDGDD y cookies). Datos del titular en
+      // src/lib/legal.ts; el pie, el aviso de cookies y el formulario de El
+      // Reservado enlazan aquí.
+      { path: "aviso-legal", lazy: lazyRoute(() => import("./pages/AvisoLegal")) },
+      { path: "privacidad", lazy: lazyRoute(() => import("./pages/Privacidad")) },
+      { path: "cookies", lazy: lazyRoute(() => import("./pages/Cookies")) },
       // Página de los enlaces de los correos de reserva (Supabase sirve el HTML
       // de sus funciones como text/plain, así que la sirve la web). `noindex`;
       // el SSG prerenderiza un cascarón vacío: el token se lee en el navegador.

@@ -18,6 +18,10 @@ const AJUSTES = {
   "/reservado": { priority: "0.8", changefreq: "monthly" },
   "/galeria": { priority: "0.7", changefreq: "monthly" },
   "/contacto": { priority: "0.6", changefreq: "monthly" },
+  // Textos legales: indexables (dan confianza y datos del titular), pero al final.
+  "/aviso-legal": { priority: "0.2", changefreq: "yearly" },
+  "/privacidad": { priority: "0.2", changefreq: "yearly" },
+  "/cookies": { priority: "0.2", changefreq: "yearly" },
 };
 
 const POR_DEFECTO = { priority: "0.5", changefreq: "monthly" };

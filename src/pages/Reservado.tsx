@@ -9,6 +9,7 @@ import { OptimizedImage } from "@/components/ui/optimized-image";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
+import AvisoProteccionDatos from "@/components/legal/AvisoProteccionDatos";
 
 import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
@@ -510,6 +511,7 @@ const Reservado = () => {
               <p className="text-center text-sm text-muted-foreground mt-4">
                 Solicitud sin compromiso: te confirmaremos la disponibilidad de El Reservado antes de nada.
               </p>
+              <AvisoProteccionDatos finalidad="gestionar tu solicitud de El Reservado y contactarte por correo o teléfono sobre ella." />
             </motion.form>
           </div>
         </section>

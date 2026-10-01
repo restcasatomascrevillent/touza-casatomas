@@ -31,15 +31,36 @@ export function guardarConsentimiento(valor: Exclude<Consentimiento, null>) {
   window.dispatchEvent(new CustomEvent(EVENTO, { detail: valor }));
 }
 
+/**
+ * Retira la elección guardada y vuelve a mostrar el aviso de cookies (botón
+ * "Configurar cookies" de /cookies). Retirar el consentimiento tiene que ser
+ * tan fácil como darlo (art. 7.3 RGPD). Quien escuche `useConsentimiento`
+ * recibe `null`, así que el mapa de Google deja de cargarse en la próxima
+ * visita a /contacto.
+ */
+export function reiniciarConsentimiento() {
+  try {
+    window.localStorage.removeItem(CLAVE_CONSENTIMIENTO);
+  } catch {
+    // Sin almacenamiento no había nada guardado.
+  }
+  window.dispatchEvent(new CustomEvent<Consentimiento>(EVENTO, { detail: null }));
+}
+
+/** Escucha cambios de consentimiento (aceptar, rechazar o reiniciar). */
+export function alCambiarConsentimiento(fn: (valor: Consentimiento) => void): () => void {
+  const manejador = (e: Event) => fn((e as CustomEvent<Consentimiento>).detail);
+  window.addEventListener(EVENTO, manejador);
+  return () => window.removeEventListener(EVENTO, manejador);
+}
+
 /** Valor actual, y se actualiza si el visitante responde al aviso estando en la página. */
 export function useConsentimiento(): Consentimiento {
   // null en el primer render (también en el SSG): no hay localStorage en Node.
   const [valor, setValor] = useState<Consentimiento>(null);
   useEffect(() => {
     setValor(leerConsentimiento());
-    const alCambiar = (e: Event) => setValor((e as CustomEvent<Consentimiento>).detail);
-    window.addEventListener(EVENTO, alCambiar);
-    return () => window.removeEventListener(EVENTO, alCambiar);
+    return alCambiarConsentimiento(setValor);
   }, []);
   return valor;
 }

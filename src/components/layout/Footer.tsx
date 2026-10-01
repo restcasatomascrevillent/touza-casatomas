@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Instagram, Facebook } from "lucide-react";
 import { motion } from "framer-motion";
+import { RUTAS_LEGALES } from "@/lib/legal";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -9,6 +10,12 @@ const footerLinks = [
   { name: "Galería", path: "/galeria" },
   { name: "El Reservado", path: "/reservado" },
   { name: "Contacto", path: "/contacto" },
+];
+
+const legalLinks = [
+  { name: "Aviso legal", path: RUTAS_LEGALES.avisoLegal },
+  { name: "Privacidad", path: RUTAS_LEGALES.privacidad },
+  { name: "Cookies", path: RUTAS_LEGALES.cookies },
 ];
 
 const Footer = () => {
@@ -123,6 +130,21 @@ const Footer = () => {
           <div className="mt-8 md:mt-16 pt-5 md:pt-8 border-t border-white/5">
             <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 text-xs text-white/50 font-light">
               <p>© {currentYear} Touza Cocktail Bar</p>
+              <nav aria-label="Información legal">
+                <ul className="flex flex-wrap items-center justify-center gap-x-1">
+                  {legalLinks.map((link, i) => (
+                    <li key={link.path} className="flex items-center">
+                      {i > 0 && <span aria-hidden="true" className="text-white/25 px-1">·</span>}
+                      <Link
+                        to={link.path}
+                        className="inline-flex min-h-[44px] md:min-h-0 items-center px-1 md:py-1 text-white/65 hover:text-white transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
               <p>
                 Parte de{" "}
                 <a
