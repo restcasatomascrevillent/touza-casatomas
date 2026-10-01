@@ -87,30 +87,24 @@ const Galeria = () => {
       {/* Hero */}
       <section className="bg-black overflow-hidden pt-28 pb-8 px-6 md:pt-40 md:pb-24">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, ease: appleEase }}
-            className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
+          <span
+            style={{ animationDelay: "0.1s" }}
+            className="entrada-hero text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
           >
             Descubre
-          </motion.span>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: appleEase }}
-            className="font-serif font-bold text-white text-4xl mb-3 md:text-7xl md:mb-6 lg:text-8xl"
+          </span>
+          <h1
+            style={{ animationDelay: "0.2s" }}
+            className="entrada-hero font-serif font-bold text-white text-4xl mb-3 md:text-7xl md:mb-6 lg:text-8xl"
           >
             Galería
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: appleEase }}
-            className="text-white/65 text-base md:text-lg font-light max-w-xl mx-auto"
+          </h1>
+          <p
+            style={{ animationDelay: "0.35s" }}
+            className="entrada-hero text-white/65 text-base md:text-lg font-light max-w-xl mx-auto"
           >
             Un vistazo a la esencia de Touza.
-          </motion.p>
+          </p>
         </div>
       </section>
 

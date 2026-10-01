@@ -280,8 +280,10 @@ const Carta = () => {
           pantalla entera por debajo del pliegue). En escritorio no cambia. */}
       <section className="relative overflow-hidden h-[46vh] md:h-[80vh]">
         <motion.div
-          initial={{ scale: 1.05, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
+          // Sin fundido de opacidad: la foto es el LCP y con opacity:0 inicial
+          // el HTML del SSG la traía invisible hasta hidratar.
+          initial={{ scale: 1.05 }}
+          animate={{ scale: 1 }}
           transition={{ duration: 1.5, ease: appleEase }}
           className="absolute inset-0"
         >
@@ -297,30 +299,24 @@ const Carta = () => {
 
         <div className="absolute inset-0 z-10 flex items-end pb-12 md:pb-20 px-6">
           <div className="max-w-6xl mx-auto w-full text-center">
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: appleEase }}
-              className="text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
+            <span
+              style={{ animationDelay: "0.15s" }}
+              className="entrada-hero text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
             >
               Selección Exclusiva
-            </motion.span>
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.5, ease: appleEase }}
-              className="font-serif font-bold text-white leading-[0.9] text-4xl mb-4 md:text-7xl md:mb-6 lg:text-8xl"
+            </span>
+            <h1
+              style={{ animationDelay: "0.25s" }}
+              className="entrada-hero font-serif font-bold text-white leading-[0.9] text-4xl mb-4 md:text-7xl md:mb-6 lg:text-8xl"
             >
               Nuestra Carta
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.7, ease: appleEase }}
-              className="text-white/70 text-base md:text-lg font-light max-w-xl mx-auto"
+            </h1>
+            <p
+              style={{ animationDelay: "0.4s" }}
+              className="entrada-hero text-white/70 text-base md:text-lg font-light max-w-xl mx-auto"
             >
               Una colección curada de sabores. Desde clásicos atemporales hasta innovaciones audaces.
-            </motion.p>
+            </p>
           </div>
         </div>
       </section>
