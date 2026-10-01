@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, LayoutGroup, type PanInfo } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -11,30 +11,33 @@ import { canonical } from "@/lib/site";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
+// Sin filtro "El Reservado": no hay ninguna foto real de la sala. Las que
+// lo llevaban eran un mojito, unas botellas de champagne (dos veces, en dos
+// recortes) y la foto de la barra repetida. Se recupera cuando el dueño
+// mande fotos del espacio.
 const galleryCategories = [
   { id: "all", name: "Todo" },
   { id: "ambiente", name: "Ambiente" },
   { id: "cocktails", name: "Cócteles" },
-  { id: "reservado", name: "El Reservado" },
 ];
 
-// Las fotos de ambiente y reservado son propias (src/assets).
-// ⚠️ Las 5 de "cocktails" siguen siendo stock de Unsplash: un bar real
-// ilustrado con fotos de catálogo resta credibilidad frente a la ficha de
-// Google, donde sí habrá fotos reales. Pendiente de fotos del dueño.
+// Las fotos locales (IMAGENES) son propias y cada `alt` describe lo que se
+// ve en ellas, no lo que se querría enseñar.
+// ⚠️ Las 5 de Unsplash siguen siendo stock: un bar real ilustrado con fotos
+// de catálogo resta credibilidad frente a la ficha de Google, donde sí habrá
+// fotos reales. Pendiente de fotos del dueño.
+// El orden importa: las posiciones 0 y 5 son las casillas grandes (2×2).
 const galleryData = [
-  { id: 1, category: "ambiente", image: IMAGENES.interior, alt: "Interior del bar con iluminación cálida" },
+  { id: 1, category: "ambiente", image: IMAGENES.interior, alt: "Interior de Touza: sofá corrido color mostaza, mesas de mármol y sillas tapizadas" },
   { id: 2, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel Signature" },
-  { id: 3, category: "ambiente", image: IMAGENES.barra, alt: "Barra del bar" },
+  { id: 3, category: "ambiente", image: IMAGENES.barra, alt: "Bartender colando un cóctel sobre hielo en la barra" },
   { id: 4, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel tropical" },
-  { id: 5, category: "reservado", image: IMAGENES.reservado, alt: "El Reservado - espacio privado" },
+  { id: 5, category: "cocktails", image: IMAGENES.reservado, alt: "Mojito con hielo picado y pajita de Touza, recién servido en la barra" },
+  { id: 8, category: "ambiente", image: IMAGENES.mesaPrivada, alt: "Tres botellas de champagne y una copa servida sobre una mesa de mármol" },
   { id: 6, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1536935338788-846bb9981813?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel clásico" },
-  { id: 7, category: "ambiente", image: IMAGENES.decoracion, alt: "Detalle decoración" },
-  { id: 8, category: "reservado", image: IMAGENES.mesaPrivada, alt: "Mesa privada" },
+  { id: 7, category: "ambiente", image: IMAGENES.decoracion, alt: "Botellas de aperitivo, ron y licores junto a un spritz en la barra" },
   { id: 9, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=600&h=800&fit=crop", 600, 800), alt: "Mojito" },
-  { id: 10, category: "ambiente", image: IMAGENES.local, alt: "Vista general del local" },
   { id: 11, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1556855810-ac404aa91e85?w=600&h=800&fit=crop", 600, 800), alt: "Margarita" },
-  { id: 12, category: "reservado", image: IMAGENES.barra, alt: "Evento en El Reservado" },
 ];
 
 const Galeria = () => {
@@ -42,6 +45,10 @@ const Galeria = () => {
   const [selectedImage, setSelectedImage] = useState<typeof galleryData[0] | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  // Las fotos del primer pintado (HTML del SSG) nunca llevan opacity:0; solo
+  // las que entran después, al cambiar de filtro, se animan.
+  const [montado, setMontado] = useState(false);
+  useEffect(() => setMontado(true), []);
 
   const filteredImages = galleryData.filter(
     (item) => selectedCategory === "all" || item.category === selectedCategory
@@ -84,27 +91,40 @@ const Galeria = () => {
         keywords={['fotos touza', 'galería cócteles', 'imágenes bar crevillente', 'fotos reservado']}
       />
 
-      {/* Hero */}
-      <section className="bg-black overflow-hidden pt-28 pb-8 px-6 md:pt-40 md:pb-24">
-        <div className="max-w-4xl mx-auto text-center">
-          <span
-            style={{ animationDelay: "0.1s" }}
-            className="entrada-hero text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
-          >
-            Descubre
-          </span>
-          <h1
-            style={{ animationDelay: "0.2s" }}
-            className="entrada-hero font-serif font-bold text-white text-4xl mb-3 md:text-7xl md:mb-6 lg:text-8xl"
-          >
-            Galería
-          </h1>
-          <p
-            style={{ animationDelay: "0.35s" }}
-            className="entrada-hero text-white/65 text-base md:text-lg font-light max-w-xl mx-auto"
-          >
-            Un vistazo a la esencia de Touza.
-          </p>
+      {/* Cabecera con foto, como Carta y El Reservado (antes, un bloque negro
+          con el titular). Foto con priority y sin fundido: es el LCP. */}
+      <section className="relative overflow-hidden h-[44vh] min-h-[19rem] md:h-[62vh]">
+        <div className="absolute inset-0">
+          <OptimizedImage
+            imagen={IMAGENES.decoracion}
+            alt=""
+            className="w-full h-full object-cover [&_img]:object-[50%_38%]"
+            sizes="100vw"
+            priority={true}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black" />
+        </div>
+        <div className="absolute inset-0 z-10 flex items-end px-6 pb-10 md:pb-16">
+          <div className="max-w-4xl mx-auto w-full text-center">
+            <span
+              style={{ animationDelay: "0.1s" }}
+              className="entrada-hero text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
+            >
+              Descubre
+            </span>
+            <h1
+              style={{ animationDelay: "0.2s" }}
+              className="entrada-hero font-serif font-bold text-white leading-[0.9] text-5xl mb-3 md:text-7xl md:mb-6 lg:text-8xl"
+            >
+              Galería
+            </h1>
+            <p
+              style={{ animationDelay: "0.35s" }}
+              className="entrada-hero text-white/70 text-base md:text-lg font-light max-w-xl mx-auto"
+            >
+              Un vistazo a la esencia de Touza.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -144,9 +164,8 @@ const Galeria = () => {
                 {filteredImages.map((item, index) => (
                   <motion.div
                     layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, margin: "-50px" }}
+                    initial={montado ? { opacity: 0, scale: 0.95 } : false}
+                    animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.6, delay: index * 0.05, ease: appleEase }}
                     key={item.id}
