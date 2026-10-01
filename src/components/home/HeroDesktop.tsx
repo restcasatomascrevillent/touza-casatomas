@@ -3,24 +3,19 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { HERO_VARIANTE_MOVIL, IMAGENES } from "@/assets/imagenes";
-import { lazy, Suspense, useRef } from "react";
+import { useRef } from "react";
 import { HeroBackgroundSVG } from "@/components/ui/svg/HeroBackgroundSVG";
-import { Scene3DErrorBoundary } from "@/components/3d/Scene3DErrorBoundary";
-import { useDeferred3D } from "@/hooks/use-deferred-3d";
 
-// Three.js (~478KB raw / ~193KB brotli) se carga de forma diferida y SOLO en
-// cliente: queda fuera del HTML del SSG (que requeriría WebGL en Node) y fuera
-// del chunk principal. Además `useDeferred3D` lo limita a escritorio con puntero
-// fino, sin reduced-motion ni ahorro de datos, y lo pide tras `load` + idle.
-// La imagen del hero + HeroBackgroundSVG son el póster estático: siempre se
-// pintan y la escena solo se superpone (con fade-in) cuando está lista.
-const Scene3D = lazy(() => import("@/components/3d/Scene3D"));
+// La escena 3D (react-three-fiber: cristal flotante + estrellas) está retirada
+// por ahora: el fondo es la imagen del hero (la misma que en móvil) +
+// HeroBackgroundSVG + un halo dorado estático tras el titular, que ocupa el
+// sitio donde flotaba el cristal. Para recuperarla, ver el historial de git
+// (src/components/3d/Scene3D.tsx y src/hooks/use-deferred-3d.ts).
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
 const HeroDesktop = () => {
   const ref = useRef<HTMLDivElement>(null);
-  const mostrar3D = useDeferred3D();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -52,13 +47,11 @@ const HeroDesktop = () => {
 
         <HeroBackgroundSVG />
 
-        {mostrar3D && (
-          <Scene3DErrorBoundary>
-            <Suspense fallback={null}>
-              <Scene3D />
-            </Suspense>
-          </Scene3DErrorBoundary>
-        )}
+        {/* Halo cálido estático detrás del titular (relevo del cristal 3D). */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_45%_40%_at_50%_48%,hsl(var(--gold)/0.14),transparent_70%)]"
+        />
 
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/90 pointer-events-none" />
       </motion.div>
