@@ -4,8 +4,9 @@ import { AnimatedMartiniSVG, AnimatedStarSVG, AnimatedKeySVG } from "@/component
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
-const stats = [
-  { value: 200, suffix: "+", label: "Cócteles Creados", icon: AnimatedMartiniSVG },
+// Sin cifra inventada de cócteles: el dueño pidió quitar el "200+".
+const stats: { value?: number; texto?: string; suffix: string; label: string; icon: typeof AnimatedMartiniSVG }[] = [
+  { texto: "De autor", suffix: "", label: "Cócteles de la casa", icon: AnimatedMartiniSVG },
   { value: 5, suffix: " Años", label: "De Experiencia", icon: AnimatedStarSVG },
   { value: 1, suffix: "", label: "Reservado Privado Único", icon: AnimatedKeySVG },
 ];
@@ -51,7 +52,7 @@ const FeaturesGrid = () => {
                   <Icon className="w-16 h-16 transition-transform duration-700 group-hover:scale-110" />
                 </div>
                 <div className="font-serif text-6xl lg:text-7xl text-white mb-4 tabular-nums">
-                  <AnimatedNumber value={stat.value} suffix={stat.suffix} />
+                  {stat.value === undefined ? stat.texto : <AnimatedNumber value={stat.value} suffix={stat.suffix} />}
                 </div>
                 <p className="text-white/60 text-sm tracking-[0.2em] uppercase font-light">{stat.label}</p>
               </motion.div>

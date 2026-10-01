@@ -68,7 +68,7 @@ const HeroDesktop = () => {
           className="entrada-hero inline-block text-foreground/70 text-xs tracking-[0.5em] uppercase font-light mb-8"
           style={{ animationDelay: "0.2s" }}
         >
-          Est. 2023 · Crevillente
+          Cocktail bar · Crevillente
         </span>
 
         <h1

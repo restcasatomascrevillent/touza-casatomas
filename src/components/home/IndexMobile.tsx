@@ -46,7 +46,7 @@ const IndexMobile = () => {
       />
 
       <ShowcaseMobile
-        title="El Privado"
+        title="El Reservado"
         description="Un espacio exclusivo diseñado para la intimidad. Perfecto para celebraciones especiales."
         imagen={IMAGENES.decoracion}
         ctaText="Reservar ahora"
