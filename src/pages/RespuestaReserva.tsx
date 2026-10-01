@@ -92,7 +92,12 @@ const RespuestaReserva = () => {
     if (fase.tipo !== "cargando") tituloRef.current?.focus();
   }, [clave, fase.tipo]);
 
-  const negocio = fase.tipo === "lista" ? fase.respuesta.negocio : null;
+  // Solo se usan los datos de negocio que diga la función si son de Touza. Con
+  // un token inválido o caducado la función no encuentra la reserva, no sabe
+  // la marca y responde con la de por defecto (Casa Tomás): sin este filtro,
+  // la web de Touza enseñaba el nombre y el teléfono del restaurante.
+  const negocioRespuesta = fase.tipo === "lista" ? fase.respuesta.negocio : null;
+  const negocio = negocioRespuesta?.marca === "touza" ? negocioRespuesta : null;
   const telHref = negocio?.telefonoDigits ? `tel:+34${negocio.telefonoDigits}` : PHONE_HREF;
   const telTexto = negocio?.telefonoTexto || PHONE_DISPLAY;
   const nombreNegocio = negocio?.nombre || "Touza";

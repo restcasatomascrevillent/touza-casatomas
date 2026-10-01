@@ -113,6 +113,37 @@ describe("<RespuestaReserva />", () => {
     expect(f.mock.calls[1][0]).toBe(ENLACE_EJECUTAR_URL);
   });
 
+  it("un enlace inválido NO enseña Casa Tomás: la función no sabe la marca y responde con la de por defecto", async () => {
+    // Respuesta real de producción (01/10/2026) a un token inexistente: sin
+    // reserva no hay marca, y `respuestaInvalida()` cae en casa_tomas.
+    const invalida = respuesta({
+      ok: false,
+      estado: "invalido",
+      tipo: null,
+      accion: null,
+      detalles: null,
+      negocio: {
+        marca: "casa_tomas",
+        nombre: "Casa Tomás",
+        telefonoTexto: "966 10 78 87",
+        telefonoDigits: "966107887",
+        web: "https://restaurantecasatomascrevillente.es",
+      },
+    });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(json(invalida)));
+    const { default: RespuestaReserva } = await import("@/pages/RespuestaReserva");
+    render(
+      <MemoryRouter>
+        <RespuestaReserva />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Este enlace ya no es válido" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /966 782 000/ })).toHaveAttribute("href", "tel:+34966782000");
+    expect(screen.queryByText(/Casa Tom[aá]s/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/966 10 78 87/)).not.toBeInTheDocument();
+  });
+
   it("con la función caída (CORS, red buena) asume la culpa y da el teléfono, sin culpar a la conexión", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
     const { default: RespuestaReserva } = await import("@/pages/RespuestaReserva");

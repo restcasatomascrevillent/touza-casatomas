@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import type { ImagenResponsive } from "@/assets/imagenes";
 
@@ -52,12 +52,30 @@ export const OptimizedImage = ({
     const [isLoaded, setIsLoaded] = useState(priority);
     const [hasError, setHasError] = useState(false);
 
+    const imgRef = useRef<HTMLImageElement>(null);
+
     useEffect(() => {
+        // En el HTML del SSG el navegador puede terminar de cargar la foto —o
+        // de fallar, como la URL caída del Clover Club— ANTES de que React
+        // hidrate. Esos `load`/`error` ya no se repiten, así que sin mirar
+        // `complete` la tarjeta se quedaba en el skeleton (o en opacity-0)
+        // para siempre. Una imagen diferida (lazy) aún sin pedir da
+        // `complete === false` y sigue el camino normal de los eventos.
+        const img = imgRef.current;
+        if (img?.complete) {
+            const cargada = img.naturalWidth > 0;
+            setIsLoaded(cargada);
+            setHasError(!cargada);
+            return;
+        }
         setIsLoaded(priority);
         setHasError(false);
     }, [url, priority]);
 
-    if (hasError) {
+    // Sin URL (p. ej. `imagen_url` a NULL en Supabase) no se pinta un
+    // `<img src="">`: va directo al relleno de marca, igual en el SSG y en el
+    // navegador (no depende de ningún evento).
+    if (hasError || !url) {
         // Antes: el texto "Error al cargar imagen" en gris, en medio de la
         // carta (pasa con fotos de stock caídas, p. ej. la del Clover Club).
         // Ahora un relleno discreto con la marca, y el `alt` se conserva como
@@ -96,6 +114,7 @@ export const OptimizedImage = ({
                 {imagen?.avif && <source type="image/avif" srcSet={imagen.avif} sizes={sizes} />}
                 {imagen?.webp && <source type="image/webp" srcSet={imagen.webp} sizes={sizes} />}
                 <img
+                    ref={imgRef}
                     src={url}
                     alt={alt}
                     width={anchoFinal}
