@@ -19,6 +19,29 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const lastScrollY = useRef(0);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Las barras pegajosas (pestañas de la carta, filtros de la galería) se
+  // colocan justo debajo de la cabecera cuando está visible y suben a 0 cuando
+  // se esconde al bajar. Antes iban a 52/60 px fijos: con la cabecera oculta
+  // quedaba una franja por la que se veía pasar el contenido.
+  useEffect(() => {
+    const cabecera = headerRef.current;
+    if (!cabecera || typeof ResizeObserver === "undefined") return;
+    const raiz = document.documentElement;
+    const medir = () => raiz.style.setProperty("--alto-cabecera", `${cabecera.offsetHeight}px`);
+    medir();
+    const observador = new ResizeObserver(medir);
+    observador.observe(cabecera);
+    return () => observador.disconnect();
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--offset-cabecera",
+      isHidden ? "0px" : "var(--alto-cabecera, 0px)"
+    );
+  }, [isHidden]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,6 +67,7 @@ const Header = () => {
 
   return (
     <header
+      ref={headerRef}
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled

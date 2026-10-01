@@ -322,7 +322,7 @@ const Carta = () => {
       </section>
 
       {/* Tabs */}
-      <div className="sticky top-[52px] md:top-[60px] z-40 bg-black/80 backdrop-blur-2xl border-y border-white/5 py-3">
+      <div className="sticky top-[var(--offset-cabecera,0px)] transition-[top] duration-500 z-40 bg-black/80 backdrop-blur-2xl border-y border-white/5 py-3">
         <div className="max-w-6xl mx-auto overflow-x-auto scrollbar-hide px-4">
           <div className="flex justify-start md:justify-center min-w-max">
             <Tabs value={activeMainCategory} onValueChange={setActiveMainCategory}>
