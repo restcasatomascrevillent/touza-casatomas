@@ -32,10 +32,10 @@ const galleryData = [
   { id: 2, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel Signature" },
   { id: 3, category: "ambiente", image: IMAGENES.barra, alt: "Bartender colando un cóctel sobre hielo en la barra" },
   { id: 4, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel tropical" },
-  { id: 5, category: "cocktails", image: IMAGENES.reservado, alt: "Mojito con hielo picado y pajita de Touza, recién servido en la barra" },
-  { id: 8, category: "ambiente", image: IMAGENES.mesaPrivada, alt: "Tres botellas de champagne y una copa servida sobre una mesa de mármol" },
+  { id: 5, category: "cocktails", image: IMAGENES.mojito, alt: "Mojito con hielo picado y pajita de Touza, recién servido en la barra" },
+  { id: 8, category: "ambiente", image: IMAGENES.champanMesa, alt: "Tres botellas de champagne y una copa servida sobre una mesa de mármol" },
   { id: 6, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1536935338788-846bb9981813?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel clásico" },
-  { id: 7, category: "ambiente", image: IMAGENES.decoracion, alt: "Botellas de aperitivo, ron y licores junto a un spritz en la barra" },
+  { id: 7, category: "ambiente", image: IMAGENES.botellas, alt: "Botellas de aperitivo, ron y licores junto a un spritz en la barra" },
   { id: 9, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=600&h=800&fit=crop", 600, 800), alt: "Mojito" },
   { id: 11, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1556855810-ac404aa91e85?w=600&h=800&fit=crop", 600, 800), alt: "Margarita" },
 ];
@@ -86,9 +86,9 @@ const Galeria = () => {
     <Layout>
       <Seo
         title="Galería de Imágenes"
-        description="Explora la galería de imágenes de Touza. Fotos de nuestros cócteles artesanales, el ambiente exclusivo y nuestro reservado en Crevillente."
+        description="Explora la galería de imágenes de Touza: nuestros cócteles artesanales, la barra y el ambiente del local en Crevillente."
         canonical={canonical("/galeria")}
-        keywords={['fotos touza', 'galería cócteles', 'imágenes bar crevillente', 'fotos reservado']}
+        keywords={['fotos touza', 'galería cócteles', 'imágenes bar crevillente']}
       />
 
       {/* Cabecera con foto, como Carta y El Reservado (antes, un bloque negro
@@ -96,7 +96,7 @@ const Galeria = () => {
       <section className="relative overflow-hidden h-[44vh] min-h-[19rem] md:h-[62vh]">
         <div className="absolute inset-0">
           <OptimizedImage
-            imagen={IMAGENES.decoracion}
+            imagen={IMAGENES.botellas}
             alt=""
             className="w-full h-full object-cover [&_img]:object-[50%_38%]"
             sizes="100vw"

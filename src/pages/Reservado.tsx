@@ -26,7 +26,24 @@ const features = [
   { icon: Star, title: "Eventos Especiales", description: "Cumpleaños, cenas y reuniones" },
 ];
 
-const galleryImages = [IMAGENES.reservado, IMAGENES.mesaPrivada, IMAGENES.barra];
+// OJO: no hay ninguna foto real de la sala de El Reservado. Hasta que lleguen
+// (huecos, proporciones y qué debe enseñar cada una en
+// docs/fotos-necesarias.md), se usan fotos reales del bar con un `alt` que
+// dice lo que enseñan, y el bloque se presenta como el ambiente de Touza, no
+// como la sala. Antes un mojito y unas botellas de champán salían como
+// "Espacio privado El Reservado - vista N".
+const fotoHero = {
+  imagen: IMAGENES.champan,
+  alt: "Botellas de champán Laurent-Perrier y una copa servida sobre una mesa de mármol",
+};
+
+const galleryImages = [
+  { imagen: IMAGENES.barra, alt: "Bartender de Touza colando un cóctel sobre hielo en la barra" },
+  // Recorte vertical de la foto de la sala principal: encaja en la caja 3:4
+  // sin desperdiciar la mitad de la apaisada.
+  { imagen: IMAGENES.interiorMovil, alt: "Sala principal de Touza: sofá corrido color mostaza y mesas de mármol" },
+  { imagen: IMAGENES.botellas, alt: "Botellas de aperitivo, ron y licores junto a un spritz en la barra de Touza" },
+];
 
 // ---------------------------------------------------------------------------
 // El Reservado entra por el mismo circuito de solicitud que usa el
@@ -286,8 +303,8 @@ const Reservado = () => {
             className="absolute inset-0"
           >
             <OptimizedImage
-              imagen={IMAGENES.local}
-              alt="El Reservado"
+              imagen={fotoHero.imagen}
+              alt={fotoHero.alt}
               className="w-full h-full object-cover"
               sizes="100vw"
               priority={true}
@@ -339,7 +356,7 @@ const Reservado = () => {
                 y={20}
                 className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
               >
-                Descubre el espacio
+                El ambiente de Touza
               </Reveal>
               <Reveal
                 as="h2"
@@ -355,9 +372,9 @@ const Reservado = () => {
                 clases responsive (antes dos árboles elegidos con useIsMobile, y el
                 HTML del SSG siempre traía el de escritorio). */}
             <div className="flex overflow-x-auto gap-3 pb-4 snap-x scrollbar-hide -mx-6 px-6 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:mx-0 md:px-0 md:pb-0">
-              {galleryImages.map((image, index) => (
+              {galleryImages.map(({ imagen: image, alt }, index) => (
                 <Reveal
-                  key={index}
+                  key={image.src}
                   y={0}
                   scale={0.95}
                   delay={index * 0.12}
@@ -372,7 +389,7 @@ const Reservado = () => {
                       src={image.src}
                       width={image.width}
                       height={image.height}
-                      alt={`Espacio privado El Reservado de Touza en Crevillente - vista ${index + 1}`}
+                      alt={alt}
                       className="w-full h-full object-cover"
                       loading="lazy"
                       decoding="async"

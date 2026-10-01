@@ -55,7 +55,7 @@ const Index = () => {
         title="Cócteles de autor"
         description="Cada copa que servimos cuenta una historia. Ingredientes seleccionados, técnicas de vanguardia y una presentación que desafía lo convencional."
         foto={{ imagen: IMAGENES.barra, alt: "Bartender de Touza colando un cóctel sobre hielo en vaso bajo" }}
-        detalle={{ imagen: IMAGENES.reservado, alt: "Mojito recién servido en la barra, con pajita de Touza" }}
+        detalle={{ imagen: IMAGENES.mojito, alt: "Mojito recién servido en la barra, con pajita de Touza" }}
         ctaText="Ver la carta"
         ctaLink="/carta"
       />
@@ -65,8 +65,8 @@ const Index = () => {
         label="Espacio exclusivo"
         title="El Reservado"
         description="Un espacio exclusivo diseñado para la intimidad. Perfecto para celebraciones especiales o simplemente para desconectar del mundo exterior."
-        foto={{ imagen: IMAGENES.mesaPrivada, alt: "Botellas de champagne y una copa servida sobre una mesa de mármol" }}
-        detalle={{ imagen: IMAGENES.decoracion, alt: "Botellas de aperitivo y ron en la barra de Touza" }}
+        foto={{ imagen: IMAGENES.champanMesa, alt: "Botellas de champagne y una copa servida sobre una mesa de mármol" }}
+        detalle={{ imagen: IMAGENES.botellas, alt: "Botellas de aperitivo y ron en la barra de Touza" }}
         ctaText="Solicitar El Reservado"
         ctaLink="/reservado"
         invertido

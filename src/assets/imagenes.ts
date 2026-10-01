@@ -68,30 +68,34 @@ function construir(nombre: string): ImagenResponsive {
 }
 
 /**
- * Claves = nombre del maestro en `src/assets/originales/`. Se mantienen los
- * nombres del origen (`Touza-2`, `Touza-5`…) para poder rastrear cada foto.
+ * Cada clave dice lo que ENSEÑA la foto, no dónde se usa: antes había
+ * `reservado` (un mojito), `local` y `mesaPrivada` (bodegones de champán) y
+ * `decoracion` (botellas), y acababan presentadas como la sala de El
+ * Reservado. El argumento de `construir` es el nombre del maestro en
+ * `src/assets/originales/` (`touza-2`, `touza-5`…) para rastrear cada foto.
+ *
+ * No hay ninguna foto real de El Reservado. Cuando lleguen, van a
+ * `src/assets/originales/` con una clave propia (p. ej. `salaReservado`);
+ * formatos y huecos en docs/fotos-necesarias.md.
  */
 export const IMAGENES = {
-  /** Interior, apaisada. Hero de la portada, og:image y `image` del JSON-LD. */
+  /** Sala principal (sofá mostaza, mesas de mármol), apaisada. Hero de la portada, og:image y `image` del JSON-LD. */
   interior: construir("touza-2"),
   /**
    * Recorte central ≈3:4 de `interior` para el hero en móvil vertical (ver
    * RECORTES en scripts/generar-imagenes.mjs). Mismo encuadre, menos bytes.
    */
   interiorMovil: construir("touza-2-movil"),
-  /** Barra, vertical. Hero de /carta y showcase "Cócteles de Autor". */
+  /** Bartender colando un cóctel en la barra, vertical. Hero de /carta y vitrina "Cócteles de Autor". */
   barra: construir("touza-5"),
-  /**
-   * Vertical. OJO: pese al nombre, es un mojito en la barra, no la sala de El
-   * Reservado (no hay foto real de la sala). Detalle de la vitrina de cócteles.
-   */
-  reservado: construir("touza-7"),
-  /** Champagne y copa sobre mármol, vertical. Vitrina "El Reservado". */
-  mesaPrivada: construir("touza-8-1"),
-  /** Recorte cuadrado de la misma foto de champagne. Hero de /reservado. */
-  local: construir("touza-8"),
-  /** Botellas de aperitivo y ron en la barra, vertical. */
-  decoracion: construir("touza-10"),
+  /** Mojito con pajita de Touza en la barra, con el bartender desenfocado detrás. Vertical. */
+  mojito: construir("touza-7"),
+  /** Tres botellas de champán Laurent-Perrier y una copa sobre mármol, vertical. */
+  champanMesa: construir("touza-8-1"),
+  /** Recorte cuadrado de la misma escena de champán. Hero de /reservado. */
+  champan: construir("touza-8"),
+  /** Botellas de aperitivo (Select), ron (Kraken) y licores junto a un spritz, vertical. */
+  botellas: construir("touza-10"),
 } satisfies Record<string, ImagenResponsive>;
 
 /**
