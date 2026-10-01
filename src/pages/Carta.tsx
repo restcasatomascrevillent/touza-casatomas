@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Search, Wine, Beer, Martini, GlassWater, Sparkles, X, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import Reveal from "@/components/Reveal";
@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
 import { BARRA_BAJO_CABECERA } from "@/lib/cabecera";
+import { irA } from "@/lib/scroll";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
 import { useVinos, useVinosRestantes, transformVinosToUI, type VinoUI } from "@/hooks/useVinos";
 import { agruparVinosPorTipo, capitalizarEtiqueta } from "@/lib/vinos-carta";
@@ -112,6 +113,40 @@ const Carta = () => {
   // "Rioja") se arrastraría a "Blancos" y no encajaría con ninguna
   // denominación de esa pestaña, dejando la lista vacía.
   useEffect(() => { setSelectedCategory("all"); }, [activeMainCategory]);
+
+  // Al cambiar de pestaña en el móvil: (1) la pestaña elegida se centra en la
+  // fila (con 9 pestañas, las de los extremos quedaban medio fuera), y (2) si
+  // se venía de mitad de una lista larga (p. ej. el vino 40 de Tintos), la
+  // lista nueva empieza arriba, justo bajo la barra pegajosa, en vez de abrir
+  // a media altura de otra lista.
+  const filaPestanasRef = useRef<HTMLDivElement>(null);
+  const barraPestanasRef = useRef<HTMLDivElement>(null);
+  const inicioListaRef = useRef<HTMLDivElement>(null);
+  const cambiarPestana = (id: string) => {
+    setActiveMainCategory(id);
+    const barra = barraPestanasRef.current;
+    const inicio = inicioListaRef.current;
+    if (barra && inicio) {
+      const altoBarra = barra.getBoundingClientRect().bottom;
+      const top = inicio.getBoundingClientRect().top;
+      if (top < altoBarra) irA(window.scrollY + top - altoBarra);
+    }
+  };
+  useEffect(() => {
+    const fila = filaPestanasRef.current;
+    const activa = fila?.querySelector<HTMLElement>('[data-state="active"]');
+    if (!fila || !activa) return;
+    const destino = Math.max(0, activa.offsetLeft - (fila.clientWidth - activa.offsetWidth) / 2);
+    // jsdom (tests) no implementa `Element.scrollTo`.
+    if (typeof fila.scrollTo !== "function") {
+      fila.scrollLeft = destino;
+      return;
+    }
+    fila.scrollTo({
+      left: destino,
+      behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
+  }, [activeMainCategory]);
 
   const { data: coctelesData, isLoading: loadingCocteles } = useCocteles();
   const cocktailsData = useMemo(() => transformCoctelesToUI(coctelesData), [coctelesData]);
@@ -297,7 +332,7 @@ const Carta = () => {
         </motion.div>
 
         <div className="absolute inset-0 z-10 flex items-end pb-12 md:pb-20 px-6">
-          <div className="max-w-6xl mx-auto w-full text-center">
+          <div className="max-w-6xl mx-auto w-full text-center text-shadow">
             <span
               style={{ animationDelay: "0.15s" }}
               className="entrada-hero text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
@@ -321,17 +356,17 @@ const Carta = () => {
       </section>
 
       {/* Tabs */}
-      <div className={cn(BARRA_BAJO_CABECERA, "bg-black/80 backdrop-blur-2xl border-y border-white/5 py-3")}>
-        <div className="max-w-6xl mx-auto overflow-x-auto scrollbar-hide px-4">
+      <div ref={barraPestanasRef} className={cn(BARRA_BAJO_CABECERA, "bg-black/85 backdrop-blur-2xl border-y border-white/5 py-2.5")}>
+        <div ref={filaPestanasRef} className="relative max-w-6xl mx-auto overflow-x-auto scrollbar-hide px-4">
           <div className="flex justify-start md:justify-center min-w-max">
-            <Tabs value={activeMainCategory} onValueChange={setActiveMainCategory}>
+            <Tabs value={activeMainCategory} onValueChange={cambiarPestana}>
               <TabsList className="bg-transparent p-0 gap-1">
                 {tabsCarta.map((cat) => (
                   <TabsTrigger
                     key={cat.id}
                     value={cat.id}
                     className={cn(
-                      "rounded-full px-5 py-2.5 text-sm font-light transition-all duration-300",
+                      "rounded-full px-5 min-h-11 text-[15px] md:text-sm font-light transition-all duration-300",
                       "data-[state=active]:bg-white data-[state=active]:text-black",
                       "data-[state=inactive]:text-white/60 data-[state=inactive]:hover:text-white",
                       "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0"
@@ -347,7 +382,7 @@ const Carta = () => {
       </div>
 
       {/* Search + Filters */}
-      <div className="max-w-6xl mx-auto py-5 px-6 md:py-8">
+      <div ref={inicioListaRef} className="max-w-6xl mx-auto py-5 px-5 md:px-6 md:py-8">
         {/* items-stretch en móvil: con items-center la fila de filtros, más
             ancha que la pantalla, desbordaba por los DOS lados y "Todos" quedaba
             cortado a la izquierda sin poder llegar a él con el scroll. */}
@@ -375,7 +410,7 @@ const Carta = () => {
           </div>
 
           {subFilterOptions.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0" role="group" aria-label="Filtrar">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0" role="group" aria-label="Filtrar">
               {subFilterOptions.map(cat => (
                 <button
                   type="button"
@@ -383,10 +418,10 @@ const Carta = () => {
                   onClick={() => setSelectedCategory(cat.id)}
                   aria-pressed={selectedCategory === cat.id}
                   className={cn(
-                    "px-5 py-2 rounded-full text-sm font-light whitespace-nowrap transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                    "px-5 min-h-11 rounded-full text-[15px] md:text-sm font-light whitespace-nowrap transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     selectedCategory === cat.id
                       ? "bg-white text-black"
-                      : "text-white/60 hover:text-white"
+                      : "text-white/70 ring-1 ring-inset ring-white/10 hover:text-white hover:ring-white/25"
                   )}
                 >
                   {cat.name}
@@ -400,7 +435,7 @@ const Carta = () => {
             se repetía bajo CADA tarjeta de cóctel y de tapa. Vive aquí, fuera
             del condicional de pestaña, para que se vea en todas (cócteles,
             vinos, cervezas...). Ver AVISO_ALERGENOS_CARTA en lib/alergenos.ts. */}
-        <p className="mb-6 flex items-start gap-2 text-xs font-light leading-relaxed text-white/60 md:mb-8">
+        <p className="mb-6 flex items-start gap-2 text-[13px] md:text-xs font-light leading-relaxed text-white/65 md:mb-8">
           <Info className="mt-[2px] h-3.5 w-3.5 flex-shrink-0 text-white/50" aria-hidden="true" />
           <span>{AVISO_ALERGENOS_CARTA}</span>
         </p>
@@ -439,7 +474,7 @@ const Carta = () => {
                       />
                       <CocktailHoverOutlineSVG />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent group-hover:from-black/90 transition-all duration-700" />
-                      <span className="absolute bottom-3 right-3 bg-white text-black text-xs font-medium px-3 py-1 rounded-full z-30">
+                      <span className="absolute bottom-3 right-3 bg-white text-black text-[13px] md:text-xs font-medium tabular-nums px-3 py-1 rounded-full z-30">
                         {cocktail.price}
                       </span>
                     </div>
@@ -454,7 +489,7 @@ const Carta = () => {
                         {cocktail.alergenos.map((alergeno) => (
                           <span
                             key={alergeno}
-                            className="px-2 py-0.5 rounded-full border border-white/10 text-[10px] text-white/50 font-light uppercase tracking-wide"
+                            className="px-2 py-0.5 rounded-full border border-white/10 text-[11px] text-white/60 font-light uppercase tracking-wide"
                           >
                             {alergeno}
                           </span>
@@ -549,7 +584,7 @@ const Carta = () => {
                           {tapa.alergenos.map((alergeno) => (
                             <span
                               key={alergeno}
-                              className="px-2 py-0.5 rounded-full border border-white/10 text-[10px] text-white/50 font-light uppercase tracking-wide"
+                              className="px-2 py-0.5 rounded-full border border-white/10 text-[11px] text-white/60 font-light uppercase tracking-wide"
                             >
                               {alergeno}
                             </span>
@@ -574,7 +609,7 @@ const Carta = () => {
         {/* En móvil, a pantalla completa y con scroll en el propio diálogo: antes
             el texto largo (ingredientes + alérgenos) se salía por abajo sin
             poder llegar a él. */}
-        <DialogContent className="p-0 gap-0 bg-black border-white/5 text-white max-w-[100vw] h-[100dvh] overflow-y-auto rounded-none md:h-auto md:max-h-[90vh] md:max-w-4xl md:overflow-hidden md:rounded-2xl">
+        <DialogContent className="p-0 gap-0 bg-black border-white/5 text-white w-full max-w-[100vw] h-[100dvh] overflow-y-auto rounded-none md:h-auto md:max-h-[90vh] md:max-w-4xl md:overflow-hidden md:rounded-2xl">
           <div className="grid grid-rows-[40vh_auto] md:grid-rows-none md:grid-cols-2">
             <div className="relative bg-white/5 md:min-h-[480px]">
               {selectedCocktail && (
@@ -585,7 +620,7 @@ const Carta = () => {
                 />
               )}
             </div>
-            <div className="p-8 md:p-12 flex flex-col justify-center md:max-h-[90vh] md:overflow-y-auto">
+            <div className="px-6 pt-7 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] md:p-12 flex flex-col justify-center md:max-h-[90vh] md:overflow-y-auto">
               {selectedCocktail && (
                 <>
                   <span className="text-primary text-xs uppercase tracking-widest mb-3">

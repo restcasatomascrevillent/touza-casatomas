@@ -25,3 +25,13 @@ export function irArriba() {
   window.scrollTo(0, 0);
   lenisActivo?.scrollTo(0, { immediate: true, force: true });
 }
+
+/**
+ * Lleva el scroll a `y` sin animación, pasando también por Lenis (ver
+ * `irArriba`). Lo usa la carta al cambiar de pestaña con la lista a medias.
+ */
+export function irA(y: number) {
+  if (typeof window === "undefined") return;
+  window.scrollTo(0, y);
+  lenisActivo?.scrollTo(y, { immediate: true, force: true });
+}
