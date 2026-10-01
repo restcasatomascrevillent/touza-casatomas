@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Search, Wine, Beer, Martini, GlassWater, Sparkles, X, Info } from "lucide-react";
 import { motion, AnimatePresence, Transition } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,6 @@ import { AVISO_ALERGENOS_CARTA, AVISO_SIN_ALERGENOS } from "@/lib/alergenos";
 import { Skeleton } from "@/components/ui/skeleton";
 import Seo from "@/components/Seo";
 import { OptimizedImage } from "@/components/ui/optimized-image";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { CocktailHoverOutlineSVG } from "@/components/ui/svg/CocktailHoverOutlineSVG";
 import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
@@ -67,6 +66,32 @@ const cocktailCategories = [
 
 import { LiquidLoaderSVG } from "@/components/ui/svg/LiquidLoaderSVG";
 
+/** Minúsculas y sin diacríticos, para comparar búsquedas. */
+const normalizarBusqueda = (texto: string) =>
+  texto.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+
+const SinResultados = ({ termino, onLimpiar }: { termino: string; onLimpiar: () => void }) => (
+  <div className="col-span-full py-16 text-center" role="status">
+    <p className="font-serif text-2xl text-white mb-2">
+      {termino ? <>Nada con «{termino}» en esta sección</> : "No hay nada en esta sección ahora mismo"}
+    </p>
+    {termino ? (
+      <>
+        <p className="text-white/60 font-light mb-6">Prueba con otra palabra o mira en otra pestaña de la carta.</p>
+        <button
+          type="button"
+          onClick={onLimpiar}
+          className="px-6 py-2.5 rounded-full border border-white/20 text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          Borrar búsqueda
+        </button>
+      </>
+    ) : (
+      <p className="text-white/60 font-light">Pregúntanos en barra por las opciones del día.</p>
+    )}
+  </div>
+);
+
 const DrinksSkeleton = () => (
   <div className="w-full flex justify-center py-20 col-span-full">
     <LiquidLoaderSVG />
@@ -76,10 +101,8 @@ const DrinksSkeleton = () => (
 const Carta = () => {
   const [activeMainCategory, setActiveMainCategory] = useState("cocteles");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedBase, setSelectedBase] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCocktail, setSelectedCocktail] = useState<CoctelUI | null>(null);
-  const isMobile = useIsMobile();
 
   // El filtro secundario (pills bajo el buscador) cambia de significado según
   // la pestaña activa: categoría de cóctel, o denominación de vino. Si no se
@@ -171,17 +194,21 @@ const Carta = () => {
     ]);
   }, []);
 
+  // Búsqueda sin distinguir mayúsculas ni tildes: "cafe" encuentra "Café",
+  // "rioja" encuentra "RIOJA". Antes una tilde de menos dejaba la lista vacía.
+  const busqueda = normalizarBusqueda(searchTerm.trim());
+
   const filteredCocktails = cocktailsData.filter((cocktail) => {
     const matchesCategory = selectedCategory === "all" || cocktail.category === selectedCategory;
-    const matchesBase = selectedBase === "all" || cocktail.base === selectedBase;
-    const matchesSearch = cocktail.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cocktail.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesBase && matchesSearch;
+    const matchesSearch = !busqueda ||
+      normalizarBusqueda(cocktail.name).includes(busqueda) ||
+      normalizarBusqueda(cocktail.description).includes(busqueda);
+    return matchesCategory && matchesSearch;
   });
 
   const filterBySearch = <T extends { name: string }>(items: T[]) => {
-    if (!searchTerm) return items;
-    return items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (!busqueda) return items;
+    return items.filter(item => normalizarBusqueda(item.name).includes(busqueda));
   };
 
   // Grupo de vino (Blancos, Tintos...) que corresponde a la pestaña activa,
@@ -251,10 +278,7 @@ const Carta = () => {
       {/* En móvil el héroe baja de 60vh a 46vh: esta es la página de la carta,
           y con 60vh la primera bebida caía a 725 px del inicio (casi una
           pantalla entera por debajo del pliegue). En escritorio no cambia. */}
-      <section className={cn(
-        "relative overflow-hidden",
-        isMobile ? "h-[46vh]" : "h-[80vh]"
-      )}>
+      <section className="relative overflow-hidden h-[46vh] md:h-[80vh]">
         <motion.div
           initial={{ scale: 1.05, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -285,10 +309,7 @@ const Carta = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.5, ease: appleEase }}
-              className={cn(
-                "font-serif font-bold text-white leading-[0.9]",
-                isMobile ? "text-4xl mb-4" : "text-7xl lg:text-8xl mb-6"
-              )}
+              className="font-serif font-bold text-white leading-[0.9] text-4xl mb-4 md:text-7xl md:mb-6 lg:text-8xl"
             >
               Nuestra Carta
             </motion.h1>
@@ -296,7 +317,7 @@ const Carta = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.7, ease: appleEase }}
-              className="text-white/50 text-base md:text-lg font-light max-w-xl mx-auto"
+              className="text-white/70 text-base md:text-lg font-light max-w-xl mx-auto"
             >
               Una colección curada de sabores. Desde clásicos atemporales hasta innovaciones audaces.
             </motion.p>
@@ -317,7 +338,8 @@ const Carta = () => {
                     className={cn(
                       "rounded-full px-5 py-2.5 text-sm font-light transition-all duration-300",
                       "data-[state=active]:bg-white data-[state=active]:text-black",
-                      "data-[state=inactive]:text-white/40 data-[state=inactive]:hover:text-white/70"
+                      "data-[state=inactive]:text-white/60 data-[state=inactive]:hover:text-white",
+                      "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0"
                     )}
                   >
                     {cat.name}
@@ -331,32 +353,45 @@ const Carta = () => {
 
       {/* Search + Filters */}
       <div className="max-w-6xl mx-auto py-5 px-6 md:py-8">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-4 md:mb-8">
+        {/* items-stretch en móvil: con items-center la fila de filtros, más
+            ancha que la pantalla, desbordaba por los DOS lados y "Todos" quedaba
+            cortado a la izquierda sin poder llegar a él con el scroll. */}
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center mb-4 md:mb-8">
           <div className="relative w-full md:w-80 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" aria-hidden="true" />
             <Input
+              type="search"
+              aria-label="Buscar en la carta"
               placeholder="Buscar..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-white/5 border-transparent focus:border-white/20 rounded-full h-12 text-white placeholder:text-white/20 pl-5 pr-10"
+              className="bg-white/5 border-transparent focus:border-white/20 rounded-full h-12 text-white placeholder:text-white/40 pl-11 pr-11 [&::-webkit-search-cancel-button]:hidden"
             />
             {searchTerm && (
-              <button onClick={() => setSearchTerm("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
-                <X className="w-4 h-4" />
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                aria-label="Borrar búsqueda"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full text-white/50 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             )}
           </div>
 
           {subFilterOptions.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0" role="group" aria-label="Filtrar">
               {subFilterOptions.map(cat => (
                 <button
+                  type="button"
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
+                  aria-pressed={selectedCategory === cat.id}
                   className={cn(
-                    "px-5 py-2 rounded-full text-sm font-light whitespace-nowrap transition-all duration-300",
+                    "px-5 py-2 rounded-full text-sm font-light whitespace-nowrap transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     selectedCategory === cat.id
                       ? "bg-white text-black"
-                      : "text-white/40 hover:text-white/70"
+                      : "text-white/60 hover:text-white"
                   )}
                 >
                   {cat.name}
@@ -370,20 +405,18 @@ const Carta = () => {
             se repetía bajo CADA tarjeta de cóctel y de tapa. Vive aquí, fuera
             del condicional de pestaña, para que se vea en todas (cócteles,
             vinos, cervezas...). Ver AVISO_ALERGENOS_CARTA en lib/alergenos.ts. */}
-        <p className="mb-6 flex items-start gap-2 text-[11px] font-light leading-relaxed text-white/40 md:mb-8 md:text-xs">
-          <Info className="mt-[2px] h-3.5 w-3.5 flex-shrink-0 text-white/30" aria-hidden="true" />
+        <p className="mb-6 flex items-start gap-2 text-xs font-light leading-relaxed text-white/60 md:mb-8">
+          <Info className="mt-[2px] h-3.5 w-3.5 flex-shrink-0 text-white/50" aria-hidden="true" />
           <span>{AVISO_ALERGENOS_CARTA}</span>
         </p>
 
         <div className="min-h-[50vh]">
           {/* Cocktails Grid */}
           {activeMainCategory === "cocteles" && (
-            loadingCocteles ? <DrinksSkeleton /> :
-              <div className={cn(
-                "grid gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8",
-                isMobile ? "grid-cols-2" : "grid-cols-3 lg:grid-cols-4"
-              )}
-              >
+            loadingCocteles ? <DrinksSkeleton /> : filteredCocktails.length === 0 ? (
+              <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />
+            ) :
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8">
                 {filteredCocktails.map((cocktail, index) => (
                   <motion.div
                     initial={{ opacity: 0, y: 25 }}
@@ -391,9 +424,16 @@ const Carta = () => {
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.6, delay: index * 0.06, ease: appleEase }}
                     key={cocktail.id}
-                    onClick={() => setSelectedCocktail(cocktail)}
-                    className="group cursor-pointer"
+                    className="group relative"
                   >
+                    {/* Botón que cubre toda la tarjeta: antes el clic vivía en un
+                        <div> y con teclado no había forma de abrir el detalle. */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCocktail(cocktail)}
+                      aria-label={`Ver detalle de ${cocktail.name}, ${cocktail.price}`}
+                      className="absolute inset-0 z-40 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+                    />
                     <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 relative mb-4">
                       <OptimizedImage
                         src={cocktail.image}
@@ -407,7 +447,7 @@ const Carta = () => {
                       </span>
                     </div>
                     <h3 className="font-serif text-base md:text-lg text-white group-hover:text-primary transition-colors leading-tight mb-1">{cocktail.name}</h3>
-                    <p className="text-white/30 text-sm line-clamp-2 font-light">{cocktail.description}</p>
+                    <p className="text-white/55 text-sm line-clamp-2 font-light">{cocktail.description}</p>
                     {/* Solo las etiquetas reales. El "no consta" ya no se pinta
                         aquí (eran 13 bloques idénticos en la rejilla): vive una
                         vez en la cabecera de la carta y, por cóctel, en su
@@ -443,7 +483,9 @@ const Carta = () => {
                 // derivarse de gruposVino, esas pestañas solo existen (y por
                 // tanto solo se pueden seleccionar) una vez que sus datos ya
                 // han llegado — ver tabsCarta.
-              ) ? <DrinksSkeleton /> : null}
+              ) ? <DrinksSkeleton /> : filterBySearch(activeDrinkData).length === 0 ? (
+                <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />
+              ) : null}
 
               {filterBySearch(activeDrinkData).map((drink, index) => (
                 <motion.div
@@ -457,10 +499,10 @@ const Carta = () => {
                   <div>
                     <h3 className="font-serif text-lg text-white group-hover:text-primary transition-colors duration-300">{drink.name}</h3>
                     {(drink as GenericDrink).type && (
-                      <span className="text-xs text-white/30 uppercase tracking-wider font-light">{(drink as GenericDrink).type}</span>
+                      <span className="text-xs text-white/50 uppercase tracking-wider font-light">{(drink as GenericDrink).type}</span>
                     )}
                   </div>
-                  <span className="text-primary font-medium text-lg">{drink.price}</span>
+                  <span className="text-primary font-medium text-lg whitespace-nowrap tabular-nums">{drink.price}</span>
                 </motion.div>
               ))}
             </div>
@@ -486,7 +528,7 @@ const Carta = () => {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
-              className="text-white/30 font-light"
+              className="text-white/60 font-light"
             >
               El maridaje perfecto para elevar la experiencia.
             </motion.p>
@@ -496,10 +538,7 @@ const Carta = () => {
               <LiquidLoaderSVG />
             </div>
           ) : (
-            <div className={cn(
-              "max-w-6xl mx-auto px-6",
-              isMobile ? "flex overflow-x-auto gap-4 snap-x scrollbar-hide" : "grid grid-cols-3 gap-8"
-            )}>
+            <div className="max-w-6xl mx-auto px-6 flex overflow-x-auto gap-4 snap-x scrollbar-hide md:grid md:grid-cols-3 md:gap-8 md:overflow-visible">
               {tapasData.map((tapa, index) => (
                 <motion.div
                   initial={{ opacity: 0, y: 25 }}
@@ -507,7 +546,7 @@ const Carta = () => {
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: index * 0.1, ease: appleEase }}
                   key={tapa.id}
-                  className={cn("group", isMobile && "min-w-[280px] snap-center")}
+                  className="group min-w-[280px] snap-center md:min-w-0"
                 >
                   <div className="aspect-video rounded-2xl overflow-hidden mb-4">
                     <OptimizedImage
@@ -519,7 +558,7 @@ const Carta = () => {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-serif text-lg text-white mb-1">{tapa.name}</h3>
-                      <p className="text-white/30 text-sm font-light">{tapa.description}</p>
+                      <p className="text-white/55 text-sm font-light">{tapa.description}</p>
                       {tapa.alergenos.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1">
                           {tapa.alergenos.map((alergeno) => (
@@ -533,10 +572,10 @@ const Carta = () => {
                         </div>
                       )}
                       {tapa.alergenosNota && (
-                        <p className="mt-1 text-[10px] italic text-destructive/90">{tapa.alergenosNota}</p>
+                        <p className="mt-1 text-xs italic text-red-300">{tapa.alergenosNota}</p>
                       )}
                     </div>
-                    <span className="text-primary font-medium ml-4">{tapa.price}</span>
+                    <span className="text-primary font-medium ml-4 whitespace-nowrap tabular-nums">{tapa.price}</span>
                   </div>
                 </motion.div>
               ))}
@@ -547,12 +586,12 @@ const Carta = () => {
 
       {/* Detail Modal */}
       <Dialog open={!!selectedCocktail} onOpenChange={() => setSelectedCocktail(null)}>
-        <DialogContent className={cn(
-          "p-0 overflow-hidden bg-black border-white/5 text-white",
-          isMobile ? "max-w-[100vw] h-[100dvh] rounded-none" : "max-w-4xl rounded-2xl"
-        )}>
-          <div className={cn("grid", isMobile ? "grid-rows-[40vh_1fr]" : "md:grid-cols-2")}>
-            <div className="relative bg-white/5">
+        {/* En móvil, a pantalla completa y con scroll en el propio diálogo: antes
+            el texto largo (ingredientes + alérgenos) se salía por abajo sin
+            poder llegar a él. */}
+        <DialogContent className="p-0 gap-0 bg-black border-white/5 text-white max-w-[100vw] h-[100dvh] overflow-y-auto rounded-none md:h-auto md:max-h-[90vh] md:max-w-4xl md:overflow-hidden md:rounded-2xl">
+          <div className="grid grid-rows-[40vh_auto] md:grid-rows-none md:grid-cols-2">
+            <div className="relative bg-white/5 md:min-h-[480px]">
               {selectedCocktail && (
                 <OptimizedImage
                   src={selectedCocktail.image}
@@ -561,18 +600,21 @@ const Carta = () => {
                 />
               )}
             </div>
-            <div className="p-8 md:p-12 flex flex-col justify-center overflow-y-auto">
+            <div className="p-8 md:p-12 flex flex-col justify-center md:max-h-[90vh] md:overflow-y-auto">
               {selectedCocktail && (
                 <>
-                  <span className="text-primary text-xs uppercase tracking-widest mb-3">{selectedCocktail.category}</span>
+                  <span className="text-primary text-xs uppercase tracking-widest mb-3">
+                    {/* El nombre legible ("Clásicos"), no el id interno ("clasicos"). */}
+                    {cocktailCategories.find((c) => c.id === selectedCocktail.category)?.name ?? selectedCocktail.category}
+                  </span>
                   <DialogTitle className="font-serif text-3xl md:text-5xl mb-6 leading-[0.9] text-white">
                     {selectedCocktail.name}
                   </DialogTitle>
-                  <p className="text-lg text-white/50 font-light leading-relaxed mb-8">
+                  <DialogDescription className="text-lg text-white/70 font-light leading-relaxed mb-8">
                     {selectedCocktail.description}
-                  </p>
+                  </DialogDescription>
                   <div>
-                    <h4 className="text-xs uppercase tracking-widest text-white/30 mb-3">Notas de cata</h4>
+                    <h4 className="text-xs uppercase tracking-widest text-white/55 mb-3">Notas de cata</h4>
                     <div className="flex flex-wrap gap-2">
                       {selectedCocktail.ingredients.map((ing, i) => (
                         <span key={i} className="px-3 py-1 rounded-full border border-white/10 text-sm text-white/60 font-light">
@@ -582,7 +624,7 @@ const Carta = () => {
                     </div>
                   </div>
                   <div className="mt-6">
-                    <h4 className="text-xs uppercase tracking-widest text-white/30 mb-3">Alérgenos</h4>
+                    <h4 className="text-xs uppercase tracking-widest text-white/55 mb-3">Alérgenos</h4>
                     {selectedCocktail.alergenos.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {selectedCocktail.alergenos.map((alergeno, i) => (
@@ -592,14 +634,14 @@ const Carta = () => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-destructive">{AVISO_SIN_ALERGENOS}</p>
+                      <p className="text-sm text-red-300">{AVISO_SIN_ALERGENOS}</p>
                     )}
                     {selectedCocktail.alergenosNota && (
-                      <p className="mt-2 text-xs italic text-destructive/90">{selectedCocktail.alergenosNota}</p>
+                      <p className="mt-2 text-xs italic text-red-300">{selectedCocktail.alergenosNota}</p>
                     )}
                   </div>
                   <div className="flex items-center justify-between pt-8 mt-8 border-t border-white/5">
-                    <span className="text-xs text-white/30">Base: <span className="text-white/60 capitalize">{selectedCocktail.base}</span></span>
+                    <span className="text-xs text-white/55">Base: <span className="text-white/80 capitalize">{selectedCocktail.base}</span></span>
                     <span className="text-3xl font-serif text-primary">{selectedCocktail.price}</span>
                   </div>
                 </>
@@ -608,7 +650,7 @@ const Carta = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </Layout >
+    </Layout>
   );
 };
 
