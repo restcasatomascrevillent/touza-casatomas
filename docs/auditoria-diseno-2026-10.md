@@ -199,18 +199,21 @@ El punto negro era el cursor propio (`CustomCursor`): un círculo blanco con `mi
 | M14 | Medio | El Reservado en el móvil: ninguna acción en la primera pantalla (sin barra y con el formulario tres secciones más abajo); titular sobre las etiquetas de las botellas; etiquetas del formulario a 12 px. | ✅ `ea189cd`: botón "Solicitar El Reservado" a `#solicitud`, degradado más oscuro y etiquetas a 13 px. Los campos ya tenían `type`, `autocomplete` e `inputMode` correctos y 16 px (sin zoom de iOS); los errores salen en un diálogo. |
 | M15 | Bajo | Diálogos de borde a borde y con esquinas rectas en el móvil. | ✅ `e9cb071` |
 | M16 | Bajo | Teléfono de los textos legales partido en dos líneas. | ✅ `59bc04d` |
+| M17 | Medio | Aviso de cookies en la primera visita: franja de 153 px a todo el ancho sobre la barra, que a 360×640 tapaba la frase y los dos botones del hero (48 px de solape en cada uno) hasta responder. "Rechazar" (contorno) pesaba menos que "Aceptar" (dorado). | ✅ `befa75d`: tarjeta flotante de 98 px a 360 de ancho (una línea, "Más información" → /cookies y "Aceptar" / "Rechazar" idénticos), 8 px sobre la barra, con zona segura. Mientras está abierta publica su alto (`--aviso-cookies`) y el texto del hero sube eso con `transform` (sin CLS). En horizontal, una fila a la derecha; ≥ md, tarjeta de 24 rem abajo a la derecha con el texto completo. Al reabrirla desde "Configurar cookies" el foco va a "Aceptar" y vuelve al botón al responder. |
+| M18 | Bajo | La barra fija decidía por la URL: salía en `/no-existe` (ruta `*`) pero no en `/404`, aunque las dos pintan NotFound. | ✅ `d49b231`: la decide la ruta que pinta la página (`handle: SIN_BARRA_MOVIL` en El Reservado, Contacto y la respuesta a la reserva; `useMatches`, que también vale en el SSG). **Decisión:** el 404 lleva barra en las dos URLs, porque "Llamar" y "Reservar" son las salidas más útiles para quien llega de un enlace roto. |
 
 Sin cambios porque ya estaban bien: no hay desbordamiento horizontal en ninguna página a 360–430; la foto del hero en el móvil es el recorte vertical de 600/900 px (96 KB en AVIF a DPR 3); los campos del formulario no provocan zoom; el diálogo de cóctel ya era de pantalla completa con scroll.
 
 ### Pendiente o decisión del dueño
 
-- **Aviso de cookies en la primera visita:** en una pantalla pequeña (360×640) tapa la frase y los botones del hero hasta que se acepta o se rechaza (153 px sobre la barra). Es lo normal en un aviso así; si se prefiere, puede ir arriba o como tarjeta flotante más pequeña.
+- ~~**Aviso de cookies en la primera visita**~~ → resuelto en M17.
 - **Fotos de cócteles:** muchas tarjetas de la carta salen con el relleno "TOUZA" (sin foto en Supabase). En el móvil se nota más, porque la rejilla es casi todo foto (ver P5).
 - **Registro mercantil:** el aviso legal sigue mostrando "[DATOS DE INSCRIPCIÓN EN EL REGISTRO MERCANTIL PENDIENTES]".
-- **404 en URLs inventadas:** en `/404` no sale la barra fija, pero en una URL inexistente cualquiera (`/no-existe`) sí, porque la barra decide por la ruta. No molesta (ofrece llamar y reservar), pero es incoherente.
+- ~~**404 en URLs inventadas**~~ → resuelto en M18 (con barra en las dos).
 - **Gestos reales:** el arrastre del visor y el scroll de las pestañas se han probado con emulación; falta un repaso en un iPhone real (zona segura y barra de Safari).
 
 ### Verificación
 
 - `npm run typecheck` ✅ · `npm test` ✅ 153/153 (nuevo `barra-movil.test.ts`; los tests de Contacto se adaptan a las filas pulsables y comprueban las acciones rápidas) · `npm run build` ✅ · `npm run lint`: 44 problemas, todos anteriores (eran 46), ninguno nuevo.
 - Escritorio a 1440: hero, cabecera, pie, Contacto y El Reservado sin cambios a peor (el hero conserva el fundido, el parallax y el titular grande).
+- M17/M18 (Chromium sin cabeza, primera visita con `touza_cookie_consent` borrado): a 360×640, 375×812 y 430×932 el aviso mide 98 px y no solapa la marca, la frase ni los botones del hero (quedan 20 px por encima) ni la barra; a 1440 va abajo a la derecha sin tocar el hero. Con el menú móvil abierto, el menú queda encima del aviso. Barra: sí en `/`, `/carta`, `/404` y `/no-existe`; no en `/reservado` ni `/contacto` (también en el HTML del build: `404.html` la lleva y `reservado.html` no). Capturas `antes-cookies-*.png` / `despues-cookies-*.png` y `despues-404-*.png` en `capturas/movil/`. `npm test` ✅ 158/158; lint sin errores nuevos (44, los mismos).
