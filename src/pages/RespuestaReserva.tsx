@@ -123,12 +123,23 @@ const RespuestaReserva = () => {
                 <p>Cargando tu reserva…</p>
               </div>
             ) : fase.tipo === "sin_token" ? (
-              <Estado
-                tituloRef={tituloRef}
-                tono="neutro"
-                titulo="Falta el enlace de tu correo"
-                parrafos={["Abre esta página desde el botón del correo que te enviamos."]}
-              />
+              <>
+                <Estado
+                  tituloRef={tituloRef}
+                  tono="neutro"
+                  titulo="Falta el enlace de tu correo"
+                  parrafos={["Abre esta página desde el botón del correo que te enviamos."]}
+                />
+                {/* Igual que en el resto de estados finales: una salida clara a
+                    la web (antes este era el único sin botón). */}
+                <Button
+                  asChild
+                  variant="outline"
+                  className="mt-6 w-full h-14 rounded-2xl border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white text-base"
+                >
+                  <Link to="/">Ir a la web de Touza</Link>
+                </Button>
+              </>
             ) : fase.tipo === "sin_conexion" ? (
               <>
                 {/* Título y párrafos salen de `textosSinConexion`: solo se le
