@@ -78,7 +78,14 @@ const Hero = () => {
         className="absolute inset-x-0 bottom-0 h-40 z-[1] bg-gradient-to-t from-background to-transparent pointer-events-none"
       />
 
-      <motion.div style={efectos ? { opacity } : undefined} className="relative z-10 w-full text-center md:w-auto">
+      {/* En el móvil, mientras está abierto el aviso de cookies (primera
+          visita), el texto y los botones suben lo que mide el aviso
+          (`--aviso-cookies`, lo publica CookieConsent) para que no queden
+          debajo. Con `transform`: no mueve el diseño ni cuenta para el CLS. */}
+      <motion.div
+        style={efectos ? { opacity } : undefined}
+        className="relative z-10 w-full text-center md:w-auto -translate-y-[var(--aviso-cookies,0px)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:translate-y-0 apaisado:translate-y-0"
+      >
         {/* El h1 ya dice "Cocktail Bar en Crevillente" para lectores de
             pantalla; esta línea es solo visual. */}
         <p

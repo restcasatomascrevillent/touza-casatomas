@@ -116,6 +116,47 @@ describe("Política de cookies", () => {
   });
 });
 
+describe("Aviso de cookies", () => {
+  it("Aceptar y Rechazar tienen el mismo peso visual y nada va premarcado", () => {
+    enRouter(React.createElement(CookieConsent));
+    const aviso = screen.getByRole("region", { name: "Aviso de cookies" });
+    expect(aviso).toHaveAccessibleDescription(/Cookies del mapa de Google/);
+    const aceptar = screen.getByRole("button", { name: "Aceptar" });
+    const rechazar = screen.getByRole("button", { name: "Rechazar" });
+    expect(aceptar.className).toBe(rechazar.className);
+    expect(aviso.querySelector("input")).toBeNull();
+  });
+
+  it("publica su alto para el hero mientras está abierto y lo retira al responder", () => {
+    enRouter(React.createElement(CookieConsent));
+    expect(document.documentElement.style.getPropertyValue("--aviso-cookies")).toMatch(/px$/);
+    fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
+    expect(localStorage.getItem("touza_cookie_consent")).toBe("accepted");
+    expect(document.documentElement.style.getPropertyValue("--aviso-cookies")).toBe("");
+  });
+
+  it("reabierto desde «Configurar cookies» toma el foco y lo devuelve al responder", () => {
+    localStorage.setItem("touza_cookie_consent", "rejected");
+    enRouter(
+      React.createElement(
+        React.Fragment,
+        null,
+        React.createElement(Cookies),
+        React.createElement(CookieConsent),
+      ),
+    );
+    const configurar = screen.getByRole("button", { name: "Configurar cookies" });
+    configurar.focus();
+    act(() => {
+      fireEvent.click(configurar);
+    });
+    expect(screen.getByRole("button", { name: "Aceptar" })).toHaveFocus();
+
+    fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
+    expect(configurar).toHaveFocus();
+  });
+});
+
 describe("Enlaces a los textos legales", () => {
   it("el aviso de cookies enlaza «Más información» a /cookies", () => {
     enRouter(React.createElement(CookieConsent));
