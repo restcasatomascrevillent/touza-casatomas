@@ -81,21 +81,22 @@ export const IMAGENES = {
   interiorMovil: construir("touza-2-movil"),
   /** Barra, vertical. Hero de /carta y showcase "Cócteles de Autor". */
   barra: construir("touza-5"),
-  /** El Reservado, vertical. */
+  /**
+   * Vertical. OJO: pese al nombre, es un mojito en la barra, no la sala de El
+   * Reservado (no hay foto real de la sala). Detalle de la vitrina de cócteles.
+   */
   reservado: construir("touza-7"),
-  /** Mesa privada, vertical. */
+  /** Champagne y copa sobre mármol, vertical. Vitrina "El Reservado". */
   mesaPrivada: construir("touza-8-1"),
-  /** Vista general del local, cuadrada. Hero de /reservado. */
+  /** Recorte cuadrado de la misma foto de champagne. Hero de /reservado. */
   local: construir("touza-8"),
-  /** Detalle de decoración, vertical. Showcase "El Reservado". */
+  /** Botellas de aperitivo y ron en la barra, vertical. */
   decoracion: construir("touza-10"),
 } satisfies Record<string, ImagenResponsive>;
 
 /**
- * Hero de la portada en pantallas verticales (móvil). Se pasa a HeroDesktop Y
- * a HeroMobile: el HTML prerenderizado siempre trae HeroDesktop (en SSG
- * `useIsMobile()` es false), así que si solo lo llevara HeroMobile el móvil
- * bajaría las dos imágenes.
+ * Hero de la portada en pantallas verticales (móvil), como dirección de arte
+ * del único `<img>` del hero (`components/home/Hero.tsx`).
  *
  * - `media`: el recorte es ≈3:4 y la caja ocupa todo el viewport (100dvh ≥
  *   alto del viewport de las media queries), así que con proporción ≤ 2:3 el

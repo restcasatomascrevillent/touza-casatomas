@@ -99,22 +99,13 @@ vi.mock("@/components/SmoothScroll", () => ({
 }));
 
 // Componentes del home que pueden tener dependencias pesadas
-vi.mock("@/components/home/HeroDesktop", () => ({
-  default: () => React.createElement("div", { "data-testid": "hero-desktop" }, "TOUZA Hero"),
+vi.mock("@/components/home/Hero", () => ({
+  default: () => React.createElement("div", { "data-testid": "hero" }, "TOUZA Hero"),
 }));
-vi.mock("@/components/home/HeroMobile", () => ({
-  default: () => React.createElement("div", { "data-testid": "hero-mobile" }, "TOUZA Hero"),
-}));
-vi.mock("@/components/home/ShowcaseSection", () => ({
+vi.mock("@/components/home/Showcase", () => ({
   default: () => null,
 }));
-vi.mock("@/components/home/ShowcaseMobile", () => ({
-  default: () => null,
-}));
-vi.mock("@/components/home/FeaturesGrid", () => ({
-  default: () => null,
-}));
-vi.mock("@/components/home/FeaturesMobile", () => ({
+vi.mock("@/components/home/Claves", () => ({
   default: () => null,
 }));
 vi.mock("@/components/ScrollTextReveal", () => ({
@@ -194,8 +185,9 @@ describe("Rutas de la aplicación — renderizan sin crash", () => {
       () => expect(screen.queryByText("Cargando...")).not.toBeInTheDocument(),
       { timeout: 5000 }
     );
-    // HeroDesktop (mocked) se renderiza en la ruta raíz
-    expect(screen.getByTestId("hero-desktop")).toBeInTheDocument();
+    // El hero (mockeado) se renderiza en la ruta raíz, una sola vez: la
+    // portada ya no lleva una composición móvil y otra de escritorio.
+    expect(screen.getAllByTestId("hero")).toHaveLength(1);
   });
 
   it("ruta '/carta' — renderiza la página Carta", async () => {
