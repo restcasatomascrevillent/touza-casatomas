@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import React from "react";
 
@@ -103,10 +103,32 @@ describe("Contacto — renderizado", () => {
     expect(fbLink.getAttribute("href")).toContain("facebook.com/touzabar");
   });
 
-  it("el iframe del mapa tiene el título de accesibilidad correcto", () => {
+  it("sin consentimiento, NO carga el iframe de Google Maps (cookies de terceros)", () => {
+    localStorage.removeItem("touza_cookie_consent");
     renderContacto();
-    const iframe = screen.getByTitle("Ubicación Touza");
-    expect(iframe).toBeInTheDocument();
+    expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /abrir en google maps/i })).toBeInTheDocument();
+  });
+
+  it("con 'Rechazar' guardado, el mapa tampoco se carga solo", () => {
+    localStorage.setItem("touza_cookie_consent", "rejected");
+    renderContacto();
+    expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
+    localStorage.removeItem("touza_cookie_consent");
+  });
+
+  it("el iframe del mapa aparece al pedirlo, con su título de accesibilidad", () => {
+    localStorage.removeItem("touza_cookie_consent");
+    renderContacto();
+    fireEvent.click(screen.getByRole("button", { name: /cargar mapa/i }));
+    expect(screen.getByTitle("Ubicación Touza")).toBeInTheDocument();
+  });
+
+  it("con 'Aceptar' guardado, el mapa se carga directamente", () => {
+    localStorage.setItem("touza_cookie_consent", "accepted");
+    renderContacto();
+    expect(screen.getByTitle("Ubicación Touza")).toBeInTheDocument();
+    localStorage.removeItem("touza_cookie_consent");
   });
 
   it("muestra el encabezado 'Encuéntranos'", () => {

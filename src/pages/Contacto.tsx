@@ -1,22 +1,30 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Phone, MapPin, Clock, Mail, Instagram, Facebook } from "lucide-react";
+import { Phone, MapPin, Clock, Mail, Instagram, Facebook, ExternalLink } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
 import { canonical } from "@/lib/site";
+import { useConsentimiento } from "@/lib/consentimiento";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
+const DIRECCION_MAPS = "C/ San Vicente, 14, 03330 Crevillente, Alicante";
+const URL_MAPS = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DIRECCION_MAPS)}`;
+// Embed clásico por dirección. El anterior llevaba un `pb=` con un place id
+// inventado ("0x4a1234567890abcd") y una marca de tiempo de ejemplo.
+const URL_MAPA_EMBEBIDO = `https://maps.google.com/maps?q=${encodeURIComponent(DIRECCION_MAPS)}&z=17&hl=es&output=embed`;
+
 const contactInfo = [
-  { icon: MapPin, title: "Dirección", content: "C/ San Vicente, 14\n03330 Crevillente, Alicante", link: "https://maps.google.com/?q=C/+San+Vicente,+14,+03330+Crevillente,+Alicante" },
+  { icon: MapPin, title: "Dirección", content: "C/ San Vicente, 14\n03330 Crevillente, Alicante", link: URL_MAPS },
   { icon: Phone, title: "Teléfono", content: "966 782 000", link: "tel:+34966782000" },
   { icon: Clock, title: "Horario", content: "Jue - Sáb: 20:00 - 02:00\nDom: 18:00 - 00:00", link: null },
   { icon: Mail, title: "Email", content: "info@touzabar.es", link: "mailto:info@touzabar.es" },
 ];
 
 const Contacto = () => {
-  const isMobile = useIsMobile();
+  const consentimiento = useConsentimiento();
+  const [mapaPedido, setMapaPedido] = useState(false);
+  const mostrarMapa = consentimiento === "accepted" || mapaPedido;
 
   return (
     <Layout>
@@ -28,10 +36,7 @@ const Contacto = () => {
       />
 
       {/* Hero - Minimal black */}
-      <section className={cn(
-        "bg-black overflow-hidden",
-        isMobile ? "pt-24 pb-8 px-6" : "pt-40 pb-24"
-      )}>
+      <section className="bg-black overflow-hidden pt-28 pb-8 px-6 md:pt-40 md:pb-24">
         <div className="max-w-4xl mx-auto text-center">
           <motion.span
             initial={{ opacity: 0 }}
@@ -45,10 +50,7 @@ const Contacto = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: appleEase }}
-            className={cn(
-              "font-serif font-bold text-white",
-              isMobile ? "text-4xl" : "text-7xl lg:text-8xl"
-            )}
+            className="font-serif font-bold text-white text-4xl md:text-7xl lg:text-8xl"
           >
             Contacto
           </motion.h1>
@@ -58,10 +60,7 @@ const Contacto = () => {
       {/* Contact info */}
       <section className="py-10 md:py-32 bg-background">
         <div className="max-w-3xl mx-auto px-6">
-          <h2 className={cn(
-            "font-serif font-bold text-foreground mb-6 md:mb-10",
-            isMobile ? "text-2xl" : "text-4xl"
-          )}>
+          <h2 className="font-serif font-bold text-foreground mb-6 md:mb-10 text-2xl md:text-4xl">
             Encuéntranos
           </h2>
 
@@ -76,7 +75,7 @@ const Contacto = () => {
                 className="flex items-start gap-5"
               >
                 <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                  <item.icon className="w-5 h-5 text-muted-foreground" />
+                  <item.icon className="w-5 h-5 text-primary" aria-hidden="true" />
                 </div>
                 <div className="pt-1">
                   <h3 className="text-sm text-foreground font-medium mb-1">{item.title}</h3>
@@ -85,12 +84,12 @@ const Contacto = () => {
                       href={item.link}
                       target={item.link.startsWith("http") ? "_blank" : undefined}
                       rel={item.link.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="text-muted-foreground hover:text-foreground transition-colors duration-300 whitespace-pre-line text-sm font-light"
+                      className="inline-block py-1 text-white/75 hover:text-primary underline-offset-4 hover:underline transition-colors duration-300 whitespace-pre-line text-base font-light rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       {item.content}
                     </a>
                   ) : (
-                    <p className="text-muted-foreground whitespace-pre-line text-sm font-light">{item.content}</p>
+                    <p className="text-white/75 whitespace-pre-line text-base font-light">{item.content}</p>
                   )}
                 </div>
               </motion.div>
@@ -117,20 +116,50 @@ const Contacto = () => {
             </a>
           </motion.div>
 
-          {/* Map */}
+          {/* Mapa: el iframe de Google pone cookies de terceros, así que solo se
+              carga con el consentimiento aceptado o si el visitante lo pide aquí.
+              Antes cargaba siempre, aunque se hubiera pulsado "Rechazar". */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.8, ease: appleEase }}
-            className="rounded-2xl overflow-hidden border border-border/30"
+            className="rounded-2xl overflow-hidden border border-border/30 bg-card"
           >
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3127.8967799847837!2d-0.8111399!3d38.2493699!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd63b5c3d9d4e0cf%3A0x4a1234567890abcd!2sC.%20San%20Vicente%2C%2014%2C%2003330%20Crevillent%2C%20Alicante!5e0!3m2!1ses!2ses!4v1234567890123"
-              width="100%" height="350" style={{ border: 0 }} allowFullScreen loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade" title="Ubicación Touza"
-              sandbox="allow-scripts allow-same-origin"
-            />
+            {mostrarMapa ? (
+              <iframe
+                src={URL_MAPA_EMBEBIDO}
+                width="100%" height="350" style={{ border: 0 }} allowFullScreen loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade" title="Ubicación Touza"
+                // allow-popups: sin él, "Ampliar el mapa" de Google no abría nada.
+                sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+              />
+            ) : (
+              <div className="h-[350px] flex flex-col items-center justify-center gap-5 px-6 text-center">
+                <MapPin className="w-8 h-8 text-primary" aria-hidden="true" />
+                <p className="text-white/70 text-sm font-light max-w-sm leading-relaxed">
+                  El mapa lo sirve Google y usa cookies de terceros. Cárgalo aquí o ábrelo directamente en Google Maps.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setMapaPedido(true)}
+                    className="min-h-[44px] px-6 rounded-full bg-white text-black text-sm font-medium hover:bg-white/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
+                    Cargar mapa
+                  </button>
+                  <a
+                    href={URL_MAPS}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="min-h-[44px] px-6 inline-flex items-center justify-center gap-2 rounded-full border border-white/25 text-sm text-white/85 hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    Abrir en Google Maps
+                    <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                  </a>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
