@@ -1,13 +1,10 @@
 import { motion } from "framer-motion";
 import Layout from "@/components/layout/Layout";
-import Seo from "@/components/Seo";
 import ScrollTextReveal from "@/components/ScrollTextReveal";
 import HeroDesktop from "./HeroDesktop";
 import ShowcaseSection from "./ShowcaseSection";
 import FeaturesGrid from "./FeaturesGrid";
 import VisitUs from "@/components/VisitUs";
-import { canonical } from "@/lib/site";
-import { barSchema } from "@/lib/negocio";
 import { IMAGENES } from "@/assets/imagenes";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
@@ -15,14 +12,6 @@ const appleEase = [0.25, 0.1, 0.25, 1] as const;
 const IndexDesktop = () => {
   return (
     <Layout>
-      <Seo
-        title="Touza - Cocktail Bar Premium en Crevillente"
-        description="Touza es un cocktail bar premium en Crevillente. Disfruta de cócteles artesanales, ambiente único y nuestro espacio privado El Reservado."
-        canonical={canonical("/")}
-        keywords={['cocktail bar', 'crevillente', 'cócteles', 'premium', 'reservado', 'eventos']}
-        schema={barSchema()}
-      />
-
       <HeroDesktop />
 
       {/* Philosophy */}

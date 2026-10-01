@@ -12,8 +12,6 @@ import { HeroBackgroundSVG } from "@/components/ui/svg/HeroBackgroundSVG";
 // sitio donde flotaba el cristal. Para recuperarla, ver el historial de git
 // (src/components/3d/Scene3D.tsx y src/hooks/use-deferred-3d.ts).
 
-const appleEase = [0.25, 0.1, 0.25, 1] as const;
-
 const HeroDesktop = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -26,13 +24,13 @@ const HeroDesktop = () => {
   return (
     <section ref={ref} className="relative h-[100dvh] flex items-center justify-center overflow-hidden">
       <motion.div style={{ y }} className="absolute inset-0 z-0 bg-black">
+        {/* Sin fundido de opacidad de entrada: la foto es el LCP y con
+            `initial={{ opacity: 0 }}` llegaba invisible en el HTML del SSG
+            hasta hidratar + 2 s. Solo queda el zoom lento (ken burns). */}
         <motion.div
-          initial={{ scale: 1.05, opacity: 0 }}
-          animate={{ scale: 1.15, opacity: 1 }}
-          transition={{
-            opacity: { duration: 2, ease: appleEase },
-            scale: { duration: 30, repeat: Infinity, repeatType: "reverse", ease: "linear" }
-          }}
+          initial={{ scale: 1.05 }}
+          animate={{ scale: 1.15 }}
+          transition={{ duration: 30, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
           className="absolute inset-0"
         >
           <OptimizedImage
@@ -56,42 +54,39 @@ const HeroDesktop = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/90 pointer-events-none" />
       </motion.div>
 
+      {/* Fundido al fondo de la página: con el parallax la foto bajaba y
+          dejaba un corte duro contra la sección siguiente. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-40 z-[1] bg-gradient-to-t from-background to-transparent pointer-events-none"
+      />
+
       <motion.div style={{ opacity }} className="relative z-10 text-center px-6">
-        <motion.span
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3, ease: appleEase }}
-          className="inline-block text-foreground/50 text-xs tracking-[0.5em] uppercase font-light mb-8"
+        {/* Entrada con animación CSS (no framer-motion): arranca con el HTML
+            del SSG, sin esperar a que cargue e hidrate el JS. */}
+        <span
+          className="entrada-hero inline-block text-foreground/70 text-xs tracking-[0.5em] uppercase font-light mb-8"
+          style={{ animationDelay: "0.2s" }}
         >
           Est. 2023 · Crevillente
-        </motion.span>
+        </span>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.5, ease: appleEase }}
-          className="font-serif text-[10rem] xl:text-[12rem] font-bold text-white leading-[0.85] tracking-tighter mb-8"
+        <h1
+          className="entrada-hero font-serif text-[10rem] xl:text-[12rem] font-bold text-white leading-[0.85] tracking-tighter mb-8"
+          style={{ animationDelay: "0.35s" }}
         >
           TOUZA
           <span className="sr-only"> · Cocktail Bar en Crevillente</span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.9, ease: appleEase }}
-          className="text-white/80 text-xl font-light max-w-lg mx-auto mb-14 leading-relaxed"
-          style={{ textWrap: "balance" }}
+        <p
+          className="entrada-hero text-white/80 text-xl font-light max-w-lg mx-auto mb-14 leading-relaxed"
+          style={{ textWrap: "balance", animationDelay: "0.6s" }}
         >
           Donde la alquimia de los cócteles se encuentra con la excelencia.
-        </motion.p>
+        </p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.3, ease: appleEase }}
-          className="flex gap-5 justify-center"
-        >
+        <div className="entrada-hero flex gap-5 justify-center" style={{ animationDelay: "0.85s" }}>
           <Button
             asChild
             size="lg"
@@ -107,7 +102,7 @@ const HeroDesktop = () => {
           >
             <Link to="/reservado">El Reservado</Link>
           </Button>
-        </motion.div>
+        </div>
       </motion.div>
 
       <motion.div

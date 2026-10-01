@@ -461,12 +461,34 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  /* Entrada del hero en CSS puro: se reproduce con el HTML prerenderizado,
+     sin esperar a que hidrate React. `both` mantiene el estado inicial
+     durante el animation-delay (sin parpadeo antes de empezar). */
+  .entrada-hero {
+    animation: entrada-hero 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  }
+
+  @keyframes entrada-hero {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
 
     *,
     *::before,
     *::after {
+      /* Sin el delay, un elemento con fill-mode `both` seguiría oculto
+         durante todo el retraso aunque la animación dure 0,01 ms. */
+      animation-delay: 0ms !important;
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;

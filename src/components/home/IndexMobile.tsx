@@ -1,29 +1,17 @@
 import { motion } from "framer-motion";
-import { lazy, Suspense } from "react";
 import Layout from "@/components/layout/Layout";
-import Seo from "@/components/Seo";
 import HeroMobile from "./HeroMobile";
 import ShowcaseMobile from "./ShowcaseMobile";
 import FeaturesMobile from "./FeaturesMobile";
-import { canonical } from "@/lib/site";
-import { barSchema } from "@/lib/negocio";
+import VisitUs from "@/components/VisitUs";
 import { IMAGENES } from "@/assets/imagenes";
 
-const VisitUs = lazy(() => import("@/components/VisitUs"));
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
 const IndexMobile = () => {
   return (
     <Layout>
-      <Seo
-        title="Touza - Cocktail Bar Premium en Crevillente"
-        description="Touza es un cocktail bar premium en Crevillente. Disfruta de cócteles artesanales, ambiente único y nuestro espacio privado El Reservado."
-        canonical={canonical("/")}
-        keywords={['cocktail bar', 'crevillente', 'cócteles', 'premium', 'reservado', 'eventos']}
-        schema={barSchema()}
-      />
-
       <HeroMobile />
 
       {/* Philosophy — simple fade, no scroll-reveal on mobile */}
@@ -68,9 +56,10 @@ const IndexMobile = () => {
 
       <FeaturesMobile />
 
-      <Suspense fallback={null}>
-        <VisitUs />
-      </Suspense>
+      {/* Import directo, no lazy: la portada de escritorio ya lo trae en el
+          mismo chunk y, al prerenderizarse ahora también esta composición,
+          un lazy dejaba el hueco vacío en el HTML estático. */}
+      <VisitUs />
     </Layout>
   );
 };
