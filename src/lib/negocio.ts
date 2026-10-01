@@ -89,7 +89,9 @@ export function barSchema(): Record<string, unknown> {
     geo: { "@type": "GeoCoordinates", latitude: NEGOCIO.lat, longitude: NEGOCIO.lng },
     url: canonical("/"),
     sameAs: [...NEGOCIO.redes],
-    acceptsReservations: canonical("/reservado"),
+    // Touza no acepta reservas por la web (decisión del dueño, 01/10/2026):
+    // nada de URL de reserva ni de ReserveAction. Se llama o se viene.
+    acceptsReservations: false,
     hasMenu: canonical("/carta"),
     servesCuisine: ["Cócteles", "Tapas"],
     // "€€", nunca "$$": react-helmet pasa el contenido por String.replace() y

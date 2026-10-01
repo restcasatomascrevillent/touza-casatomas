@@ -95,7 +95,7 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: 'Touza Cocktail Bar',
         short_name: 'Touza',
-        description: 'Cocktail Bar Premium en Crevillente. Cócteles de autor, ambiente único y eventos privados.',
+        description: 'Cocktail Bar Premium en Crevillente. Cócteles de autor, champagne, vinos y whisky.',
         theme_color: '#D4A574',
         background_color: '#0a0a0a',
         display: 'standalone',
