@@ -1,9 +1,7 @@
 import { Link } from "react-router-dom";
 import { Instagram, Facebook } from "lucide-react";
-import { motion } from "framer-motion";
+import Reveal from "@/components/Reveal";
 import { RUTAS_LEGALES } from "@/lib/legal";
-
-const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
 const footerLinks = [
   { name: "Carta", path: "/carta" },
@@ -25,35 +23,22 @@ const Footer = () => {
     <>
       {/* Pre-footer CTA */}
       <section className="bg-black py-10 md:py-24 text-center px-5 md:px-6">
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, ease: appleEase }}
-          className="h-px bg-primary/40 max-w-xl mx-auto mb-6 md:mb-16"
-        />
-        <motion.h3
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.3, ease: appleEase }}
-          className="font-serif text-3xl md:text-6xl text-white mb-4 md:mb-6"
-        >
+        {/* <Reveal> y no `whileInView`: este CTA va en el pie de TODAS las
+            páginas y el `opacity:0` de framer salía en línea en el HTML del
+            SSG, oculto hasta hidratar. La línea dorada crece desde el centro
+            (scale 0 → 1; con 1 px de alto, en la práctica es un scaleX). */}
+        <Reveal y={0} scale={0} aria-hidden="true" className="h-px bg-primary/40 max-w-xl mx-auto mb-6 md:mb-16" />
+        <Reveal as="h3" y={20} delay={0.3} className="font-serif text-3xl md:text-6xl text-white mb-4 md:mb-6">
           Reserva tu experiencia
-        </motion.h3>
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.5, ease: appleEase }}
-        >
+        </Reveal>
+        <Reveal y={0} delay={0.5}>
           <Link
             to="/reservado"
             className="inline-block px-8 md:px-10 py-3.5 md:py-4 border border-white/25 rounded-full text-white/85 hover:text-white hover:border-white/50 active:scale-[0.97] transition-all duration-300 text-base md:text-lg font-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             Solicita El Reservado
           </Link>
-        </motion.div>
+        </Reveal>
       </section>
 
       <footer className="bg-black border-t border-white/5">

@@ -1,6 +1,6 @@
 import { useEffect, useRef, type CSSProperties, type ElementType, type HTMLAttributes } from "react";
 
-type Etiqueta = "div" | "section" | "span" | "p" | "h2" | "h3" | "li" | "ul";
+type Etiqueta = "div" | "section" | "span" | "p" | "h2" | "h3" | "li" | "ul" | "form";
 
 interface RevealProps extends HTMLAttributes<HTMLElement> {
   as?: Etiqueta;

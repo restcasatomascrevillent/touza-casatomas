@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
 import AvisoProteccionDatos from "@/components/legal/AvisoProteccionDatos";
+import Reveal from "@/components/Reveal";
 
 import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
@@ -317,20 +318,13 @@ const Reservado = () => {
           <div className="max-w-5xl mx-auto px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-8 md:gap-16">
               {features.map((feature, index) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.6, ease: appleEase }}
-                  key={index}
-                  className="text-center"
-                >
+                <Reveal key={feature.title} y={20} delay={index * 0.1} className="text-center">
                   <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-3 md:mb-5 rounded-full bg-white/5 flex items-center justify-center">
                     <feature.icon className="w-6 h-6 text-primary" aria-hidden="true" />
                   </div>
                   <h3 className="font-serif text-lg text-white mb-2">{feature.title}</h3>
                   <p className="text-white/65 text-sm font-light">{feature.description}</p>
-                </motion.div>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -340,24 +334,21 @@ const Reservado = () => {
         <section className="py-12 md:py-32 bg-background">
           <div className="max-w-6xl mx-auto px-6">
             <div className="text-center mb-8 md:mb-16">
-              <motion.span
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.6, ease: appleEase }}
+              <Reveal
+                as="span"
+                y={20}
                 className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
               >
                 Descubre el espacio
-              </motion.span>
-              <motion.h2
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
+              </Reveal>
+              <Reveal
+                as="h2"
+                y={30}
+                delay={0.1}
                 className="font-serif font-bold text-foreground text-3xl md:text-5xl lg:text-6xl"
               >
                 Un ambiente único
-              </motion.h2>
+              </Reveal>
             </div>
 
             {/* Carrusel en móvil, rejilla de 3 en escritorio: un único bloque con
@@ -365,12 +356,11 @@ const Reservado = () => {
                 HTML del SSG siempre traía el de escritorio). */}
             <div className="flex overflow-x-auto gap-3 pb-4 snap-x scrollbar-hide -mx-6 px-6 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:mx-0 md:px-0 md:pb-0">
               {galleryImages.map((image, index) => (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.12, duration: 0.7, ease: appleEase }}
+                <Reveal
                   key={index}
+                  y={0}
+                  scale={0.95}
+                  delay={index * 0.12}
                   className="min-w-[75vw] snap-center md:min-w-0 aspect-[3/4] rounded-2xl overflow-hidden"
                 >
                   {/* <picture> con `contents`: el <img> sigue siendo hijo
@@ -388,7 +378,7 @@ const Reservado = () => {
                       decoding="async"
                     />
                   </picture>
-                </motion.div>
+                </Reveal>
               ))}
             </div>
 
@@ -408,40 +398,29 @@ const Reservado = () => {
         <section className="py-12 md:py-32 bg-black">
           <div className="max-w-2xl mx-auto px-6">
             <div className="text-center mb-8 md:mb-12">
-              <motion.span
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.6, ease: appleEase }}
+              <Reveal
+                as="span"
+                y={0}
                 className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
               >
                 Reserva tu espacio
-              </motion.span>
-              <motion.h2
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
+              </Reveal>
+              <Reveal
+                as="h2"
+                y={30}
+                delay={0.1}
                 className="font-serif font-bold text-white mb-4 text-3xl md:text-5xl"
               >
                 Solicita información
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.7, delay: 0.2, ease: appleEase }}
-                className="text-white/65 font-light"
-              >
+              </Reveal>
+              <Reveal as="p" y={0} delay={0.2} className="text-white/65 font-light">
                 Cuéntanos sobre tu evento y diseñaremos una experiencia a medida.
-              </motion.p>
+              </Reveal>
             </div>
 
-            <motion.form
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: appleEase }}
+            <Reveal
+              as="form"
+              y={30}
               onSubmit={handleSubmit}
               className="space-y-4 md:space-y-5"
             >
@@ -512,7 +491,7 @@ const Reservado = () => {
                 Solicitud sin compromiso: te confirmaremos la disponibilidad de El Reservado antes de nada.
               </p>
               <AvisoProteccionDatos finalidad="gestionar tu solicitud de El Reservado y contactarte por correo o teléfono sobre ella." />
-            </motion.form>
+            </Reveal>
           </div>
         </section>
       </Layout>

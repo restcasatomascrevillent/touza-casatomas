@@ -1,10 +1,7 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
-
-const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
 // Salidas útiles desde el 404: antes solo había "Volver al inicio" y ni
 // siquiera cabecera, así que quien llegaba de un enlace roto a la carta o a
@@ -27,36 +24,31 @@ const NotFound = () => {
         noindex={true}
       />
       <section className="flex min-h-[80vh] flex-col items-center justify-center bg-black px-6 pt-32 pb-20 text-center">
-        <motion.p
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, ease: appleEase }}
-          className="font-serif text-[8rem] md:text-[12rem] font-light text-primary/25 leading-none mb-2 select-none"
+        {/* Entrada con la animación CSS de los heroes (.entrada-hero) y no con
+            el `initial` de framer: este contenido va en 404.html y con
+            opacity:0 en línea no se veía nada hasta que hidrataba React. */}
+        <p
+          style={{ animationDelay: "0s" }}
+          className="entrada-hero font-serif text-[8rem] md:text-[12rem] font-light text-primary/25 leading-none mb-2 select-none"
           aria-hidden="true"
         >
           404
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: appleEase }}
-          className="font-serif text-3xl md:text-5xl text-white mb-4"
+        </p>
+        <h1
+          style={{ animationDelay: "0.2s" }}
+          className="entrada-hero font-serif text-3xl md:text-5xl text-white mb-4"
         >
           Página no encontrada
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4, ease: appleEase }}
-          className="text-white/65 font-light max-w-sm mb-10 leading-relaxed"
+        </h1>
+        <p
+          style={{ animationDelay: "0.4s" }}
+          className="entrada-hero text-white/65 font-light max-w-sm mb-10 leading-relaxed"
         >
           Lo sentimos, la página que buscas no existe o ha cambiado de sitio.
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6, ease: appleEase }}
-          className="flex flex-col items-center gap-6"
+        </p>
+        <div
+          style={{ animationDelay: "0.6s" }}
+          className="entrada-hero flex flex-col items-center gap-6"
         >
           <Button
             asChild
@@ -79,7 +71,7 @@ const NotFound = () => {
               ))}
             </ul>
           </nav>
-        </motion.div>
+        </div>
       </section>
     </Layout>
   );

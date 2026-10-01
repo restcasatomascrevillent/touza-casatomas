@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Search, Wine, Beer, Martini, GlassWater, Sparkles, X, Info } from "lucide-react";
-import { motion, AnimatePresence, Transition } from "framer-motion";
+import { motion } from "framer-motion";
+import Reveal from "@/components/Reveal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -261,16 +262,6 @@ const Carta = () => {
     }
   }, [activeMainCategory, champagneData, cavasData, cervezasData, copasData, whiskiesData, grupoVinoActivo, selectedCategory]);
 
-  const containerVars = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.04 } }
-  };
-
-  const itemVars = {
-    hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: appleEase } as Transition }
-  };
-
   return (
     <Layout>
       <Seo
@@ -421,12 +412,14 @@ const Carta = () => {
             ) :
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8">
                 {filteredCocktails.map((cocktail, index) => (
-                  <motion.div
-                    initial={{ opacity: 0, y: 25 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-50px" }}
-                    transition={{ duration: 0.6, delay: index * 0.06, ease: appleEase }}
+                  // <Reveal> y no `whileInView`: el HTML del SSG ya no trae las
+                  // tarjetas con opacity:0. El retraso escalona por columna
+                  // (index % 4), no por posición: con `index * 0.06` la tarjeta
+                  // 12 esperaba 0,7 s después de entrar en pantalla.
+                  <Reveal
                     key={cocktail.id}
+                    y={25}
+                    delay={(index % 4) * 0.06}
                     className="group relative"
                   >
                     {/* Botón que cubre toda la tarjeta: antes el clic vivía en un
@@ -467,7 +460,7 @@ const Carta = () => {
                         ))}
                       </div>
                     )}
-                  </motion.div>
+                  </Reveal>
                 ))}
               </div>
           )}
@@ -490,13 +483,13 @@ const Carta = () => {
                 <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />
               ) : null}
 
-              {filterBySearch(activeDrinkData).map((drink, index) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 15 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-30px" }}
-                  transition={{ duration: 0.5, delay: index * 0.04, ease: appleEase }}
+              {/* Sin retraso por posición: las filas entran de una en una al
+                  hacer scroll, y con `index * 0.04` el vino 60 de una lista
+                  esperaba 2,4 s después de llegar a la pantalla. */}
+              {filterBySearch(activeDrinkData).map((drink) => (
+                <Reveal
                   key={drink.id}
+                  y={15}
                   className="flex justify-between items-center gap-4 py-3.5 md:py-5 border-b border-white/5 group"
                 >
                   <div>
@@ -506,7 +499,7 @@ const Carta = () => {
                     )}
                   </div>
                   <span className="text-primary font-medium text-lg whitespace-nowrap tabular-nums">{drink.price}</span>
-                </motion.div>
+                </Reveal>
               ))}
             </div>
           )}
@@ -517,24 +510,12 @@ const Carta = () => {
       {(loadingPlatos || tapasData.length > 0) && (
         <section className="py-12 md:py-20 bg-white/[0.02] mt-8 md:mt-16">
           <div className="max-w-6xl mx-auto px-6 text-center mb-8 md:mb-12">
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7, ease: appleEase }}
-              className="font-serif text-3xl md:text-4xl text-white mb-3 md:mb-4"
-            >
+            <Reveal as="h2" y={30} className="font-serif text-3xl md:text-4xl text-white mb-3 md:mb-4">
               Tapea con tu Cóctel
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
-              className="text-white/60 font-light"
-            >
+            </Reveal>
+            <Reveal as="p" y={0} delay={0.1} className="text-white/60 font-light">
               El maridaje perfecto para elevar la experiencia.
-            </motion.p>
+            </Reveal>
           </div>
           {loadingPlatos ? (
             <div className="w-full flex justify-center py-10">
@@ -543,12 +524,10 @@ const Carta = () => {
           ) : (
             <div className="max-w-6xl mx-auto px-6 flex overflow-x-auto gap-4 snap-x scrollbar-hide md:grid md:grid-cols-3 md:gap-8 md:overflow-visible">
               {tapasData.map((tapa, index) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 25 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.6, delay: index * 0.1, ease: appleEase }}
+                <Reveal
                   key={tapa.id}
+                  y={25}
+                  delay={(index % 3) * 0.1}
                   className="group min-w-[280px] snap-center md:min-w-0"
                 >
                   {tapa.image && (
@@ -582,7 +561,7 @@ const Carta = () => {
                     </div>
                     <span className="text-primary font-medium ml-4 whitespace-nowrap tabular-nums">{tapa.price}</span>
                   </div>
-                </motion.div>
+                </Reveal>
               ))}
             </div>
           )}
