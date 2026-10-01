@@ -53,7 +53,7 @@ const Footer = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-8 md:gap-16">
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
-              <Link to="/" className="inline-block">
+              <Link to="/" className="inline-flex items-center min-h-11">
                 <span className="font-serif text-2xl font-bold tracking-wider text-primary">
                   TOUZA
                 </span>

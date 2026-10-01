@@ -129,7 +129,7 @@ const Showcase = ({ indice, label, title, description, foto, detalle, ctaText, c
               asChild
               size="lg"
               className={cn(
-                "group w-full h-[52px] rounded-2xl bg-white text-black hover:bg-white/90 text-[15px] font-medium active:scale-[0.98] transition-all duration-300",
+                "group w-full h-12 rounded-full bg-white text-black hover:bg-white/90 text-[15px] font-medium active:scale-[0.98] transition-all duration-300",
                 "md:w-auto md:h-14 md:px-10 md:rounded-full md:bg-transparent md:text-foreground md:border md:border-foreground/20",
                 "md:hover:bg-foreground md:hover:text-background md:text-lg md:font-light"
               )}

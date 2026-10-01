@@ -109,7 +109,7 @@ const RespuestaReserva = () => {
       <header className="px-4 py-6 flex justify-center">
         <Link
           to="/"
-          className="font-serif text-2xl font-bold tracking-[0.3em] text-primary rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="inline-flex items-center min-h-11 font-serif text-2xl font-bold tracking-[0.3em] text-primary rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Touza, ir al inicio"
         >
           TOUZA
@@ -169,7 +169,7 @@ const RespuestaReserva = () => {
 
           <p className="mt-8 pt-5 border-t border-white/10 text-center text-sm text-muted-foreground">
             ¿Dudas? Llámanos al{" "}
-            <a href={telHref} className="inline-flex items-center gap-1 font-medium text-primary hover:underline">
+            <a href={telHref} className="inline-flex items-center gap-1 min-h-11 align-middle font-medium text-primary hover:underline">
               <Phone className="h-3.5 w-3.5" aria-hidden="true" />
               {telTexto}
             </a>

@@ -63,7 +63,7 @@ const NotFound = () => {
                 <li key={s.to}>
                   <Link
                     to={s.to}
-                    className="inline-block py-2 text-white/70 hover:text-primary underline-offset-4 hover:underline transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="inline-flex min-h-11 items-center text-white/70 hover:text-primary underline-offset-4 hover:underline transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     {s.texto}
                   </Link>
