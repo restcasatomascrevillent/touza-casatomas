@@ -2,7 +2,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement } from "react";
-import { usePlatosTouza, transformPlatosToUI, type PlatoTouza } from "../usePlatos";
+import {
+  usePlatosTouza,
+  transformPlatosToUI,
+  leerMostrarFotosPlatosTouza,
+  useMostrarFotosPlatosTouza,
+  type PlatoTouza,
+} from "../usePlatos";
 
 // ---------------------------------------------------------------------------
 // Mock del cliente Supabase
@@ -227,6 +233,20 @@ describe("transformPlatosToUI", () => {
     expect(result[0].image).toBe("/placeholder.svg");
   });
 
+  // Interruptor «Fotos de platos en Touza» (panel → Gestor Web → Carta).
+  it("con mostrarFotos: true se comporta como siempre (foto o placeholder)", () => {
+    const result = transformPlatosToUI([mockPlatoA, mockPlatoB], { mostrarFotos: true });
+    expect(result.map((p) => p.image)).toEqual(["https://example.com/croquetas.jpg", "/placeholder.svg"]);
+  });
+
+  it("con mostrarFotos: false no hay foto ni placeholder (image: null)", () => {
+    const result = transformPlatosToUI([mockPlatoA, mockPlatoB], { mostrarFotos: false });
+    expect(result.map((p) => p.image)).toEqual([null, null]);
+    // El resto del plato no cambia.
+    expect(result[0].name).toBe("Croquetas de jamón");
+    expect(result[0].price).toBe("7,50€");
+  });
+
   it("usa string vacío para nombre y descripción null", () => {
     const platoSinDatos: PlatoTouza = {
       ...mockPlatoB,
@@ -277,5 +297,88 @@ describe("transformPlatosToUI", () => {
   it("devuelve alergenosNota: null cuando alergenos_notas es null", () => {
     const result = transformPlatosToUI([mockPlatoB]);
     expect(result[0].alergenosNota).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Interruptor «Fotos de platos en Touza»: lectura de configuracion_web
+// Falla ABIERTO: solo un `false` explícito oculta las fotos.
+// ---------------------------------------------------------------------------
+
+function mockConfigChain(result: { data: unknown; error: unknown } | Error) {
+  const chain = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: result instanceof Error ? vi.fn().mockRejectedValue(result) : vi.fn().mockResolvedValue(result),
+  };
+  vi.mocked(supabase.from).mockReturnValue(chain as never);
+  return chain;
+}
+
+describe("leerMostrarFotosPlatosTouza", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("devuelve false solo si la fila dice false", async () => {
+    mockConfigChain({ data: { mostrar_fotos_platos_touza: false }, error: null });
+    await expect(leerMostrarFotosPlatosTouza()).resolves.toBe(false);
+    expect(supabase.from).toHaveBeenCalledWith("configuracion_web");
+  });
+
+  it("devuelve true si la fila dice true o si no hay fila", async () => {
+    mockConfigChain({ data: { mostrar_fotos_platos_touza: true }, error: null });
+    await expect(leerMostrarFotosPlatosTouza()).resolves.toBe(true);
+    mockConfigChain({ data: null, error: null });
+    await expect(leerMostrarFotosPlatosTouza()).resolves.toBe(true);
+  });
+
+  it("lanza si no puede leerla (el hook se queda con el valor que tenía)", async () => {
+    mockConfigChain({ data: null, error: { code: "PGRST205", message: "Could not find the table" } });
+    await expect(leerMostrarFotosPlatosTouza()).rejects.toThrow(/configuracion_web/);
+  });
+});
+
+describe("useMostrarFotosPlatosTouza", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("mientras carga (y fuera del build, sin instantánea) vale true", () => {
+    mockConfigChain({ data: { mostrar_fotos_platos_touza: false }, error: null });
+    const { result } = renderHook(() => useMostrarFotosPlatosTouza(), { wrapper: wrapper(buildQueryClient()) });
+    expect(result.current).toBe(true);
+  });
+
+  it("pasa a false cuando la configuración lo apaga", async () => {
+    mockConfigChain({ data: { mostrar_fotos_platos_touza: false }, error: null });
+    const { result } = renderHook(() => useMostrarFotosPlatosTouza(), { wrapper: wrapper(buildQueryClient()) });
+    await waitFor(() => expect(result.current).toBe(false));
+  });
+
+  it("si la lectura falla (tabla sin crear) sigue mostrando las fotos", async () => {
+    const chain = mockConfigChain({ data: null, error: { code: "PGRST205", message: "Could not find the table" } });
+    const { result } = renderHook(() => useMostrarFotosPlatosTouza(), { wrapper: wrapper(buildQueryClient()) });
+    await waitFor(() => expect(chain.maybeSingle).toHaveBeenCalled());
+    expect(result.current).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// JSON-LD: con las fotos apagadas, los platos van sin `imagen_url`.
+// ---------------------------------------------------------------------------
+import { platosParaJsonLd } from "@/lib/carta-ssg";
+
+describe("platosParaJsonLd", () => {
+  it("encendido deja los platos tal cual", () => {
+    expect(platosParaJsonLd([mockPlatoA], true)).toEqual([mockPlatoA]);
+  });
+
+  it("apagado quita la foto y nada más", () => {
+    expect(platosParaJsonLd([mockPlatoA], false)).toEqual([{ ...mockPlatoA, imagen_url: null }]);
+  });
+
+  it("fuera del build (sin instantánea) vale «fotos visibles»", () => {
+    expect(platosParaJsonLd([mockPlatoA])).toEqual([mockPlatoA]);
   });
 });

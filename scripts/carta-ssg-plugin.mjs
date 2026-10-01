@@ -40,8 +40,36 @@ async function consultar(base, key, tabla, params) {
   return filas;
 }
 
+/**
+ * Interruptor «Fotos de platos en Touza» del panel (Gestor Web → Carta), en
+ * `configuracion_web.mostrar_fotos_platos_touza` (fila única, legible con la
+ * anon key; migración 20261001113700 de adminpanelct).
+ *
+ * FALLA ABIERTO: cualquier problema leyéndolo (tabla aún sin crear → 404
+ * PGRST205, red, fila ausente) deja las fotos VISIBLES, que es lo de siempre;
+ * solo un `false` explícito las oculta. Nunca rompe el build: no poder leer un
+ * ajuste cosmético no justifica dejar de desplegar. El navegador lo vuelve a
+ * leer al cargar la página (`useMostrarFotosPlatosTouza`, src/hooks/usePlatos.ts):
+ * hoy `rebuild-webs` no llega a lanzar deploys, así que el cambio tiene que
+ * notarse sin uno.
+ *
+ * @returns {Promise<boolean>}
+ */
+export async function leerMostrarFotosPlatos(base, key) {
+  try {
+    const filas = await consultar(base, key, "configuracion_web", "select=mostrar_fotos_platos_touza&id=eq.true&limit=1");
+    return filas[0]?.mostrar_fotos_platos_touza !== false;
+  } catch (err) {
+    console.warn(
+      `[carta-ssg] No se pudo leer configuracion_web (${err?.message ?? err}); ` +
+        "se publican las fotos de los platos (comportamiento por defecto).",
+    );
+    return true;
+  }
+}
+
 async function traerCarta(base, key) {
-  const [cocteles, vinos, bebidas, platos] = await Promise.all([
+  const [cocteles, vinos, bebidas, platos, mostrarFotosPlatos] = await Promise.all([
     // Mismos filtros y orden que useCocteles.ts / useVinos.ts / useBebidas.ts /
     // usePlatos.ts. Si divergen, el HTML y lo que refresca React Query dejarían
     // de coincidir y habría parpadeo al hidratar.
@@ -69,6 +97,7 @@ async function traerCarta(base, key) {
       "Platos",
       "select=id,nombre,descripcion,precio_eur,imagen_url,categoria,alergenos_oficiales,alergenos_notas&activado=eq.true&touza=eq.true&order=orden.asc",
     ),
+    leerMostrarFotosPlatos(base, key),
   ]);
 
   const porCategoria = (filas, categorias) =>
@@ -106,7 +135,13 @@ async function traerCarta(base, key) {
     bebidas: porCategoria(bebidas, CATEGORIAS_BEBIDAS),
     // `Platos.touza` es false en las 128 filas de la tabla → esto viene vacío
     // a propósito. Ver el comentario de src/hooks/usePlatos.ts.
+    // `imagen_url` se conserva aunque las fotos estén apagadas: el navegador
+    // relee el interruptor al cargar (`useMostrarFotosPlatosTouza`) y, si se
+    // vuelven a encender, las enseña sin esperar a un deploy. La tarjeta las
+    // oculta con `transformPlatosToUI(…, { mostrarFotos })` y el JSON-LD con
+    // `platosParaJsonLd` (src/lib/carta-ssg.ts).
     platos,
+    config: { mostrarFotosPlatos },
   };
 }
 

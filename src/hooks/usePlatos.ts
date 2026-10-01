@@ -19,7 +19,12 @@ export interface PlatoTouzaUI {
   name: string;
   description: string;
   price: string;
-  image: string;
+  /**
+   * URL de la foto, o `/placeholder.svg` si el plato no tiene. `null` cuando
+   * el panel apagó «Fotos de platos en Touza»: entonces la tarjeta no pinta
+   * ni foto ni placeholder.
+   */
+  image: string | null;
   categoria: string;
   /** Etiquetas legibles ("Gluten", "Lácteos"...). [] si no consta el dato. */
   alergenos: string[];
@@ -75,7 +80,48 @@ export const usePlatosTouza = () => {
   });
 };
 
-export const transformPlatosToUI = (platos: PlatoTouza[] | undefined): PlatoTouzaUI[] => {
+/**
+ * Interruptor «Fotos de platos en Touza» del panel (Gestor Web → Carta), en
+ * `configuracion_web.mostrar_fotos_platos_touza`. Lo lee también el build
+ * (`scripts/carta-ssg-plugin.mjs`), que siembra este valor para que el HTML
+ * y la hidratación coincidan; el navegador lo vuelve a pedir SIEMPRE al
+ * montar (`initialDataUpdatedAt: 0` = semilla caducada desde el principio),
+ * porque hoy `rebuild-webs` no llega a lanzar deploys y el cambio tiene que
+ * notarse sin uno.
+ *
+ * FALLA ABIERTO, en dos niveles. Esta función LANZA si no puede leer la fila
+ * (tabla sin crear porque la migración está pendiente, red…), y entonces
+ * React Query se queda con lo que tenía: el valor del build, que a su vez es
+ * `true` si el build tampoco pudo leerlo; fuera del build (sin instantánea),
+ * `true`. Una fila ausente vale `true`. Solo un `false` explícito oculta las
+ * fotos.
+ */
+export async function leerMostrarFotosPlatosTouza(): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('configuracion_web')
+    .select('mostrar_fotos_platos_touza')
+    .eq('id', true)
+    .maybeSingle();
+  if (error) throw new Error(`No se pudo leer configuracion_web: ${error.message}`);
+  return data?.mostrar_fotos_platos_touza !== false;
+}
+
+export const useMostrarFotosPlatosTouza = (): boolean => {
+  const sembrado = CARTA_SSG?.config?.mostrarFotosPlatos;
+  const { data } = useQuery({
+    queryKey: ['configuracion-web', 'fotos-platos-touza'],
+    queryFn: leerMostrarFotosPlatosTouza,
+    staleTime: 60 * 1000,
+    retry: 1,
+    ...(typeof sembrado === 'boolean' ? { initialData: sembrado, initialDataUpdatedAt: 0 } : {}),
+  });
+  return data !== false;
+};
+
+export const transformPlatosToUI = (
+  platos: PlatoTouza[] | undefined,
+  { mostrarFotos = true }: { mostrarFotos?: boolean } = {},
+): PlatoTouzaUI[] => {
   if (!platos) return [];
 
   return platos.map(p => {
@@ -87,7 +133,7 @@ export const transformPlatosToUI = (platos: PlatoTouza[] | undefined): PlatoTouz
       name: p.nombre || '',
       description: p.descripcion || '',
       price: p.precio_eur ? `${p.precio_eur.toFixed(2).replace('.', ',')}€` : '',
-      image: p.imagen_url || '/placeholder.svg',
+      image: mostrarFotos ? p.imagen_url || '/placeholder.svg' : null,
       categoria: p.categoria || '',
       alergenos: etiquetasAlergenos(datos),
       alergenosNota: datos.notas,

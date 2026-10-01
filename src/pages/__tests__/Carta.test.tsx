@@ -278,6 +278,40 @@ describe("Carta — sección Tapas", () => {
     expect(img.src).toContain("/placeholder.svg");
   });
 
+  // Interruptor «Fotos de platos en Touza» apagado en el panel:
+  // `transformPlatosToUI` devuelve `image: null` y la tarjeta no pinta ni la
+  // foto ni el placeholder, pero sí el nombre y el precio.
+  it("no pinta foto ni placeholder cuando las fotos de platos están apagadas", () => {
+    const tapas = [
+      {
+        id: "1",
+        name: "Croquetas de jamón",
+        description: "Suaves croquetas caseras",
+        price: "7,50€",
+        image: null,
+        categoria: "tapas",
+        alergenos: [],
+        alergenosNota: null,
+      },
+    ];
+
+    vi.mocked(usePlatosModule.usePlatosTouza).mockReturnValue({
+      data: tapas,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as never);
+    vi.mocked(usePlatosModule.useMostrarFotosPlatosTouza).mockReturnValue(false);
+    vi.mocked(usePlatosModule.transformPlatosToUI).mockReturnValue(tapas);
+
+    renderCarta();
+
+    expect(screen.getByText("Croquetas de jamón")).toBeInTheDocument();
+    expect(screen.getByText("7,50€")).toBeInTheDocument();
+    expect(screen.queryByAltText("Croquetas de jamón")).not.toBeInTheDocument();
+    expect(usePlatosModule.transformPlatosToUI).toHaveBeenCalledWith(tapas, { mostrarFotos: false });
+  });
+
   it("NO muestra la sección 'Tapea con tu Cóctel' cuando no hay platos y no está cargando", () => {
     vi.mocked(usePlatosModule.usePlatosTouza).mockReturnValue({
       data: [],

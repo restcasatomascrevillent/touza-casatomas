@@ -11,7 +11,7 @@ import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCo
 import { useVinos, useVinosRestantes, transformVinosToUI, type VinoUI } from "@/hooks/useVinos";
 import { agruparVinosPorTipo, capitalizarEtiqueta } from "@/lib/vinos-carta";
 import { useBebidas, transformBebidasToUI, type BebidaUI } from "@/hooks/useBebidas";
-import { usePlatosTouza, transformPlatosToUI } from "@/hooks/usePlatos";
+import { usePlatosTouza, transformPlatosToUI, useMostrarFotosPlatosTouza } from "@/hooks/usePlatos";
 import { AVISO_ALERGENOS_CARTA, AVISO_SIN_ALERGENOS } from "@/lib/alergenos";
 import { Skeleton } from "@/components/ui/skeleton";
 import Seo from "@/components/Seo";
@@ -20,7 +20,7 @@ import { CocktailHoverOutlineSVG } from "@/components/ui/svg/CocktailHoverOutlin
 import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
 import { menuSchema } from "@/lib/negocio";
-import { CARTA_SSG } from "@/lib/carta-ssg";
+import { CARTA_SSG, platosParaJsonLd } from "@/lib/carta-ssg";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -160,7 +160,13 @@ const Carta = () => {
   const whiskiesData = useMemo(() => transformBebidasToUI(whiskiesRaw), [whiskiesRaw]);
 
   const { data: platosRaw, isLoading: loadingPlatos } = usePlatosTouza();
-  const tapasData = useMemo(() => transformPlatosToUI(platosRaw), [platosRaw]);
+  // Interruptor «Fotos de platos en Touza» del panel. Falla abierto: solo un
+  // `false` explícito oculta las fotos (sin foto ni placeholder).
+  const mostrarFotosPlatos = useMostrarFotosPlatosTouza() !== false;
+  const tapasData = useMemo(
+    () => transformPlatosToUI(platosRaw, { mostrarFotos: mostrarFotosPlatos }),
+    [platosRaw, mostrarFotosPlatos]
+  );
 
   // JSON-LD `Menu` con TODA la carta, no solo la pestaña activa.
   // En pantalla champagnes, cavas, cervezas, copas y whiskies viven detrás de
@@ -190,7 +196,8 @@ const Carta = () => {
       { nombre: "Cervezas", items: CARTA_SSG.bebidas["Cervezas"] ?? [] },
       { nombre: "Copas de vino", items: CARTA_SSG.bebidas["Copas"] ?? [] },
       { nombre: "Whiskies", items: CARTA_SSG.bebidas["Whiskies"] ?? [] },
-      { nombre: "Tapas", items: CARTA_SSG.platos },
+      // Sin fotos si el panel las apagó al construir (ver `platosParaJsonLd`).
+      { nombre: "Tapas", items: platosParaJsonLd(CARTA_SSG.platos) },
     ]);
   }, []);
 
@@ -544,13 +551,15 @@ const Carta = () => {
                   key={tapa.id}
                   className="group min-w-[280px] snap-center md:min-w-0"
                 >
-                  <div className="aspect-video rounded-2xl overflow-hidden mb-4">
-                    <OptimizedImage
-                      src={tapa.image}
-                      alt={tapa.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                  </div>
+                  {tapa.image && (
+                    <div className="aspect-video rounded-2xl overflow-hidden mb-4">
+                      <OptimizedImage
+                        src={tapa.image}
+                        alt={tapa.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                    </div>
+                  )}
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-serif text-lg text-white mb-1">{tapa.name}</h3>

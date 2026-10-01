@@ -22,6 +22,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 // Hooks de datos — vacíos para todas las rutas
 vi.mock("@/hooks/usePlatos", () => ({
   usePlatosTouza: () => ({ data: [], isLoading: false, isError: false }),
+  useMostrarFotosPlatosTouza: () => true,
   transformPlatosToUI: () => [],
 }));
 vi.mock("@/hooks/useCocteles", () => ({
