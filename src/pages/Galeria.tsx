@@ -106,7 +106,7 @@ const Galeria = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black" />
         </div>
         <div className="absolute inset-0 z-10 flex items-end px-6 pb-10 md:pb-16">
-          <div className="max-w-4xl mx-auto w-full text-center">
+          <div className="max-w-4xl mx-auto w-full text-center text-shadow">
             <span
               style={{ animationDelay: "0.1s" }}
               className="entrada-hero text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
@@ -130,8 +130,8 @@ const Galeria = () => {
       </section>
 
       {/* Filters */}
-      <section className={cn(BARRA_BAJO_CABECERA, "bg-black/80 backdrop-blur-2xl border-y border-white/5 py-4")}>
-        <div className="max-w-6xl mx-auto px-6">
+      <section className={cn(BARRA_BAJO_CABECERA, "bg-black/85 backdrop-blur-2xl border-y border-white/5 py-2.5 md:py-4")}>
+        <div className="max-w-6xl mx-auto px-4 md:px-6">
           <div className="flex items-center justify-start md:justify-center gap-2 overflow-x-auto scrollbar-hide" role="group" aria-label="Filtrar fotos">
             {galleryCategories.map((category) => (
               <button
@@ -140,10 +140,10 @@ const Galeria = () => {
                 onClick={() => setSelectedCategory(category.id)}
                 aria-pressed={selectedCategory === category.id}
                 className={cn(
-                  "px-5 py-2.5 text-sm font-light rounded-full transition-all duration-300 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                  "px-5 min-h-11 text-[15px] md:text-sm font-light rounded-full transition-all duration-300 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                   selectedCategory === category.id
                     ? "bg-white text-black"
-                    : "bg-transparent text-white/60 hover:text-white"
+                    : "bg-transparent text-white/70 ring-1 ring-inset ring-white/10 hover:text-white hover:ring-white/25"
                 )}
               >
                 {category.name}
@@ -208,7 +208,10 @@ const Galeria = () => {
       {/* Lightbox with swipe */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent
-          className="max-w-5xl w-[95vw] bg-black border-white/5 p-0 md:p-4 rounded-2xl"
+          // En el móvil, visor a pantalla completa con los controles en una
+          // fila bajo la foto (antes flotaban sobre las esquinas de la propia
+          // foto). Desde md, ventana con los controles superpuestos.
+          className="w-screen max-w-[100vw] h-[100dvh] rounded-none border-0 bg-black p-0 flex flex-col justify-center md:h-auto md:w-[95vw] md:max-w-5xl md:rounded-2xl md:border md:border-white/5 md:p-4"
           // Flechas del teclado para pasar de foto (antes solo con los botones).
           onKeyDown={(e) => {
             if (e.key === "ArrowRight") navigateLightbox("next");
@@ -240,29 +243,31 @@ const Galeria = () => {
                     imagen={selectedImage.image}
                     alt={selectedImage.alt}
                     sizes="95vw"
-                    className="w-full h-auto max-h-[80vh] object-contain rounded-xl select-none pointer-events-none"
+                    className="w-full h-auto max-h-[calc(100dvh-9rem)] md:max-h-[80vh] object-contain md:rounded-xl select-none pointer-events-none"
                     priority={true}
                   />
                 </motion.div>
               </AnimatePresence>
-              <button
-                type="button"
-                onClick={() => navigateLightbox("prev")}
-                className="absolute left-3 bottom-3 w-12 h-12 md:bottom-auto md:top-1/2 md:-translate-y-1/2 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-colors duration-200 hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label="Foto anterior"
-              >
-                <ChevronLeft className="w-6 h-6" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateLightbox("next")}
-                className="absolute right-3 bottom-3 w-12 h-12 md:bottom-auto md:top-1/2 md:-translate-y-1/2 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-colors duration-200 hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label="Foto siguiente"
-              >
-                <ChevronRight className="w-6 h-6" aria-hidden="true" />
-              </button>
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-xs text-white/80 tabular-nums" aria-hidden="true">
-                {currentIndex + 1} / {filteredImages.length}
+              <div className="flex items-center justify-between px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] md:contents">
+                <button
+                  type="button"
+                  onClick={() => navigateLightbox("prev")}
+                  className="w-12 h-12 md:absolute md:left-3 md:top-1/2 md:-translate-y-1/2 rounded-full bg-white/10 md:bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-colors duration-200 hover:bg-black/70 active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label="Foto anterior"
+                >
+                  <ChevronLeft className="w-6 h-6" aria-hidden="true" />
+                </button>
+                <div className="px-4 py-2 rounded-full text-[13px] text-white/80 tabular-nums md:absolute md:bottom-6 md:left-1/2 md:-translate-x-1/2 md:bg-black/50 md:backdrop-blur-sm md:text-xs" aria-hidden="true">
+                  {currentIndex + 1} / {filteredImages.length}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigateLightbox("next")}
+                  className="w-12 h-12 md:absolute md:right-3 md:top-1/2 md:-translate-y-1/2 rounded-full bg-white/10 md:bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-colors duration-200 hover:bg-black/70 active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label="Foto siguiente"
+                >
+                  <ChevronRight className="w-6 h-6" aria-hidden="true" />
+                </button>
               </div>
             </div>
           )}
