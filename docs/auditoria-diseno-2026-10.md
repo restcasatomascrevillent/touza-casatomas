@@ -46,7 +46,7 @@ Columnas: **Sev.** = severidad · **Cat.** = categoría · **Estado** = ✅ corr
 | G13 | Bajo | Accesibilidad | No había `aria-current` en el enlace activo y el logo no tenía nombre accesible. | ✅ `371fb26` |
 | G14 | Medio | Bug funcional | A 320 px el botón "Reservar" de la barra fija móvil se salía 9 px de la pantalla. | ✅ `ebd1ba7` |
 | G15 | Medio | Diseño | Una imagen que falla mostraba el texto gris "Error al cargar imagen". Ahora se ve un relleno con la marca y se conserva el `alt`. | ✅ `ebd1ba7` |
-| G16 | Medio | Rendimiento | Quedan secciones bajo el pliegue con `opacity:0` en el HTML (reveals de `whileInView`). Si el JS tarda o falla, esas secciones no se ven. | 📝 P4 |
+| G16 | Medio | Rendimiento | Quedan secciones bajo el pliegue con `opacity:0` en el HTML (reveals de `whileInView`). Si el JS tarda o falla, esas secciones no se ven. | ✅ P4 (todo el sitio) |
 
 ### Portada (`/`)
 
@@ -100,7 +100,7 @@ Columnas: **Sev.** = severidad · **Cat.** = categoría · **Estado** = ✅ corr
 | R4 | Medio | Accesibilidad | Etiquetas al 40 %, placeholders al 20 % y bordes de campo casi invisibles. | ✅ `213d931` |
 | R5 | Alto | Legal / UX | El formulario recoge nombre, email y teléfono **sin información básica de protección de datos** (responsable, finalidad, derechos) y sin enlace a una política de privacidad, que no existe. | 📝 P1 (texto legal: decisión humana) |
 | R6 | — | QA | Comprobado con `fetch` interceptado: la validación nativa bloquea el envío vacío y lleva el foco al primer campo; con un 201 aparece el diálogo "Solicitud recibida" con los datos. El rechazo, `grupo_grande`, el 500 y el fallo de red ya los cubren los tests. | ✅ sin cambios |
-| R7 | Bajo | Contenido | La foto del hero ("El Reservado") muestra botellas y no el espacio privado. | 📝 Faltan fotos reales |
+| R7 | Bajo | Contenido | La foto del hero ("El Reservado") muestra botellas y no el espacio privado. El carrusel presentaba un mojito y un bodegón de champán como "Espacio privado El Reservado - vista N". | ✅ Textos alternativos que dicen lo que enseña cada foto y carrusel "El ambiente de Touza" (barra, sala principal, botellas). 📝 Siguen faltando fotos reales de la sala |
 
 ### Contacto (`/contacto`) y cookies
 
@@ -138,6 +138,7 @@ Columnas: **Sev.** = severidad · **Cat.** = categoría · **Estado** = ✅ corr
   - ✅ **Hecho** (`a544842`). `Index` es un solo árbol (`Hero`, `Showcase`, `Claves`, `VisitUs`) sin `useIsMobile`: `dist/index.html` lleva un único `<h1>` y pesa 41,5 KB. Comprobado a 320, 375, 768, 1024, 1440 y 1920 px: sin desbordamiento horizontal, sin salto al hidratar y la foto del hero (LCP) con `fetchpriority="high"`, sin fundido y con el recorte vertical en móvil.
 - **P4 · Reveals sin depender del JS.** Pasar los `whileInView` a una clase CSS que se activa con `IntersectionObserver`, o añadir un `<noscript>` que fuerce `opacity:1`, para que nada quede invisible si el JS tarda o falla.
   - ✅ **Hecho** en portada, Galería y Contacto (`ed69e6c`, `4f553e4`, `ef5bf40`) y con `<noscript>` para todo el sitio (`92c1d3c`). Nuevo `<Reveal>`: el HTML sale visible y solo se oculta, ya en el navegador, lo que está bajo el pliegue al montar; con `prefers-reduced-motion` no se anima. `ScrollTextReveal` ya no vuelca `opacity:0.15` por palabra. Quedan `whileInView` en Carta, El Reservado y el CTA del pie (otros dueños): sin JS los cubre el `<noscript>`, pero con JS lento siguen ocultos hasta hidratar.
+  - ✅ **Completado** en Carta (tarjetas de cóctel, filas de vinos y bebidas, tapas), El Reservado (ventajas, galería, formulario), el CTA "Reserva tu experiencia" del pie (en todas las páginas) y el 404 (que pasa a `.entrada-hero`, como los heroes). Ya no queda ningún `whileInView` en `src/`. Los retrasos escalonados ya no crecen con la posición: con `index * 0.04` el vino 60 de una lista esperaba 2,4 s después de llegar a la pantalla. En `dist/` solo queda `opacity:0` en el CSS del `<noscript>` y en el SVG decorativo del hero de escritorio.
 - **P5 · Fotos reales.** Sustituir las fotos de stock de cócteles (en Supabase y en la galería), las rotas (Clover Club) y las que no corresponden (Pornstar Martini, El Reservado).
   - 📝 Parcial (`4f553e4`): en la galería cada `alt` describe ya lo que muestra la foto, se quitaron los duplicados y el filtro "El Reservado" (no hay ninguna foto real de la sala). Siguen faltando las fotos.
 - **P6 · Limpieza de dependencias.** `yet-another-react-lightbox` ya no se importa en ningún sitio. Quitarla del `package.json` cuando se vaya a tocar el lockfile.
@@ -159,3 +160,9 @@ Columnas: **Sev.** = severidad · **Cat.** = categoría · **Estado** = ✅ corr
 - `npm run build` ✅ (SSG de las 7 rutas, PWA y sitemap).
 - `npm test`: 125/126 en el árbol de trabajo. El único fallo (`App.routes › /carta`) lo provoca un cambio **sin commitear de otro trabajo en curso** sobre `usePlatos`/`Carta.tsx` (la función `useMostrarFotosPlatosTouza`, que falta en el mock del test). No viene de esta auditoría: en un worktree limpio de `HEAD` pasan todos los tests que no necesitan `.env`.
 - `npm run lint`: 45 problemas, todos anteriores (eran 46: desaparece el `any` de `Galeria.tsx`). Ninguno nuevo.
+
+### Segunda pasada (01/10/2026, tarde)
+
+- **Vinos sin orden estable.** `Vinos.orden` es texto y vale "0" (o null) en las 184 filas: el orden del HTML prerenderizado y el del refresco del navegador podían no coincidir, y como texto "10" iría antes que "2". Ahora `ordenarVinos` (`src/lib/carta-consultas.mjs`, compartido por los hooks y el plugin del build) ordena por `orden` numérico, nombre sin mayúsculas ni tildes e id. `agruparVinosPorTipo` desempata las denominaciones con el mismo número de vinos. Comprobado: los 37 champagnes salen en el mismo orden en el JSON-LD de `dist/carta.html` que en una consulta nueva.
+- **Peso de la carta.** Cócteles, vinos y bebidas pedían `select=*` (en Vinos, 36 columnas, casi todo traducciones). Ahora solo las columnas que se usan. La instantánea dentro del chunk de la carta pasa de 213 KB a 64 KB: chunk `Carta-*.js` de 431 KB a 282 KB (81,2 → 73,8 KB con gzip). `dist/carta.html` queda igual (100,8 → 101,1 KB): no lleva la instantánea, y cambia el orden de los vinos del JSON-LD.
+- **El 404 de cada página** con `npm run preview` es `/_vercel/insights/script.js` (Vercel Web Analytics). Solo existe en Vercel: en producción responde 200. No es un fallo.

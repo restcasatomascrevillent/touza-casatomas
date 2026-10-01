@@ -63,7 +63,10 @@ const RootLayout = () => {
               {/* Vercel Web Analytics (sin cookies). Renderiza `null` y solo inyecta
                   el script en un useEffect → no afecta al HTML del SSG. El script
                   sigue los cambios de history (react-router): cada navegación en
-                  cliente cuenta como page view. */}
+                  cliente cuenta como page view.
+                  Fuera de Vercel (`npm run preview`, `npm run dev`) el script
+                  /_vercel/insights/script.js da 404 en cada página: es lo
+                  esperado, en producción responde 200. */}
               <Analytics />
             </TooltipProvider>
           </SmoothScroll>
