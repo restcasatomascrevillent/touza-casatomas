@@ -9,8 +9,7 @@ import { OptimizedImage } from "@/components/ui/optimized-image";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
+
 import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
 import { RESERVAS_WEB_CREAR_URL, functionHeaders, leerCuerpo } from "@/lib/supabase-functions";
@@ -74,7 +73,11 @@ export const TEXTOS_RECHAZO: TextosRechazo = {
 function manana(): string {
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  return d.toISOString().split("T")[0];
+  // Fecha LOCAL, no toISOString(): eso la pasa a UTC y entre las 00:00 y las
+  // 02:00 de Madrid (verano) devolvía la fecha de HOY como mínimo.
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
 function formatearFechaLarga(fechaISO: string): string {
@@ -94,7 +97,6 @@ type DetalleSolicitud = {
 };
 
 const Reservado = () => {
-  const isMobile = useIsMobile();
   const [formData, setFormData] = useState({
     nombre: "", email: "", telefono: "", fecha: "", hora: "", personas: "", mensaje: "",
   });
@@ -215,7 +217,7 @@ const Reservado = () => {
                         restaurante conteste, así que no puede prometer un correo
                         inmediato ni mandarle a mirar una bandeja vacía. */}
                     <p>Este aviso es tu único acuse de recibo: ahora no te llegará ningún correo. Te escribiremos cuando el restaurante confirme la reserva.</p>
-                    <p className="text-sm text-white/40">
+                    <p className="text-sm text-white/60">
                       ¿Prefieres hablarlo directamente? Llámanos al{" "}
                       <a href={TELEFONO_HREF} className="text-primary underline underline-offset-2">{TELEFONO_TEXTO}</a>.
                     </p>
@@ -272,13 +274,12 @@ const Reservado = () => {
         />
 
         {/* Hero - Immersive */}
-        <section className={cn(
-          "relative overflow-hidden",
-          isMobile ? "h-[60vh]" : "h-[80vh]"
-        )}>
+        <section className="relative overflow-hidden h-[60vh] md:h-[80vh]">
           <motion.div
-            initial={{ scale: 1.05, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            // Sin fundido de opacidad: la foto es el LCP y con opacity:0 inicial
+            // el HTML del SSG la traía invisible hasta hidratar.
+            initial={{ scale: 1.05 }}
+            animate={{ scale: 1 }}
             transition={{ duration: 1.5, ease: appleEase }}
             className="absolute inset-0"
           >
@@ -294,25 +295,18 @@ const Reservado = () => {
 
           <div className="absolute inset-0 z-10 flex items-end pb-12 md:pb-20 px-6">
             <div className="max-w-6xl mx-auto w-full">
-              <motion.span
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.3, ease: appleEase }}
-                className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
+              <span
+                style={{ animationDelay: "0.15s" }}
+                className="entrada-hero text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
               >
                 Espacio exclusivo
-              </motion.span>
-              <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.5, ease: appleEase }}
-                className={cn(
-                  "font-serif font-bold text-white leading-[0.9]",
-                  isMobile ? "text-4xl" : "text-7xl lg:text-8xl"
-                )}
+              </span>
+              <h1
+                style={{ animationDelay: "0.25s" }}
+                className="entrada-hero font-serif font-bold text-white leading-[0.9] text-5xl md:text-7xl lg:text-8xl"
               >
                 El Reservado
-              </motion.h1>
+              </h1>
             </div>
           </div>
         </section>
@@ -320,10 +314,7 @@ const Reservado = () => {
         {/* Features */}
         <section className="py-12 md:py-32 bg-black">
           <div className="max-w-5xl mx-auto px-6">
-            <div className={cn(
-              "grid gap-x-5 gap-y-8 md:gap-16",
-              isMobile ? "grid-cols-2" : "grid-cols-4"
-            )}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-8 md:gap-16">
               {features.map((feature, index) => (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -334,10 +325,10 @@ const Reservado = () => {
                   className="text-center"
                 >
                   <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-3 md:mb-5 rounded-full bg-white/5 flex items-center justify-center">
-                    <feature.icon className="w-6 h-6 text-white/50" />
+                    <feature.icon className="w-6 h-6 text-primary" aria-hidden="true" />
                   </div>
                   <h3 className="font-serif text-lg text-white mb-2">{feature.title}</h3>
-                  <p className="text-white/30 text-sm font-light">{feature.description}</p>
+                  <p className="text-white/65 text-sm font-light">{feature.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -362,74 +353,43 @@ const Reservado = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
-                className={cn(
-                  "font-serif font-bold text-foreground",
-                  isMobile ? "text-3xl" : "text-5xl lg:text-6xl"
-                )}
+                className="font-serif font-bold text-foreground text-3xl md:text-5xl lg:text-6xl"
               >
                 Un ambiente único
               </motion.h2>
             </div>
 
-            {isMobile ? (
-              <div className="flex overflow-x-auto gap-3 pb-4 snap-x scrollbar-hide -mx-6 px-6">
-                {galleryImages.map((image, index) => (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1, duration: 0.6, ease: appleEase }}
-                    key={index}
-                    className="min-w-[75vw] snap-center aspect-[3/4] rounded-2xl overflow-hidden"
-                  >
-                    {/* <picture> con `contents`: el <img> sigue siendo hijo
-                        directo del contenedor, misma maquetación que antes. */}
-                    <picture className="contents">
-                      <source type="image/avif" srcSet={image.avif} sizes="75vw" />
-                      <source type="image/webp" srcSet={image.webp} sizes="75vw" />
-                      <img
-                        src={image.src}
-                        width={image.width}
-                        height={image.height}
-                        alt={`Espacio privado El Reservado de Touza en Crevillente - vista ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </picture>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-3 gap-6">
-                {galleryImages.map((image, index) => (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.15, duration: 0.8, ease: appleEase }}
-                    key={index}
-                    className="aspect-[3/4] rounded-2xl overflow-hidden"
-                  >
-                    {/* <picture> con `contents`: el <img> sigue siendo hijo
-                        directo del contenedor, misma maquetación que antes. */}
-                    <picture className="contents">
-                      <source type="image/avif" srcSet={image.avif} sizes="(min-width: 768px) 33vw, calc(100vw - 3rem)" />
-                      <source type="image/webp" srcSet={image.webp} sizes="(min-width: 768px) 33vw, calc(100vw - 3rem)" />
-                      <img
-                        src={image.src}
-                        width={image.width}
-                        height={image.height}
-                        alt={`Espacio privado El Reservado de Touza en Crevillente - vista ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </picture>
-                  </motion.div>
-                ))}
-              </div>
-            )}
+            {/* Carrusel en móvil, rejilla de 3 en escritorio: un único bloque con
+                clases responsive (antes dos árboles elegidos con useIsMobile, y el
+                HTML del SSG siempre traía el de escritorio). */}
+            <div className="flex overflow-x-auto gap-3 pb-4 snap-x scrollbar-hide -mx-6 px-6 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:mx-0 md:px-0 md:pb-0">
+              {galleryImages.map((image, index) => (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.12, duration: 0.7, ease: appleEase }}
+                  key={index}
+                  className="min-w-[75vw] snap-center md:min-w-0 aspect-[3/4] rounded-2xl overflow-hidden"
+                >
+                  {/* <picture> con `contents`: el <img> sigue siendo hijo
+                      directo del contenedor, misma maquetación que antes. */}
+                  <picture className="contents">
+                    <source type="image/avif" srcSet={image.avif} sizes="(min-width: 768px) 33vw, 75vw" />
+                    <source type="image/webp" srcSet={image.webp} sizes="(min-width: 768px) 33vw, 75vw" />
+                    <img
+                      src={image.src}
+                      width={image.width}
+                      height={image.height}
+                      alt={`Espacio privado El Reservado de Touza en Crevillente - vista ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
+                </motion.div>
+              ))}
+            </div>
 
             <div className="text-center mt-8 md:mt-10">
               <Button
@@ -461,10 +421,7 @@ const Reservado = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.7, delay: 0.1, ease: appleEase }}
-                className={cn(
-                  "font-serif font-bold text-white mb-4",
-                  isMobile ? "text-3xl" : "text-5xl"
-                )}
+                className="font-serif font-bold text-white mb-4 text-3xl md:text-5xl"
               >
                 Solicita información
               </motion.h2>
@@ -473,7 +430,7 @@ const Reservado = () => {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.7, delay: 0.2, ease: appleEase }}
-                className="text-white/30 font-light"
+                className="text-white/65 font-light"
               >
                 Cuéntanos sobre tu evento y diseñaremos una experiencia a medida.
               </motion.p>
@@ -489,44 +446,53 @@ const Reservado = () => {
             >
               <div className="grid gap-4 md:gap-5 md:grid-cols-2">
                 <div>
-                  <label htmlFor="nombre" className="block text-xs text-white/40 uppercase tracking-wider mb-2">Nombre *</label>
+                  <label htmlFor="nombre" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Nombre *</label>
                   <Input id="nombre" name="nombre" type="text" required autoComplete="name" value={formData.nombre} onChange={handleChange}
-                    className="h-14 bg-white/5 border-white/10 focus:border-white/30 rounded-xl text-white placeholder:text-white/20" placeholder="Tu nombre" />
+                    className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white placeholder:text-white/35" placeholder="Tu nombre" />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-xs text-white/40 uppercase tracking-wider mb-2">Email *</label>
+                  <label htmlFor="email" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Email *</label>
                   <Input id="email" name="email" type="email" required autoComplete="email" inputMode="email" value={formData.email} onChange={handleChange}
-                    className="h-14 bg-white/5 border-white/10 focus:border-white/30 rounded-xl text-white placeholder:text-white/20" placeholder="tu@email.com" />
+                    className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white placeholder:text-white/35" placeholder="tu@email.com" />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-5">
+              {/* Rejilla de 2: a 4 columnas (o a media pantalla en móvil) el
+                  selector de fecha no cabía y el icono del calendario quedaba
+                  cortado. En móvil, fecha y hora van a lo ancho. */}
+              <div className="grid grid-cols-2 gap-4 md:gap-5">
                 <div>
-                  <label htmlFor="telefono" className="block text-xs text-white/40 uppercase tracking-wider mb-2">Teléfono *</label>
+                  <label htmlFor="telefono" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Teléfono *</label>
                   <Input id="telefono" name="telefono" type="tel" required autoComplete="tel" inputMode="tel" value={formData.telefono} onChange={handleChange}
-                    className="h-14 bg-white/5 border-white/10 focus:border-white/30 rounded-xl text-white placeholder:text-white/20" placeholder="600 000 000" />
+                    className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white placeholder:text-white/35" placeholder="600 000 000" />
                 </div>
                 <div>
-                  <label htmlFor="fecha" className="block text-xs text-white/40 uppercase tracking-wider mb-2">Fecha *</label>
-                  <Input id="fecha" name="fecha" type="date" required min={manana()} value={formData.fecha} onChange={handleChange}
-                    className="h-14 bg-white/5 border-white/10 focus:border-white/30 rounded-xl text-white [color-scheme:dark]" />
-                </div>
-                <div>
-                  <label htmlFor="hora" className="block text-xs text-white/40 uppercase tracking-wider mb-2">Hora *</label>
-                  <Input id="hora" name="hora" type="time" required value={formData.hora} onChange={handleChange}
-                    className="h-14 bg-white/5 border-white/10 focus:border-white/30 rounded-xl text-white [color-scheme:dark]" />
-                </div>
-                <div>
-                  <label htmlFor="personas" className="block text-xs text-white/40 uppercase tracking-wider mb-2">Personas *</label>
+                  <label htmlFor="personas" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Personas *</label>
                   <Input id="personas" name="personas" type="number" required min="1" max="20" inputMode="numeric" value={formData.personas} onChange={handleChange}
-                    className="h-14 bg-white/5 border-white/10 focus:border-white/30 rounded-xl text-white placeholder:text-white/20" placeholder="10" />
+                    className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white placeholder:text-white/35" placeholder="10" />
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <label htmlFor="fecha" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Fecha *</label>
+                  <Input id="fecha" name="fecha" type="date" required min={manana()} value={formData.fecha} onChange={handleChange}
+                    className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white [color-scheme:dark]" />
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <label htmlFor="hora" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Hora *</label>
+                  <Input id="hora" name="hora" type="time" required aria-describedby="horario-reservado" value={formData.hora} onChange={handleChange}
+                    className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white [color-scheme:dark]" />
                 </div>
               </div>
+
+              {/* El horario, a la vista: el selector de hora acepta cualquier hora
+                  y nada avisaba de que el local abre de noche. */}
+              <p id="horario-reservado" className="text-xs text-white/60 font-light -mt-1">
+                Abrimos de jueves a sábado de 20:00 a 02:00 y los domingos de 18:00 a 00:00.
+              </p>
 
               <div>
-                <label htmlFor="mensaje" className="block text-xs text-white/40 uppercase tracking-wider mb-2">Mensaje</label>
+                <label htmlFor="mensaje" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Mensaje</label>
                 <Textarea id="mensaje" name="mensaje" rows={4} value={formData.mensaje} onChange={handleChange}
-                  className="bg-white/5 border-white/10 focus:border-white/30 rounded-xl text-white placeholder:text-white/20 resize-none"
+                  className="bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white placeholder:text-white/35 resize-none"
                   placeholder="Tipo de evento, preferencias especiales..." />
               </div>
 
