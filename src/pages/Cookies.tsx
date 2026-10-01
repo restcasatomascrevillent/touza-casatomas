@@ -12,8 +12,8 @@ import { RUTAS_LEGALES, TITULAR } from "@/lib/legal";
 //    `touza-pages` y el precache de Workbox).
 //  · Google Maps (iframe de /contacto): solo con consentimiento o "Cargar mapa".
 //  · Vercel Web Analytics: sin cookies ni almacenamiento local.
-//  · Supabase: la web solo lee la carta y llama a funciones sin iniciar
-//    sesión, así que no guarda nada en el navegador.
+//  · Supabase: la web solo lee la carta, sin iniciar sesión, así que no
+//    guarda nada en el navegador.
 //  · Lenis (scroll suave) y framer-motion: no guardan nada.
 // Si se añade cualquier otra cookie o script de terceros, actualizar esta
 // tabla Y el aviso (CookieConsent.tsx) ANTES de publicarlo.
@@ -102,10 +102,6 @@ const Cookies = () => (
         <li>
           <strong>Tipografías (Google Fonts)</strong> y <strong>algunas fotos de la galería (Unsplash)</strong>: se
           descargan de servidores de terceros, que reciben tu dirección IP, pero no instalan cookies.
-        </li>
-        <li>
-          <strong>Formulario de El Reservado</strong>: envía los datos que escribes, pero no guarda nada en tu
-          navegador.
         </li>
       </ul>
 

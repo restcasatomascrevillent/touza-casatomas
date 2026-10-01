@@ -5,10 +5,13 @@ import { canonical } from "@/lib/site";
 import { ESTABLECIMIENTO, RUTAS_LEGALES, TITULAR } from "@/lib/legal";
 
 // Describe lo que la web hace HOY (revisado en el código el 01/10/2026):
-//  · Formulario de El Reservado → Edge Function `reservas-web` de Supabase
-//    (proyecto en eu-west-1, Irlanda) → tabla de solicitudes; comprueba la
-//    lista de exclusión (blacklist) por teléfono/email; los correos al
-//    cliente salen por Resend. Ya no pasa por n8n.
+//  · Sin formularios: Touza no acepta reservas por la web (decisión del
+//    dueño, 01/10/2026). Se retiró el de El Reservado y, con él, lo que solo
+//    existía por él: solicitudes en Supabase, comprobación de la lista de
+//    exclusión, consentimiento para alergias y correos por Resend.
+//  · El contacto es por teléfono o correo (datos en src/lib/legal.ts).
+//  · Supabase (proyecto en eu-west-1, Irlanda): el navegador lee de ahí la
+//    carta, sin iniciar sesión y sin enviar datos del visitante.
 //  · Vercel aloja la web y sirve Vercel Web Analytics (sin cookies).
 //  · Google Maps en /contacto: solo con consentimiento o a petición.
 //  · Google Fonts se cargan desde los servidores de Google (index.html).
@@ -25,7 +28,7 @@ const Privacidad = () => (
   <>
     <Seo
       title="Política de privacidad"
-      description="Cómo trata Touza Cocktail Bar los datos personales de la solicitud de El Reservado y de la navegación por la web, conforme al RGPD y la LOPDGDD."
+      description="Cómo trata Touza Cocktail Bar los datos personales de quien le llama o le escribe y de la navegación por la web, conforme al RGPD y la LOPDGDD."
       canonical={canonical(RUTAS_LEGALES.privacidad)}
       keywords={[]}
     />
@@ -53,22 +56,17 @@ const Privacidad = () => (
       </dl>
 
       <h2 id="datos">2. Qué datos tratamos</h2>
-      <h3>Si nos envías una solicitud de El Reservado</h3>
+      <p>
+        Esta web no tiene formularios: no recoge nada de lo que escribas en ella.
+      </p>
+      <h3>Si nos llamas o nos escribes</h3>
       <ul>
-        <li>Nombre, correo electrónico y teléfono.</li>
-        <li>Fecha, hora y número de personas que nos pides.</li>
-        <li>Lo que escribas en «Mensaje» (tipo de evento, preferencias…).</li>
         <li>
-          Las respuestas que nos des a los correos sobre tu solicitud (por ejemplo, si aceptas o rechazas una
-          propuesta de hora).
+          Los datos que tú nos des: tu nombre, tu teléfono o tu correo electrónico y lo que nos cuentes en la
+          llamada o en el mensaje.
         </li>
       </ul>
-      <p>
-        Los campos marcados con * son necesarios: sin ellos no podemos estudiar la solicitud ni contestarte. Por favor,
-        no incluyas en el mensaje datos de salud ni otros datos sensibles. Si quieres que tengamos en cuenta una
-        alergia o intolerancia para tu evento, al escribirla nos das tu consentimiento expreso para usarla solo con
-        ese fin.
-      </p>
+      <p>Por favor, no nos envíes datos de salud ni otros datos sensibles por correo.</p>
       <h3>Si solo navegas</h3>
       <ul>
         <li>
@@ -92,20 +90,8 @@ const Privacidad = () => (
         cabeceras={["Finalidad", "Base legal (RGPD)"]}
         filas={[
           [
-            "Estudiar tu solicitud de El Reservado, comprobar la disponibilidad y contestarte por correo o teléfono, incluida una propuesta de otra hora si hace falta.",
-            "Aplicación de medidas precontractuales a petición tuya (art. 6.1.b).",
-          ],
-          [
-            "Gestionar la reserva si se confirma: avisos, cambios y anulaciones.",
-            "Ejecución del contrato de reserva (art. 6.1.b).",
-          ],
-          [
-            "Tener en cuenta una alergia o intolerancia que nos indiques en el mensaje.",
-            "Tu consentimiento expreso (arts. 6.1.a y 9.2.a), que puedes retirar cuando quieras.",
-          ],
-          [
-            "Evitar abusos del sistema de solicitudes: limitar envíos repetidos y comprobar una lista interna de exclusión.",
-            "Interés legítimo en proteger el servicio y la disponibilidad del local (art. 6.1.f).",
+            "Contestar a lo que nos preguntes o nos pidas por teléfono o por correo.",
+            "Tu propia petición: medidas precontractuales a petición tuya (art. 6.1.b) o, si no tiene que ver con un servicio, nuestro interés legítimo en atenderte (art. 6.1.f).",
           ],
           [
             "Medir las visitas a la web de forma agregada y sin cookies, para saber qué páginas funcionan.",
@@ -133,19 +119,9 @@ const Privacidad = () => (
       <h2 id="conservacion">4. Cuánto tiempo los conservamos</h2>
       <ul>
         <li>
-          <strong>Solicitudes que no llegan a reserva:</strong> el tiempo necesario para gestionarlas y contestarte.
-        </li>
-        <li>
-          <strong>Reservas:</strong> mientras dure la reserva y, después, el tiempo necesario para atender posibles
-          reclamaciones.
-        </li>
-        <li>
-          En ambos casos, una vez cumplido el fin, los datos se conservan bloqueados solo durante los plazos de
-          prescripción de las acciones legales que puedan derivarse, y luego se suprimen.
-        </li>
-        <li>
-          <strong>Alergias o intolerancias:</strong> solo hasta que se celebre el evento, o hasta que retires tu
-          consentimiento.
+          <strong>Consultas por teléfono o correo:</strong> el tiempo necesario para contestarte. Después, los datos
+          se conservan bloqueados solo durante los plazos de prescripción de las acciones legales que puedan
+          derivarse, y luego se suprimen.
         </li>
         <li>
           <strong>Estadísticas de visitas:</strong> se guardan agregadas, sin datos que te identifiquen.
@@ -164,18 +140,13 @@ const Privacidad = () => (
         filas={[
           [
             "Supabase, Inc.",
-            "Base de datos y servidor donde se guarda y procesa la solicitud.",
+            "Base de datos de la que se carga la carta. Recibe los datos técnicos de la conexión (como la IP), pero la web no le envía datos tuyos.",
             "Servidores en la Unión Europea (Irlanda).",
           ],
           [
             "Vercel, Inc.",
             "Alojamiento de la web y estadísticas de visitas sin cookies.",
             "Red global; empresa con sede en EE. UU.",
-          ],
-          [
-            "Resend",
-            "Envío de los correos sobre tu solicitud o reserva.",
-            "Empresa con sede en EE. UU.",
           ],
         ]}
       />
@@ -200,9 +171,9 @@ const Privacidad = () => (
 
       <h2 id="transferencias">6. Transferencias internacionales</h2>
       <p>
-        Vercel y Resend son empresas de EE. UU. y pueden acceder a datos desde allí. Esas transferencias se amparan en
-        el Marco de Privacidad de Datos UE-EE. UU. o, en su defecto, en las cláusulas contractuales tipo aprobadas por
-        la Comisión Europea (art. 46 RGPD). Los datos de las solicitudes se almacenan en la Unión Europea.
+        Vercel es una empresa de EE. UU. y puede acceder a datos desde allí. Esas transferencias se amparan en el Marco
+        de Privacidad de Datos UE-EE. UU. o, en su defecto, en las cláusulas contractuales tipo aprobadas por la
+        Comisión Europea (art. 46 RGPD). La base de datos de la carta (Supabase) está en la Unión Europea.
       </p>
 
       <h2 id="derechos">7. Tus derechos</h2>
@@ -239,15 +210,15 @@ const Privacidad = () => (
 
       <h2 id="menores">8. Menores de edad</h2>
       <p>
-        Touza es una coctelería. La solicitud de El Reservado debe enviarla una persona mayor de edad; no recogemos a
-        sabiendas datos de menores de 14 años (art. 7 LOPDGDD).
+        Touza es una coctelería y esta web no está dirigida a menores. No recogemos a sabiendas datos de menores de 14
+        años (art. 7 LOPDGDD).
       </p>
 
       <h2 id="seguridad">9. Seguridad y veracidad</h2>
       <p>
-        Aplicamos medidas técnicas y organizativas para proteger tus datos: conexión cifrada (HTTPS), acceso al panel
-        de reservas restringido al personal autorizado y proveedores con garantías. Al enviar el formulario declaras
-        que los datos son tuyos y ciertos, o que tienes permiso de la persona a la que pertenecen.
+        Aplicamos medidas técnicas y organizativas para proteger tus datos: conexión cifrada (HTTPS), acceso
+        restringido al personal autorizado y proveedores con garantías. Si nos das datos de otra persona, debes tener
+        su permiso.
       </p>
 
       <h2 id="cambios">10. Cambios en esta política</h2>

@@ -48,9 +48,8 @@ const AvisoLegal = () => (
 
       <h2 id="objeto">2. Objeto y aceptación</h2>
       <p>
-        Esta web da a conocer Touza Cocktail Bar: su carta, su galería, el espacio privado El Reservado y los datos de
-        contacto. También permite enviar una solicitud de reserva de El Reservado, que no es una reserva confirmada
-        hasta que te respondamos.
+        Esta web da a conocer Touza Cocktail Bar: su carta, su galería, su horario y los datos de contacto. No tiene
+        formularios ni permite hacer compras: para cualquier consulta, llámanos o escríbenos.
       </p>
       <p>
         Navegar por la web te convierte en usuario e implica que aceptas este aviso legal. Si no estás de acuerdo con él,
@@ -61,10 +60,9 @@ const AvisoLegal = () => (
       <h2 id="uso">3. Uso de la web</h2>
       <p>Te comprometes a usar la web de forma lícita y, en particular, a no:</p>
       <ul>
-        <li>enviar solicitudes con datos falsos o de otras personas sin su permiso;</li>
         <li>introducir virus o cualquier código que pueda dañar la web o los equipos de otros usuarios;</li>
         <li>intentar acceder a zonas restringidas o a los sistemas que hay detrás de la web;</li>
-        <li>usar los formularios de forma automatizada o masiva.</li>
+        <li>hacer un uso automatizado o masivo de la web que pueda dañarla o sobrecargarla.</li>
       </ul>
       <p>
         Los precios y la carta que se muestran son orientativos y pueden cambiar sin previo aviso; los que valen son

@@ -69,14 +69,32 @@ describe("Aviso legal", () => {
 });
 
 describe("Política de privacidad", () => {
-  it("cubre el formulario de El Reservado, la base legal, los derechos y la AEPD", () => {
+  it("cubre el contacto por teléfono o correo, la base legal, los derechos y la AEPD", () => {
     enRouter(React.createElement(Privacidad));
     expect(screen.getByRole("heading", { level: 1, name: "Política de privacidad" })).toBeInTheDocument();
-    expect(screen.getByText(/Si nos envías una solicitud de El Reservado/)).toBeInTheDocument();
+    expect(screen.getByText(/Si nos llamas o nos escribes/)).toBeInTheDocument();
     expect(screen.getByText(/medidas precontractuales a petición tuya \(art\. 6\.1\.b\)/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "www.aepd.es" })).toHaveAttribute("href", "https://www.aepd.es");
-    for (const proveedor of ["Supabase, Inc.", "Vercel, Inc.", "Resend"]) {
+    for (const proveedor of ["Supabase, Inc.", "Vercel, Inc."]) {
       expect(screen.getByText(proveedor)).toBeInTheDocument();
+    }
+  });
+
+  it("ya no habla del formulario de reservas ni de lo que solo existía por él", () => {
+    const { container } = enRouter(React.createElement(Privacidad));
+    expect(container.textContent).not.toMatch(/reserv|Resend|alergia|exclusión/i);
+  });
+});
+
+describe("Teléfono de contacto de los textos legales", () => {
+  it("es el de Touza (966 782 000), no el de Casa Tomás", () => {
+    expect(TITULAR.telefono).toBe("966 782 000");
+    expect(TITULAR.telefonoHref).toBe("tel:+34966782000");
+    for (const pagina of [AvisoLegal, Privacidad]) {
+      const { container, unmount } = enRouter(React.createElement(pagina));
+      expect(container.textContent).toContain("966 782 000");
+      expect(container.textContent).not.toMatch(/966 ?10 ?78 ?87/);
+      unmount();
     }
   });
 });
