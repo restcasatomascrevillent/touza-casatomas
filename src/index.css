@@ -498,6 +498,58 @@
     }
   }
 
+  /* Apariciones al hacer scroll (componente <Reveal>). Solo el JS pone
+     `data-reveal`, y solo en lo que está bajo el pliegue al montar: el HTML
+     prerenderizado nunca trae nada oculto. */
+  [data-reveal="pendiente"] {
+    opacity: 0;
+    transform: translate3d(0, var(--reveal-y, 24px), 0) scale(var(--reveal-scale, 1));
+  }
+
+  [data-reveal="visto"] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) var(--reveal-delay, 0s),
+      transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s);
+  }
+
+  /* Zoom lento de la foto del hero (escritorio). En CSS para que arranque con
+     el HTML del SSG, sin esperar a hidratar. */
+  .ken-burns {
+    animation: ken-burns 30s linear infinite alternate;
+  }
+
+  @keyframes ken-burns {
+    from {
+      transform: scale(1.05);
+    }
+
+    to {
+      transform: scale(1.15);
+    }
+  }
+
+  /* Indicador de "hay más abajo" del hero: aparece tarde y oscila. */
+  .pista-scroll {
+    animation: entrada-hero 1s cubic-bezier(0.25, 0.1, 0.25, 1) 1.6s both;
+  }
+
+  .oscilar {
+    animation: oscilar 2s ease-in-out infinite;
+  }
+
+  @keyframes oscilar {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(7px);
+    }
+  }
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
 

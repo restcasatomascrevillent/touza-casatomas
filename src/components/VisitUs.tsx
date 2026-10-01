@@ -1,7 +1,5 @@
 import { MapPin, Clock, Phone, Mail, Instagram } from "lucide-react";
-import { motion } from "framer-motion";
-
-const appleEase = [0.25, 0.1, 0.25, 1] as const;
+import Reveal from "@/components/Reveal";
 
 // Cada dato con su enlace: antes eran <p> sueltos y en el móvil no se podía
 // pulsar el teléfono ni abrir la dirección en el mapa desde la portada.
@@ -37,33 +35,26 @@ const VisitUs = () => {
     <section className="py-12 md:py-32 bg-black text-white">
       <div className="max-w-5xl mx-auto px-5 md:px-6">
         <div className="text-center mb-8 md:mb-20">
-          <motion.span
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, ease: appleEase }}
+          <Reveal
+            as="span"
             className="text-primary text-[11px] md:text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
           >
             Contacto
-          </motion.span>
-          <motion.h2
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: appleEase }}
+          </Reveal>
+          <Reveal
+            as="h2"
+            delay={0.08}
             className="font-serif text-3xl md:text-6xl text-white mb-3 md:mb-6"
           >
             Visítanos
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1, ease: appleEase }}
+          </Reveal>
+          <Reveal
+            as="p"
+            delay={0.16}
             className="text-white/65 text-base md:text-lg max-w-xl mx-auto font-light"
           >
             Te esperamos en el corazón de Crevillente.
-          </motion.p>
+          </Reveal>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-16 relative">
@@ -72,14 +63,7 @@ const VisitUs = () => {
           <div className="hidden md:block absolute top-8 bottom-8 right-1/3 w-px bg-white/5" />
 
           {contactItems.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.08, ease: appleEase }}
-              className="text-center"
-            >
+            <Reveal key={item.title} delay={index * 0.08} className="text-center">
               <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-3 md:mb-6 rounded-full bg-white/5 flex items-center justify-center">
                 <item.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" aria-hidden="true" />
               </div>
@@ -100,15 +84,12 @@ const VisitUs = () => {
                   <p key={line.text} className="text-white/70 text-sm md:text-base font-light leading-relaxed">{line.text}</p>
                 )
               )}
-            </motion.div>
+            </Reveal>
           ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2, ease: appleEase }}
+        <Reveal
+          delay={0.2}
           className="flex justify-center gap-3 md:gap-4 mt-8 md:mt-16"
         >
           <a
@@ -127,7 +108,7 @@ const VisitUs = () => {
           >
             <Instagram className="w-[18px] h-[18px] md:w-5 md:h-5 text-white/70" aria-hidden="true" />
           </a>
-        </motion.div>
+        </Reveal>
       </div>
     </section>
   );
