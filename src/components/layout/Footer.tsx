@@ -18,17 +18,20 @@ const legalLinks = [
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  // Contacto acaba con la dirección y el mapa justo encima: "Cómo llegar"
-  // repetiría lo que ya está en la página.
-  const enContacto = useLocation().pathname.replace(/\/+$/, "") === "/contacto";
+  // La portada (con "Visítanos") y Contacto (con el mapa) ya acaban con la
+  // dirección justo encima: el CTA repetiría lo que acaba de leerse.
+  const ruta = useLocation().pathname.replace(/\/+$/, "") || "/";
+  const conCta = ruta !== "/" && ruta !== "/contacto";
 
   return (
     <>
       {/* Pre-footer CTA. Hasta el 01/10/2026 era "Reserva tu experiencia" →
           El Reservado; Touza ya no acepta reservas por la web, así que invita
-          a venir y lleva a la ruta en Google Maps. */}
-      {!enContacto && (
-      <section className="bg-black py-10 md:py-24 text-center px-5 md:px-6">
+          a venir y lleva a la ruta en Google Maps. Solo desde lg: por debajo
+          está la barra fija (lg:hidden) con el mismo "Cómo llegar" siempre a
+          mano, y repetirlo encima del pie solo alargaba la página. */}
+      {conCta && (
+      <section className="hidden lg:block bg-black py-24 text-center px-6">
         {/* <Reveal> y no `whileInView`: este CTA va en el pie de TODAS las
             páginas y el `opacity:0` de framer salía en línea en el HTML del
             SSG, oculto hasta hidratar. La línea dorada crece desde el centro

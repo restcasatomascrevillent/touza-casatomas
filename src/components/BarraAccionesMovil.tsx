@@ -33,7 +33,8 @@ const BarraAccionesMovil = () => {
       >
         {/* En tablet y en horizontal, dos botones de 400 px cada uno pesaban
             demasiado: se quedan en una columna centrada. Por debajo de 360 px
-            se quitan los iconos para que "Cómo llegar" quepa entero. */}
+            se quitan los iconos (`.icono-estrecho`, en index.css) para que
+            "Cómo llegar" quepa entero. */}
         <div className="flex gap-2 px-4 py-2 h-[4.5rem] max-w-md mx-auto">
           <Button
             asChild
@@ -42,7 +43,7 @@ const BarraAccionesMovil = () => {
             className="flex-1 min-w-0 px-4 h-14 border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white font-medium text-base rounded-full"
           >
             <a href={TELEFONO.href} aria-label={`Llamar a Touza: ${TELEFONO.texto}`} className="flex items-center justify-center gap-2">
-              <Phone className="w-5 h-5 shrink-0 max-[359px]:hidden" aria-hidden="true" />
+              <Phone className="w-5 h-5 shrink-0 icono-estrecho" aria-hidden="true" />
               <span>Llamar</span>
             </a>
           </Button>
@@ -58,7 +59,7 @@ const BarraAccionesMovil = () => {
               aria-label="Cómo llegar a Touza (abre Google Maps)"
               className="flex items-center justify-center gap-2"
             >
-              <Navigation className="w-5 h-5 shrink-0 max-[359px]:hidden" aria-hidden="true" />
+              <Navigation className="w-5 h-5 shrink-0 icono-estrecho" aria-hidden="true" />
               <span className="truncate">Cómo llegar</span>
             </a>
           </Button>
