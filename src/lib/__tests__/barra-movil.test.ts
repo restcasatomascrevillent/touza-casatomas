@@ -27,10 +27,8 @@ describe("barra del móvil por ruta (handle en App.tsx)", () => {
     expect(muestraBarraMovil([{ handle: portada?.handle }])).toBe(true);
   });
 
-  it("no sale donde ya se llama o se reserva, ni en la respuesta a la reserva", () => {
-    for (const ruta of ["reservado", "contacto", "reserva/respuesta"]) {
-      expect(muestraBarraMovil(matchesDe(ruta))).toBe(false);
-    }
+  it("no sale en Contacto, que ya lleva Llamar y Cómo llegar arriba", () => {
+    expect(muestraBarraMovil(matchesDe("contacto"))).toBe(false);
   });
 
   it("el 404 se ve igual en /404 y en cualquier URL inventada (ruta *): con barra", () => {

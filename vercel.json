@@ -2,6 +2,11 @@
   "trailingSlash": false,
   "cleanUrls": true,
   "regions": ["fra1"],
+  "redirects": [
+    { "source": "/reservado", "destination": "/contacto", "statusCode": 301 },
+    { "source": "/reserva/respuesta", "destination": "/contacto", "statusCode": 301 },
+    { "source": "/reserva/respuesta/:ruta*", "destination": "/contacto", "statusCode": 301 }
+  ],
   "headers": [
     {
       "source": "/(.*)",

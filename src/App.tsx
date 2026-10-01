@@ -93,25 +93,18 @@ export const routes: RouteRecord[] = [
       { index: true, lazy: lazyRoute(() => import("./pages/Index")) },
       { path: "carta", lazy: lazyRoute(() => import("./pages/Carta")) },
       { path: "galeria", lazy: lazyRoute(() => import("./pages/Galeria")) },
-      // `handle: SIN_BARRA_MOVIL`: sin la barra fija "Llamar / Reservar" del
-      // móvil (ver src/lib/barra-movil.ts). Ya son el destino de esos botones.
-      { path: "reservado", handle: SIN_BARRA_MOVIL, lazy: lazyRoute(() => import("./pages/Reservado")) },
+      // `handle: SIN_BARRA_MOVIL`: sin la barra fija "Llamar / Cómo llegar"
+      // del móvil (ver src/lib/barra-movil.ts). Contacto ya lleva esas mismas
+      // acciones arriba del todo.
+      // Touza no acepta reservas por la web (decisión del dueño, 01/10/2026):
+      // /reservado y /reserva/respuesta ya no existen y vercel.json las
+      // redirige (301) a /contacto.
       { path: "contacto", handle: SIN_BARRA_MOVIL, lazy: lazyRoute(() => import("./pages/Contacto")) },
       // Textos legales (LSSI-CE, RGPD/LOPDGDD y cookies). Datos del titular en
-      // src/lib/legal.ts; el pie, el aviso de cookies y el formulario de El
-      // Reservado enlazan aquí.
+      // src/lib/legal.ts; el pie y el aviso de cookies enlazan aquí.
       { path: "aviso-legal", lazy: lazyRoute(() => import("./pages/AvisoLegal")) },
       { path: "privacidad", lazy: lazyRoute(() => import("./pages/Privacidad")) },
       { path: "cookies", lazy: lazyRoute(() => import("./pages/Cookies")) },
-      // Página de los enlaces de los correos de reserva (Supabase sirve el HTML
-      // de sus funciones como text/plain, así que la sirve la web). `noindex`;
-      // el SSG prerenderiza un cascarón vacío: el token se lee en el navegador.
-      // Queda fuera del sitemap porque vive en una subcarpeta (reserva/).
-      {
-        path: "reserva/respuesta",
-        handle: SIN_BARRA_MOVIL,
-        lazy: lazyRoute(() => import("./pages/RespuestaReserva")),
-      },
       // Ruta literal para que el SSG prerenderice `404.html` (vite-react-ssg
       // descarta la ruta "*" al recolectar paths). Vercel sirve ese fichero con
       // status 404 para cualquier URL que no resuelva en el filesystem.

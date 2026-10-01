@@ -37,7 +37,6 @@ import AvisoLegal from "../AvisoLegal";
 import Privacidad from "../Privacidad";
 import Cookies from "../Cookies";
 import CookieConsent from "@/components/CookieConsent";
-import AvisoProteccionDatos from "@/components/legal/AvisoProteccionDatos";
 import { TITULAR } from "@/lib/legal";
 
 // Router de datos (como el de vite-react-ssg): el aviso de cookies lee los
@@ -161,11 +160,5 @@ describe("Enlaces a los textos legales", () => {
   it("el aviso de cookies enlaza «Más información» a /cookies", () => {
     enRouter(React.createElement(CookieConsent));
     expect(screen.getByRole("link", { name: "Más información" })).toHaveAttribute("href", "/cookies");
-  });
-
-  it("la información básica de protección de datos enlaza a /privacidad", () => {
-    enRouter(React.createElement(AvisoProteccionDatos, { finalidad: "gestionar tu solicitud." }));
-    expect(screen.getByText(TITULAR.denominacion, { exact: false })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /política de privacidad/i })).toHaveAttribute("href", "/privacidad");
   });
 });

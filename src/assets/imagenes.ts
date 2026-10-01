@@ -74,9 +74,10 @@ function construir(nombre: string): ImagenResponsive {
  * Reservado. El argumento de `construir` es el nombre del maestro en
  * `src/assets/originales/` (`touza-2`, `touza-5`…) para rastrear cada foto.
  *
- * No hay ninguna foto real de El Reservado. Cuando lleguen, van a
- * `src/assets/originales/` con una clave propia (p. ej. `salaReservado`);
- * formatos y huecos en docs/fotos-necesarias.md.
+ * Las fotos nuevas van a `src/assets/originales/` con una clave propia;
+ * formatos y huecos en docs/fotos-necesarias.md. (El recorte cuadrado del
+ * champán, `touza-8`, solo lo usaba /reservado y se retiró con las reservas
+ * web el 01/10/2026.)
  */
 export const IMAGENES = {
   /** Sala principal (sofá mostaza, mesas de mármol), apaisada. Hero de la portada, og:image y `image` del JSON-LD. */
@@ -92,8 +93,6 @@ export const IMAGENES = {
   mojito: construir("touza-7"),
   /** Tres botellas de champán Laurent-Perrier y una copa sobre mármol, vertical. */
   champanMesa: construir("touza-8-1"),
-  /** Recorte cuadrado de la misma escena de champán. Hero de /reservado. */
-  champan: construir("touza-8"),
   /** Botellas de aperitivo (Select), ron (Kraken) y licores junto a un spritz, vertical. */
   botellas: construir("touza-10"),
 } satisfies Record<string, ImagenResponsive>;

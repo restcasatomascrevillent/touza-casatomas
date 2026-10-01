@@ -129,7 +129,6 @@ vi.mock("@/components/layout/Header", () => ({
 // ---------------------------------------------------------------------------
 const Index = React.lazy(() => import("../Index"));
 const Carta = React.lazy(() => import("../Carta"));
-const Reservado = React.lazy(() => import("../Reservado"));
 const Contacto = React.lazy(() => import("../Contacto"));
 const NotFound = React.lazy(() => import("../NotFound"));
 
@@ -160,7 +159,6 @@ function renderRoute(path: string) {
             null,
             React.createElement(Route, { path: "/", element: React.createElement(Index) }),
             React.createElement(Route, { path: "/carta", element: React.createElement(Carta) }),
-            React.createElement(Route, { path: "/reservado", element: React.createElement(Reservado) }),
             React.createElement(Route, { path: "/contacto", element: React.createElement(Contacto) }),
             React.createElement(Route, { path: "*", element: React.createElement(NotFound) })
           )
@@ -197,15 +195,6 @@ describe("Rutas de la aplicación — renderizan sin crash", () => {
       { timeout: 5000 }
     );
     expect(screen.getByText("Nuestra Carta")).toBeInTheDocument();
-  });
-
-  it("ruta '/reservado' — renderiza la página El Reservado", async () => {
-    renderRoute("/reservado");
-    await waitFor(
-      () => expect(screen.queryByText("Cargando...")).not.toBeInTheDocument(),
-      { timeout: 5000 }
-    );
-    expect(screen.getByText("El Reservado")).toBeInTheDocument();
   });
 
   it("ruta '/contacto' — renderiza la página Contacto", async () => {
