@@ -15,7 +15,7 @@ const IndexDesktop = () => {
       <HeroDesktop />
 
       {/* Philosophy */}
-      <section className="py-40 bg-background">
+      <section className="py-32 lg:py-36 bg-background">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.span
             initial={{ opacity: 0 }}

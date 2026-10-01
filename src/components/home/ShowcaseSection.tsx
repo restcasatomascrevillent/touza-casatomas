@@ -34,8 +34,8 @@ const ShowcaseSection = ({
   const imageY = useTransform(scrollYProgress, [0, 1], ["-5%", "5%"]);
 
   return (
-    <section className="py-32 lg:py-40">
-      <AnimatedDividerSVG className="mb-16 hidden lg:flex" />
+    <section className="py-20 lg:py-28">
+      <AnimatedDividerSVG className="mb-14 hidden lg:flex" />
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           ref={imageRef}
