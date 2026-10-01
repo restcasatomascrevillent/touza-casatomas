@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Users, Wine, Music, Star, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Users, Wine, Music, Star, Loader2, CheckCircle2, AlertCircle, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -212,7 +212,7 @@ const Reservado = () => {
           en estado "pendiente" (201) como si la registró para revisión
           manual por ser un grupo grande (motivo "grupo_grande"). */}
       <Dialog open={showRecibidaDialog} onOpenChange={setShowRecibidaDialog}>
-        <DialogContent className="bg-black border-white/10 text-white sm:max-w-md text-center">
+        <DialogContent className="bg-black border-white/10 text-white sm:max-w-md text-center max-h-[calc(100dvh-2rem)] overflow-y-auto">
           <DialogHeader className="space-y-4">
             <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
               <CheckCircle2 className="w-9 h-9 text-primary" />
@@ -258,7 +258,7 @@ const Reservado = () => {
           alcanzado, fallo de red…). Nunca genérico: siempre con el motivo y,
           cuando lo hay, el mensaje que manda el propio servidor. */}
       <Dialog open={rechazo !== null} onOpenChange={(abierto) => !abierto && setRechazo(null)}>
-        <DialogContent className="bg-black border-white/10 text-white sm:max-w-md text-center">
+        <DialogContent className="bg-black border-white/10 text-white sm:max-w-md text-center max-h-[calc(100dvh-2rem)] overflow-y-auto">
           <DialogHeader className="space-y-4">
             <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
               <AlertCircle className="w-9 h-9 text-amber-400" />
@@ -309,11 +309,13 @@ const Reservado = () => {
               sizes="100vw"
               priority={true}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/80" />
+            {/* En el móvil el titular cae sobre las etiquetas de las botellas:
+                abajo, más oscuro. */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(0_0_0/0.4)_0%,rgb(0_0_0/0.2)_30%,rgb(0_0_0/0.7)_62%,rgb(0_0_0/0.92)_100%)] md:bg-gradient-to-b md:from-black/40 md:via-black/20 md:to-black/80" />
           </motion.div>
 
           <div className="absolute inset-0 z-10 flex items-end pb-12 md:pb-20 px-6">
-            <div className="max-w-6xl mx-auto w-full">
+            <div className="max-w-6xl mx-auto w-full text-shadow">
               <span
                 style={{ animationDelay: "0.15s" }}
                 className="entrada-hero text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
@@ -326,6 +328,17 @@ const Reservado = () => {
               >
                 El Reservado
               </h1>
+              {/* Aquí no está la barra fija "Llamar / Reservar" y el formulario
+                  queda tres secciones más abajo: sin este botón, el móvil no
+                  tenía ninguna acción en la primera pantalla. */}
+              <a
+                href="#solicitud"
+                style={{ animationDelay: "0.4s" }}
+                className="entrada-hero mt-6 md:mt-8 inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full bg-white text-black text-[15px] font-medium hover:bg-white/90 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              >
+                Solicitar El Reservado
+                <ArrowDown className="w-4 h-4" aria-hidden="true" />
+              </a>
             </div>
           </div>
         </section>
@@ -412,8 +425,8 @@ const Reservado = () => {
         </section>
 
         {/* Form */}
-        <section className="py-12 md:py-32 bg-black">
-          <div className="max-w-2xl mx-auto px-6">
+        <section id="solicitud" className="scroll-mt-16 py-12 md:py-32 bg-black">
+          <div className="max-w-2xl mx-auto px-5 md:px-6">
             <div className="text-center mb-8 md:mb-12">
               <Reveal
                 as="span"
@@ -443,12 +456,12 @@ const Reservado = () => {
             >
               <div className="grid gap-4 md:gap-5 md:grid-cols-2">
                 <div>
-                  <label htmlFor="nombre" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Nombre *</label>
+                  <label htmlFor="nombre" className="block text-[13px] md:text-xs text-white/70 uppercase tracking-wider mb-2">Nombre *</label>
                   <Input id="nombre" name="nombre" type="text" required autoComplete="name" value={formData.nombre} onChange={handleChange}
                     className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white placeholder:text-white/35" placeholder="Tu nombre" />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Email *</label>
+                  <label htmlFor="email" className="block text-[13px] md:text-xs text-white/70 uppercase tracking-wider mb-2">Email *</label>
                   <Input id="email" name="email" type="email" required autoComplete="email" inputMode="email" value={formData.email} onChange={handleChange}
                     className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white placeholder:text-white/35" placeholder="tu@email.com" />
                 </div>
@@ -459,22 +472,22 @@ const Reservado = () => {
                   cortado. En móvil, fecha y hora van a lo ancho. */}
               <div className="grid grid-cols-2 gap-4 md:gap-5">
                 <div>
-                  <label htmlFor="telefono" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Teléfono *</label>
+                  <label htmlFor="telefono" className="block text-[13px] md:text-xs text-white/70 uppercase tracking-wider mb-2">Teléfono *</label>
                   <Input id="telefono" name="telefono" type="tel" required autoComplete="tel" inputMode="tel" value={formData.telefono} onChange={handleChange}
                     className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white placeholder:text-white/35" placeholder="600 000 000" />
                 </div>
                 <div>
-                  <label htmlFor="personas" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Personas *</label>
+                  <label htmlFor="personas" className="block text-[13px] md:text-xs text-white/70 uppercase tracking-wider mb-2">Personas *</label>
                   <Input id="personas" name="personas" type="number" required min="1" max="20" inputMode="numeric" value={formData.personas} onChange={handleChange}
                     className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white placeholder:text-white/35" placeholder="10" />
                 </div>
                 <div className="col-span-2 sm:col-span-1">
-                  <label htmlFor="fecha" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Fecha *</label>
+                  <label htmlFor="fecha" className="block text-[13px] md:text-xs text-white/70 uppercase tracking-wider mb-2">Fecha *</label>
                   <Input id="fecha" name="fecha" type="date" required min={manana()} value={formData.fecha} onChange={handleChange}
                     className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white [color-scheme:dark]" />
                 </div>
                 <div className="col-span-2 sm:col-span-1">
-                  <label htmlFor="hora" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Hora *</label>
+                  <label htmlFor="hora" className="block text-[13px] md:text-xs text-white/70 uppercase tracking-wider mb-2">Hora *</label>
                   <Input id="hora" name="hora" type="time" required aria-describedby="horario-reservado" value={formData.hora} onChange={handleChange}
                     className="h-14 bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white [color-scheme:dark]" />
                 </div>
@@ -482,19 +495,19 @@ const Reservado = () => {
 
               {/* El horario, a la vista: el selector de hora acepta cualquier hora
                   y nada avisaba de que el local abre de noche. */}
-              <p id="horario-reservado" className="text-xs text-white/60 font-light -mt-1">
+              <p id="horario-reservado" className="text-[13px] md:text-xs text-white/65 font-light leading-relaxed -mt-1">
                 Abrimos de jueves a sábado de 20:00 a 02:00 y los domingos de 18:00 a 00:00.
               </p>
 
               <div>
-                <label htmlFor="mensaje" className="block text-xs text-white/65 uppercase tracking-wider mb-2">Mensaje</label>
+                <label htmlFor="mensaje" className="block text-[13px] md:text-xs text-white/70 uppercase tracking-wider mb-2">Mensaje</label>
                 <Textarea id="mensaje" name="mensaje" rows={4} value={formData.mensaje} onChange={handleChange}
                   className="bg-white/5 border-white/20 focus:border-primary/70 rounded-xl text-white placeholder:text-white/35 resize-none"
                   placeholder="Tipo de evento, preferencias especiales..." />
               </div>
 
               <Button type="submit" size="lg" disabled={isSubmitting}
-                className="w-full h-14 bg-white text-black hover:bg-white/90 font-medium rounded-2xl text-base">
+                className="w-full h-14 bg-white text-black hover:bg-white/90 font-medium rounded-full text-base">
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
