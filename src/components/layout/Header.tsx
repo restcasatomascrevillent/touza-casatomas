@@ -1,9 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CURVA_CABECERA } from "@/lib/cabecera";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+
+// En el prerender (SSG) no hay ventana y useLayoutEffect solo avisaría.
+const useEfectoDeMaqueta = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 const navLinks = [
   { name: "Inicio", path: "/" },
@@ -25,18 +29,26 @@ const Header = () => {
   // colocan justo debajo de la cabecera cuando está visible y suben a 0 cuando
   // se esconde al bajar. Antes iban a 52/60 px fijos: con la cabecera oculta
   // quedaba una franja por la que se veía pasar el contenido.
+  // Se observa la caja con borde: al hacer scroll la cabecera solo cambia de
+  // padding (py-5 → py-3), que no altera la caja de contenido, y el valor se
+  // quedaba en el alto inicial (88 px en móvil frente a 72,7 reales), dejando
+  // otra vez la franja hueca. getBoundingClientRect conserva los decimales.
   useEffect(() => {
     const cabecera = headerRef.current;
     if (!cabecera || typeof ResizeObserver === "undefined") return;
     const raiz = document.documentElement;
-    const medir = () => raiz.style.setProperty("--alto-cabecera", `${cabecera.offsetHeight}px`);
+    const medir = () =>
+      raiz.style.setProperty("--alto-cabecera", `${cabecera.getBoundingClientRect().height}px`);
     medir();
     const observador = new ResizeObserver(medir);
-    observador.observe(cabecera);
+    observador.observe(cabecera, { box: "border-box" });
     return () => observador.disconnect();
   }, []);
 
-  useEffect(() => {
+  // Antes de pintar, para que la barra pegajosa arranque su transición en el
+  // mismo fotograma que la cabecera (con la misma duración y curva, ver
+  // BARRA_BAJO_CABECERA) y no se monten la una sobre la otra al reaparecer.
+  useEfectoDeMaqueta(() => {
     document.documentElement.style.setProperty(
       "--offset-cabecera",
       isHidden ? "0px" : "var(--alto-cabecera, 0px)"
@@ -75,7 +87,7 @@ const Header = () => {
           : "bg-transparent py-5",
         isHidden ? "-translate-y-full" : "translate-y-0"
       )}
-      style={{ transitionTimingFunction: "cubic-bezier(0.25, 0.1, 0.25, 1)" }}
+      style={{ transitionTimingFunction: CURVA_CABECERA }}
     >
       <div className="max-w-6xl mx-auto px-6">
         <nav className="flex items-center justify-between">

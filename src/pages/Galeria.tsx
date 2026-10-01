@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
+import { BARRA_BAJO_CABECERA } from "@/lib/cabecera";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import Seo from "@/components/Seo";
 import { IMAGENES, imagenRemota } from "@/assets/imagenes";
@@ -129,7 +130,7 @@ const Galeria = () => {
       </section>
 
       {/* Filters */}
-      <section className="sticky top-[var(--offset-cabecera,0px)] transition-[top] duration-500 z-40 bg-black/80 backdrop-blur-2xl border-y border-white/5 py-4">
+      <section className={cn(BARRA_BAJO_CABECERA, "bg-black/80 backdrop-blur-2xl border-y border-white/5 py-4")}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex items-center justify-start md:justify-center gap-2 overflow-x-auto scrollbar-hide" role="group" aria-label="Filtrar fotos">
             {galleryCategories.map((category) => (

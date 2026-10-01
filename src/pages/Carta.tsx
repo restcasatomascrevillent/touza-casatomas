@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
+import { BARRA_BAJO_CABECERA } from "@/lib/cabecera";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
 import { useVinos, useVinosRestantes, transformVinosToUI, type VinoUI } from "@/hooks/useVinos";
 import { agruparVinosPorTipo, capitalizarEtiqueta } from "@/lib/vinos-carta";
@@ -320,7 +321,7 @@ const Carta = () => {
       </section>
 
       {/* Tabs */}
-      <div className="sticky top-[var(--offset-cabecera,0px)] transition-[top] duration-500 z-40 bg-black/80 backdrop-blur-2xl border-y border-white/5 py-3">
+      <div className={cn(BARRA_BAJO_CABECERA, "bg-black/80 backdrop-blur-2xl border-y border-white/5 py-3")}>
         <div className="max-w-6xl mx-auto overflow-x-auto scrollbar-hide px-4">
           <div className="flex justify-start md:justify-center min-w-max">
             <Tabs value={activeMainCategory} onValueChange={setActiveMainCategory}>
