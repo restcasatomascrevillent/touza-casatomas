@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -56,7 +56,7 @@ const Header = () => {
       <div className="max-w-6xl mx-auto px-6">
         <nav className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="relative z-10">
+          <Link to="/" className="relative z-10" aria-label="Touza, ir al inicio">
             <span className="font-serif text-xl lg:text-2xl font-bold tracking-wider text-primary">
               TOUZA
             </span>
@@ -70,11 +70,12 @@ const Header = () => {
                 <Link
                   key={link.path}
                   to={link.path}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
                     "relative px-5 py-2 text-[13px] font-light tracking-[0.1em] uppercase transition-colors duration-300",
                     isActive
                       ? "text-white"
-                      : "text-white/50 hover:text-white/80"
+                      : "text-white/65 hover:text-white"
                   )}
                 >
                   {link.name}
@@ -104,6 +105,8 @@ const Header = () => {
                 side="right"
                 className="w-full max-w-[320px] bg-black border-l border-white/5 p-0"
               >
+                <SheetTitle className="sr-only">Menú</SheetTitle>
+                <SheetDescription className="sr-only">Secciones de la web de Touza</SheetDescription>
                 <div className="flex flex-col h-full">
                   <div className="flex items-center p-6 border-b border-white/5">
                     <Link to="/" onClick={() => setIsOpen(false)}>
@@ -121,12 +124,13 @@ const Header = () => {
                           <li key={link.path}>
                             <Link
                               to={link.path}
+                              aria-current={isActive ? "page" : undefined}
                               onClick={() => setIsOpen(false)}
                               className={cn(
                                 "flex items-center py-4 px-4 text-lg font-light tracking-wide transition-colors duration-200",
                                 isActive
                                   ? "text-white"
-                                  : "text-white/40 hover:text-white/70"
+                                  : "text-white/60 hover:text-white"
                               )}
                             >
                               <span className="font-serif">{link.name}</span>
