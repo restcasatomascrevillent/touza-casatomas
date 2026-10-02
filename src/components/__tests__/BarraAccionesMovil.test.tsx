@@ -15,19 +15,18 @@ const pintar = (handle?: unknown) =>
   );
 
 describe("BarraAccionesMovil", () => {
-  it("ofrece Llamar (al 966 782 000) y Cómo llegar (ruta en Google Maps), sin reservar", () => {
+  it("solo ofrece Cómo llegar (ruta en Google Maps), sin llamar ni reservar", () => {
     pintar();
     const barra = screen.getByRole("navigation", { name: "Acciones rápidas" });
-    const llamar = screen.getByRole("link", { name: /^Llamar/ });
     const llegar = screen.getByRole("link", { name: /^Cómo llegar/ });
 
-    expect(llamar).toHaveAttribute("href", "tel:+34966782000");
-    expect(llamar).toHaveAccessibleName(/966 782 000/);
     const url = new URL(llegar.getAttribute("href") ?? "");
     expect(url.origin + url.pathname).toBe("https://www.google.com/maps/dir/");
     expect(url.searchParams.get("destination")).toBe("C/ San Vicente, 14, 03330 Crevillente, Alicante");
     expect(llegar).toHaveAttribute("target", "_blank");
-    expect(barra.textContent).not.toMatch(/reserv/i);
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(barra.querySelector('a[href^="tel:"]')).toBeNull();
+    expect(barra.textContent).not.toMatch(/llamar|reserv/i);
   });
 
   it("no sale en las rutas con SIN_BARRA_MOVIL", () => {

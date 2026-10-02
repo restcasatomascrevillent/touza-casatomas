@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
  *   `100svh` (el viewport con la barra del navegador desplegada: no salta al
  *   hacer scroll, a diferencia de `dvh`) y es un MÍNIMO: en horizontal o con
  *   la letra del sistema grande el hero crece en vez de recortar el texto.
- *   El padding inferior deja libre la barra fija "Llamar / Cómo llegar"
+ *   El padding inferior deja libre la barra fija "Cómo llegar"
  *   (BarraAccionesMovil), con su zona segura (`--barra-movil`).
  * - ≥ md: contenido centrado, titular enorme, botones en fila, ondas doradas
  *   y halo. El parallax y el fundido del contenido con el scroll solo se

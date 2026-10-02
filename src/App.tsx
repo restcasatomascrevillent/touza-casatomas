@@ -93,9 +93,9 @@ export const routes: RouteRecord[] = [
       { index: true, lazy: lazyRoute(() => import("./pages/Index")) },
       { path: "carta", lazy: lazyRoute(() => import("./pages/Carta")) },
       { path: "galeria", lazy: lazyRoute(() => import("./pages/Galeria")) },
-      // `handle: SIN_BARRA_MOVIL`: sin la barra fija "Llamar / Cómo llegar"
-      // del móvil (ver src/lib/barra-movil.ts). Contacto ya lleva esas mismas
-      // acciones arriba del todo.
+      // `handle: SIN_BARRA_MOVIL`: sin la barra fija "Cómo llegar"
+      // del móvil (ver src/lib/barra-movil.ts). Contacto ya lleva ese mismo botón
+      // arriba del todo.
       // Touza no acepta reservas por la web (decisión del dueño, 01/10/2026):
       // /reservado y /reserva/respuesta ya no existen y vercel.json las
       // redirige (301) a /contacto.

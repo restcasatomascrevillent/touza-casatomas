@@ -131,13 +131,14 @@ describe("Contacto — renderizado", () => {
     localStorage.removeItem("touza_cookie_consent");
   });
 
-  it("en el móvil, acciones rápidas para llamar, llegar y escribir", () => {
+  it("en el móvil, acciones rápidas para llegar y escribir, sin llamar", () => {
     renderContacto();
     const acciones = screen.getByRole("navigation", { name: /acciones rápidas/i });
     const enlaces = Array.from(acciones.querySelectorAll("a")).map((a) => a.getAttribute("href"));
-    expect(enlaces[0]).toBe("tel:+34966782000");
-    expect(enlaces[1]).toContain("google.com/maps/dir/");
-    expect(enlaces[2]).toBe("mailto:info@touzabar.es");
+    expect(enlaces).toHaveLength(2);
+    expect(enlaces[0]).toContain("google.com/maps/dir/");
+    expect(enlaces[1]).toBe("mailto:info@touzabar.es");
+    expect(acciones.textContent).not.toMatch(/llamar/i);
   });
 
   it("muestra el encabezado 'Encuéntranos'", () => {

@@ -78,12 +78,12 @@ const Contacto = () => {
         <div className="max-w-6xl mx-auto px-5 md:px-6 grid gap-10 lg:grid-cols-12 lg:gap-16 lg:items-start">
           <div className="lg:col-span-5">
             {/* Acciones rápidas en el móvil. En Contacto no está la barra fija
-                "Llamar / Cómo llegar" (repetiría estos botones), así que lo
-                que más se busca aquí desde un teléfono va arriba y a un
-                toque: llamar, llegar y escribir. */}
-            <nav aria-label="Acciones rápidas" className="grid grid-cols-3 gap-2 mb-10 lg:hidden">
+                "Cómo llegar" (repetiría este botón), así que lo que más se
+                busca aquí desde un teléfono va arriba y a un toque: llegar y
+                escribir. Sin "Llamar" desde el 02/10/2026 (decisión del
+                dueño); el teléfono sigue abajo, en "Encuéntranos". */}
+            <nav aria-label="Acciones rápidas" className="grid grid-cols-2 gap-2 mb-10 lg:hidden">
               {[
-                { href: TELEFONO.href, icono: Phone, texto: "Llamar", externo: false },
                 // Ruta hasta el bar (la misma URL que la barra del móvil y el pie).
                 { href: URL_COMO_LLEGAR, icono: Navigation, texto: "Cómo llegar", externo: true },
                 { href: "mailto:info@touzabar.es", icono: Mail, texto: "Escribir", externo: false },

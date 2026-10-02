@@ -1,8 +1,9 @@
 import { useMatches } from "react-router-dom";
 
 /**
- * Barra fija "Llamar / Cómo llegar" del móvil (BarraAccionesMovil). Hasta el
- * 01/10/2026 era "Llamar / Reservar"; Touza ya no acepta reservas por la web.
+ * Barra fija "Cómo llegar" del móvil (BarraAccionesMovil). Hasta el 01/10/2026
+ * era "Llamar / Reservar"; Touza ya no acepta reservas por la web, y el botón
+ * de llamar se quitó el 02/10/2026 (decisión del dueño).
  *
  * La decide la ruta que pinta la página, no la URL: cada ruta que no quiere
  * barra lo declara en su `handle` (`handle: SIN_BARRA_MOVIL`, en App.tsx).
@@ -14,14 +15,14 @@ import { useMatches } from "react-router-dom";
  * `matches`; un contexto rellenado desde un efecto no llegaría al HTML).
  *
  * Quién no la lleva: Contacto (decisión de 01/10/2026, revisada al quitar las
- * reservas). Su primera pantalla en el móvil ya tiene "Llamar", "Cómo llegar"
- * y "Escribir" a un toque, y debajo la dirección, el teléfono y el mapa: la
- * barra repetiría dos de esos tres botones y quitaría 72 px de pantalla.
+ * reservas). Su primera pantalla en el móvil ya tiene "Cómo llegar" y
+ * "Escribir" a un toque, y debajo la dirección, el teléfono y el mapa: la
+ * barra repetiría uno de esos botones y quitaría 72 px de pantalla.
  *
  * El 404 SÍ la lleva (decisión de 01/10/2026): quien llega de un enlace roto
- * casi siempre buscaba la carta, el horario o el teléfono, y "Llamar" y
- * "Cómo llegar" son salidas útiles, al alcance del pulgar, junto a los
- * enlaces de la propia página.
+ * casi siempre buscaba la carta, el horario o la dirección, y "Cómo llegar"
+ * es una salida útil, al alcance del pulgar, junto a los enlaces de la
+ * propia página.
  *
  * Lo comparten la barra y el aviso de cookies: el aviso se apoya encima de la
  * barra cuando la hay y baja al borde de la pantalla cuando no.

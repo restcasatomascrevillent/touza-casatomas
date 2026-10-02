@@ -27,7 +27,7 @@ describe("barra del móvil por ruta (handle en App.tsx)", () => {
     expect(muestraBarraMovil([{ handle: portada?.handle }])).toBe(true);
   });
 
-  it("no sale en Contacto, que ya lleva Llamar y Cómo llegar arriba", () => {
+  it("no sale en Contacto, que ya lleva Cómo llegar arriba", () => {
     expect(muestraBarraMovil(matchesDe("contacto"))).toBe(false);
   });
 
