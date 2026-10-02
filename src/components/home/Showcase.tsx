@@ -37,7 +37,8 @@ interface ShowcaseProps {
  * columnas y se alternan (`invertido`), con la foto en vertical (las fotos
  * del local lo son: el 16:9 las recortaba mucho) y una segunda foto pequeña
  * superpuesta en escritorio. En móvil se mantiene lo que ya funcionaba: foto
- * 3:4, título, texto y botón blanco a lo ancho.
+ * 3:4, título, texto y botón blanco a lo ancho; en vez del parallax, la foto
+ * se asienta al entrar en pantalla (`.marco-zoom`/`.foto-zoom`, CSS).
  */
 const Showcase = ({ indice, label, title, description, foto, detalle, ctaText, ctaLink, invertido = false }: ShowcaseProps) => {
   const fotoRef = useRef<HTMLDivElement>(null);
@@ -59,11 +60,11 @@ const Showcase = ({ indice, label, title, description, foto, detalle, ctaText, c
         >
           <div
             ref={fotoRef}
-            className="relative aspect-[3/4] md:aspect-[4/5] rounded-2xl md:rounded-3xl overflow-hidden bg-muted"
+            className="marco-zoom relative aspect-[3/4] md:aspect-[4/5] rounded-2xl md:rounded-3xl overflow-hidden bg-muted"
           >
             <motion.div
               style={parallax ? { y: fotoY } : undefined}
-              className="absolute inset-0 md:-inset-y-[7%]"
+              className="foto-zoom absolute inset-0 md:-inset-y-[7%]"
             >
               <OptimizedImage
                 imagen={foto.imagen}
@@ -102,7 +103,7 @@ const Showcase = ({ indice, label, title, description, foto, detalle, ctaText, c
         >
           <Reveal className="flex items-center gap-3 mb-3 md:mb-6">
             <span className="font-serif text-primary text-lg md:text-xl tabular-nums leading-none">{indice}</span>
-            <span aria-hidden="true" className="h-px w-8 md:w-12 bg-primary/40" />
+            <span aria-hidden="true" className="trazo h-px w-8 md:w-12 bg-primary/40" />
             <span className="text-primary text-[11px] md:text-xs tracking-[0.3em] uppercase font-medium">{label}</span>
           </Reveal>
 

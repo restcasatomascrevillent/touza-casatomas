@@ -23,8 +23,9 @@ import { cn } from "@/lib/utils";
  *   (BarraAccionesMovil), con su zona segura (`--barra-movil`).
  * - ≥ md: contenido centrado, titular enorme, botones en fila, ondas doradas
  *   y halo. El parallax y el fundido del contenido con el scroll solo se
- *   activan en el navegador (≥ md y sin reduced-motion); en el HTML y en
- *   móvil la foto está quieta.
+ *   activan en el navegador (≥ md y sin reduced-motion). En el móvil hacen
+ *   lo mismo las animaciones CSS ligadas al scroll (`.escena-*` en
+ *   index.css), sin JS, y la foto se asienta al cargar (`.foto-asentar`).
  *
  * La foto es el LCP: `priority`, sin fundido de opacidad, y el recorte
  * vertical (`HERO_VARIANTE_MOVIL`) en pantallas verticales. Las entradas del
@@ -43,14 +44,14 @@ const Hero = () => {
   return (
     <section
       ref={ref}
-      className="alto-pantalla relative flex items-end justify-center overflow-hidden px-5 pt-28 pb-[calc(var(--barra-movil)+1.75rem)] md:h-[100dvh] md:min-h-[34rem] md:items-center md:px-6 md:pt-0 md:pb-0 apaisado:h-auto apaisado:min-h-[100svh] apaisado:pt-[4.5rem] apaisado:pb-[calc(var(--barra-movil)+1.5rem)]"
+      className="escena-scroll alto-pantalla relative flex items-end justify-center overflow-hidden px-5 pt-28 pb-[calc(var(--barra-movil)+1.75rem)] md:h-[100dvh] md:min-h-[34rem] md:items-center md:px-6 md:pt-0 md:pb-0 apaisado:h-auto apaisado:min-h-[100svh] apaisado:pt-[4.5rem] apaisado:pb-[calc(var(--barra-movil)+1.5rem)]"
     >
       <motion.div style={efectos ? { y } : undefined} className="absolute inset-0 z-0 bg-black">
-        <div className="absolute inset-0 md:ken-burns">
+        <div className="escena-foto absolute inset-0 md:ken-burns">
           <OptimizedImage
             imagen={IMAGENES.interior}
             alt="Interior de Touza: sofá corrido color mostaza, mesas de mármol y luz cálida"
-            className="w-full h-full object-cover opacity-75 md:opacity-60"
+            className="foto-asentar w-full h-full object-cover opacity-75 md:opacity-60"
             sizes="100vw"
             variante={HERO_VARIANTE_MOVIL}
             priority={true}
@@ -84,7 +85,7 @@ const Hero = () => {
           debajo. Con `transform`: no mueve el diseño ni cuenta para el CLS. */}
       <motion.div
         style={efectos ? { opacity } : undefined}
-        className="relative z-10 w-full text-center md:w-auto -translate-y-[var(--aviso-cookies,0px)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:translate-y-0 apaisado:translate-y-0"
+        className="escena-texto relative z-10 w-full text-center md:w-auto -translate-y-[var(--aviso-cookies,0px)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:translate-y-0 apaisado:translate-y-0"
       >
         {/* El h1 ya dice "Cocktail Bar en Crevillente" para lectores de
             pantalla; esta línea es solo visual. */}

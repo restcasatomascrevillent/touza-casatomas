@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, Navigation } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -141,7 +141,9 @@ const Header = () => {
                   serif con su número (el mismo ritmo editorial de la portada),
                   la sección actual en dorado, y abajo cómo llegar y el
                   horario, que es lo que se busca desde un teléfono. Radix ya
-                  atrapa el foco, cierra con Escape y bloquea el scroll. */}
+                  atrapa el foco, cierra con Escape y bloquea el scroll.
+                  Al abrir, enlaces y pie entran escalonados (`.menu-entrada`
+                  con su orden en `--i`, CSS en index.css). */}
               <SheetContent
                 side="right"
                 className="w-full sm:max-w-sm bg-black border-l border-white/5 p-0"
@@ -162,7 +164,7 @@ const Header = () => {
                       {navLinks.map((link, i) => {
                         const isActive = location.pathname === link.path;
                         return (
-                          <li key={link.path}>
+                          <li key={link.path} className="menu-entrada" style={{ "--i": i } as CSSProperties}>
                             <Link
                               to={link.path}
                               aria-current={isActive ? "page" : undefined}
@@ -189,7 +191,10 @@ const Header = () => {
                     </ul>
                   </nav>
 
-                  <div className="px-6 pt-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] border-t border-white/5 space-y-4">
+                  <div
+                    className="menu-entrada px-6 pt-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] border-t border-white/5 space-y-4"
+                    style={{ "--i": navLinks.length } as CSSProperties}
+                  >
                     <Button
                       asChild
                       size="lg"

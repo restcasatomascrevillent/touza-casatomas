@@ -91,8 +91,8 @@ const Galeria = () => {
 
       {/* Cabecera con foto, como Carta (antes, un bloque negro
           con el titular). Foto con priority y sin fundido: es el LCP. */}
-      <section className="relative overflow-hidden h-[44vh] min-h-[19rem] md:h-[62vh]">
-        <div className="absolute inset-0">
+      <section className="escena-scroll relative overflow-hidden h-[44vh] min-h-[19rem] md:h-[62vh]">
+        <div className="escena-foto absolute inset-0">
           <OptimizedImage
             imagen={IMAGENES.botellas}
             alt=""
@@ -102,7 +102,7 @@ const Galeria = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black" />
         </div>
-        <div className="absolute inset-0 z-10 flex items-end px-6 pb-10 md:pb-16">
+        <div className="escena-texto absolute inset-0 z-10 flex items-end px-6 pb-10 md:pb-16">
           <div className="max-w-4xl mx-auto w-full text-center text-shadow">
             <span
               style={{ animationDelay: "0.1s" }}
@@ -168,7 +168,7 @@ const Galeria = () => {
                     transition={{ duration: 0.6, delay: index * 0.05, ease: appleEase }}
                     key={item.id}
                     className={cn(
-                      "group relative overflow-hidden rounded-2xl",
+                      "marco-zoom group relative overflow-hidden rounded-2xl",
                       index % 5 === 0 && "md:col-span-2 md:row-span-2"
                     )}
                   >
@@ -187,7 +187,7 @@ const Galeria = () => {
                       <OptimizedImage
                         imagen={item.image}
                         alt={item.alt}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="foto-zoom w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
                         /* Las primeras son candidatas a LCP: nunca lazy. */
                         priority={index < 4}

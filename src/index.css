@@ -601,6 +601,156 @@
     }
   }
 
+  /* Filete dorado que se dibuja de izquierda a derecha cuando su <Reveal>
+     aparece ("01 ── Descubre" de las vitrinas). Sin `data-reveal` (HTML del
+     SSG, reduced-motion o ya a la vista al cargar) está entero. */
+  .trazo {
+    transform-origin: left;
+  }
+
+  [data-reveal="pendiente"] .trazo {
+    transform: scaleX(0);
+  }
+
+  [data-reveal="visto"] .trazo {
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--reveal-delay, 0s) + 0.25s);
+  }
+
+  /* ── Animaciones del móvil ──────────────────────────────────────────────
+     Todo en CSS y solo con `opacity` y transformaciones (`transform` o las
+     propiedades sueltas `scale`/`translate`), que el navegador anima en el
+     compositor: sin JS nuevo, sin repintados y sin mover la maquetación (no
+     suman CLS). Las sueltas no pisan el `transform` de Tailwind o de
+     framer-motion que ya lleve el elemento: se componen con él.
+
+     Las ligadas al scroll usan `animation-timeline` (Chrome/Android ≥ 115,
+     Safari/iOS ≥ 26): avanzan con la posición del scroll, no con el tiempo, y
+     no escuchan eventos. Sin soporte (`@supports`) no se aplica nada y queda
+     lo de antes (las apariciones de <Reveal>).
+
+     Solo < md y sin `prefers-reduced-motion`: desde md ya están el parallax y
+     el texto de framer-motion (QUERY_EFECTOS_SCROLL) y así no se suman dos
+     efectos sobre el mismo elemento. Ninguna oculta contenido: el punto de
+     partida siempre se ve (foto ampliada, texto atenuado al 20 %…). */
+  @media (max-width: 767.98px) and (prefers-reduced-motion: no-preference) {
+    /* Foto del hero de la portada: al cargar se asienta (zoom 1,08 → 1). En
+       CSS para que arranque con el HTML del SSG; si la animación no avanza
+       (ver M1 en la auditoría), la foto se queda algo ampliada, pero se ve. */
+    .foto-asentar {
+      animation: foto-asentar 2.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+  }
+
+  @keyframes foto-asentar {
+    from {
+      transform: scale(1.08);
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (max-width: 767.98px) and (prefers-reduced-motion: no-preference) {
+      /* Cabeceras con foto (hero de la portada, Carta, Galería, Contacto):
+         mientras salen por arriba, la foto se amplía y baja más despacio que
+         la página (parallax) y el texto se desvanece. `exit` va de cuando la
+         cabecera empieza a salir (scroll 0) a cuando ha salido entera. */
+      .escena-scroll {
+        view-timeline-name: --escena;
+      }
+
+      .escena-foto {
+        animation: escena-foto linear both;
+        animation-timeline: --escena;
+        animation-range: exit 0% exit 100%;
+      }
+
+      /* Empieza al 15 %: con la barra del navegador replegada el viewport es
+         algo más alto que la cabecera y, arriba del todo, el texto ya iría
+         un poco apagado. */
+      .escena-texto {
+        animation: escena-texto linear both;
+        animation-timeline: --escena;
+        animation-range: exit 15% exit 75%;
+      }
+
+      /* Texto de la Filosofía: se enciende palabra a palabra con el scroll,
+         como en escritorio (allí con framer-motion). Cada palabra lleva su
+         índice (`--i`) y el párrafo el total (`--n`); todas acaban encendidas
+         cuando el párrafo llega a media pantalla. Fill `backwards`: antes de
+         su tramo, atenuada; después, sin animación (opacidad normal). */
+      .texto-encendido {
+        view-timeline-name: --texto;
+      }
+
+      .texto-encendido > * {
+        animation: palabra-encendida linear backwards;
+        animation-timeline: --texto;
+        animation-range:
+          cover calc(8% + var(--i, 0) / var(--n, 1) * 24%)
+          cover calc(18% + var(--i, 0) / var(--n, 1) * 24%);
+      }
+
+      /* Fotos que se asientan al entrar en pantalla (vitrinas de la portada,
+         cócteles de la carta, galería): zoom 1,15 → 1 hasta que la foto llega
+         a media pantalla. El marco (`overflow-hidden`) recorta el zoom y da la
+         línea de tiempo: tiene que ser él, y no un contenedor con scroll
+         propio, porque `view()` se mide contra el contenedor con scroll más
+         cercano. Fill `none`: fuera de su tramo la animación no existe y el
+         navegador no mantiene una capa por foto. */
+      .marco-zoom {
+        view-timeline-name: --foto;
+      }
+
+      .foto-zoom {
+        animation: foto-zoom linear;
+        animation-timeline: --foto;
+        animation-range: entry 0% cover 50%;
+      }
+    }
+  }
+
+  @keyframes escena-foto {
+    to {
+      scale: 1.1;
+      translate: 0 15%;
+    }
+  }
+
+  @keyframes escena-texto {
+    to {
+      opacity: 0;
+      translate: 0 3rem;
+    }
+  }
+
+  @keyframes palabra-encendida {
+    from {
+      opacity: 0.2;
+    }
+  }
+
+  @keyframes foto-zoom {
+    from {
+      scale: 1.15;
+    }
+  }
+
+  /* Menú del móvil: los enlaces y el pie del panel entran escalonados detrás
+     del panel (que tarda 0,5 s en llegar). Solo existe mientras el menú está
+     abierto, así que no afecta al HTML ni al resto de la página. */
+  @media (prefers-reduced-motion: no-preference) {
+    [role="dialog"][data-state="open"] .menu-entrada {
+      animation: menu-entrada 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: calc(0.12s + var(--i, 0) * 0.06s);
+    }
+  }
+
+  @keyframes menu-entrada {
+    from {
+      opacity: 0;
+      transform: translateX(1.5rem);
+    }
+  }
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
 

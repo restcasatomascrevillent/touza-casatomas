@@ -312,14 +312,14 @@ const Carta = () => {
       {/* En móvil el héroe baja de 60vh a 46vh: esta es la página de la carta,
           y con 60vh la primera bebida caía a 725 px del inicio (casi una
           pantalla entera por debajo del pliegue). En escritorio no cambia. */}
-      <section className="relative overflow-hidden h-[46vh] md:h-[80vh]">
+      <section className="escena-scroll relative overflow-hidden h-[46vh] md:h-[80vh]">
         <motion.div
           // Sin fundido de opacidad: la foto es el LCP y con opacity:0 inicial
           // el HTML del SSG la traía invisible hasta hidratar.
           initial={{ scale: 1.05 }}
           animate={{ scale: 1 }}
           transition={{ duration: 1.5, ease: appleEase }}
-          className="absolute inset-0"
+          className="escena-foto absolute inset-0"
         >
           <OptimizedImage
             imagen={IMAGENES.barra}
@@ -331,7 +331,7 @@ const Carta = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black" />
         </motion.div>
 
-        <div className="absolute inset-0 z-10 flex items-end pb-12 md:pb-20 px-6">
+        <div className="escena-texto absolute inset-0 z-10 flex items-end pb-12 md:pb-20 px-6">
           <div className="max-w-6xl mx-auto w-full text-center text-shadow">
             <span
               style={{ animationDelay: "0.15s" }}
@@ -466,11 +466,11 @@ const Carta = () => {
                       aria-label={`Ver detalle de ${cocktail.name}, ${cocktail.price}`}
                       className="absolute inset-0 z-40 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
                     />
-                    <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 relative mb-4">
+                    <div className="marco-zoom aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 relative mb-4">
                       <OptimizedImage
                         src={cocktail.image}
                         alt={cocktail.name}
-                        className="w-full h-full object-cover group-hover:scale-105 group-hover:opacity-40 transition-all duration-700"
+                        className="foto-zoom w-full h-full object-cover group-hover:scale-105 group-hover:opacity-40 transition-all duration-700"
                       />
                       <CocktailHoverOutlineSVG />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent group-hover:from-black/90 transition-all duration-700" />
