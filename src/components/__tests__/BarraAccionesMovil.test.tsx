@@ -22,7 +22,7 @@ describe("BarraAccionesMovil", () => {
 
     const url = new URL(llegar.getAttribute("href") ?? "");
     expect(url.origin + url.pathname).toBe("https://www.google.com/maps/dir/");
-    expect(url.searchParams.get("destination")).toBe("C/ San Vicente, 14, 03330 Crevillente, Alicante");
+    expect(url.searchParams.get("destination")).toBe("C/ Santa María de la Cabeza, 4, 03330 Crevillente, Alicante");
     expect(llegar).toHaveAttribute("target", "_blank");
     expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(barra.querySelector('a[href^="tel:"]')).toBeNull();

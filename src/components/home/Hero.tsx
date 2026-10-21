@@ -87,7 +87,7 @@ const Hero = () => {
         style={efectos ? { opacity } : undefined}
         className="escena-texto relative z-10 w-full text-center md:w-auto -translate-y-[var(--aviso-cookies,0px)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:translate-y-0 apaisado:translate-y-0"
       >
-        {/* El h1 ya dice "Cocktail Bar en Crevillente" para lectores de
+        {/* El h1 ya dice "Coctelería y bar de copas en Crevillente" para lectores de
             pantalla; esta línea es solo visual. */}
         <p
           aria-hidden="true"
@@ -102,7 +102,7 @@ const Hero = () => {
           style={{ animationDelay: "0.15s" }}
         >
           TOUZA
-          <span className="sr-only"> · Cocktail Bar en Crevillente</span>
+          <span className="sr-only"> · Coctelería y bar de copas en Crevillente</span>
         </h1>
 
         <p

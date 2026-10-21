@@ -1,5 +1,6 @@
 import { MapPin, Clock, Phone, Mail, Instagram } from "lucide-react";
 import Reveal from "@/components/Reveal";
+import { DIRECCION_MAPS, NEGOCIO } from "@/lib/negocio";
 
 // Cada dato con su enlace: antes eran <p> sueltos y en el móvil no se podía
 // pulsar el teléfono ni abrir la dirección en el mapa desde la portada.
@@ -9,9 +10,9 @@ const contactItems: { icon: typeof MapPin; title: string; lines: { text: string;
     title: "Ubicación",
     lines: [
       {
-        text: "C/ San Vicente, 14\n03330 Crevillente, Alicante",
-        href: "https://www.google.com/maps/search/?api=1&query=C%2F%20San%20Vicente%2C%2014%2C%2003330%20Crevillente%2C%20Alicante",
-        label: "Ver C/ San Vicente 14, Crevillente, en Google Maps",
+        text: `${NEGOCIO.calle}\n${NEGOCIO.cp} ${NEGOCIO.localidad}, ${NEGOCIO.region}`,
+        href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DIRECCION_MAPS)}`,
+        label: `Ver ${NEGOCIO.calle}, ${NEGOCIO.localidad}, en Google Maps`,
       },
     ],
   },

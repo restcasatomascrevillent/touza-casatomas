@@ -443,12 +443,21 @@ describe("Carta — estructura general", () => {
 
   it("muestra todas las categorías principales en los tabs", () => {
     renderCarta();
-    expect(screen.getByText("Cócteles")).toBeInTheDocument();
-    expect(screen.getByText("Champagne")).toBeInTheDocument();
-    expect(screen.getByText("Cavas")).toBeInTheDocument();
-    expect(screen.getByText("Cervezas")).toBeInTheDocument();
-    expect(screen.getByText("Copas de Vino")).toBeInTheDocument();
-    expect(screen.getByText("Whiskies")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Cócteles" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Champagne" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Cavas" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Cervezas" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Copas de Vino" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Whiskies" })).toBeInTheDocument();
+  });
+
+  it("pinta TODAS las secciones con su <h2> aunque solo se vea la activa (carta indexable)", () => {
+    renderCarta();
+    for (const nombre of ["Cócteles", "Champagne", "Cavas", "Cervezas", "Copas de Vino", "Whiskies"]) {
+      expect(screen.getByRole("heading", { level: 2, name: nombre, hidden: true })).toBeInTheDocument();
+    }
+    expect(screen.getByRole("heading", { level: 2, name: "Cócteles" })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 2, name: "Whiskies", hidden: true })).not.toBeVisible();
   });
 
   it("renderiza el campo de búsqueda", () => {
@@ -522,21 +531,22 @@ describe("Carta — vinos con denominación de origen (Blancos/Tintos)", () => {
 
     renderCarta();
 
-    expect(screen.getByText("Blancos")).toBeInTheDocument();
-    expect(screen.getByText("Tintos")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Blancos" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Tintos" })).toBeInTheDocument();
 
-    // "Cócteles" es la pestaña activa por defecto: el tinto aún no se ve.
-    expect(screen.queryByText("Pesus")).not.toBeInTheDocument();
+    // "Cócteles" es la pestaña activa por defecto: el tinto está en el HTML
+    // (para buscadores) pero oculto.
+    expect(screen.getByText("Pesus")).not.toBeVisible();
 
     // Radix activa TabsTrigger en onMouseDown (no en onClick), igual que en
     // el navegador un click real dispara mousedown antes que click.
-    fireEvent.mouseDown(screen.getByText("Tintos"));
-    expect(screen.getByText("Pesus")).toBeInTheDocument();
-    expect(screen.queryByText("Martín Códax")).not.toBeInTheDocument();
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Tintos" }));
+    expect(screen.getByText("Pesus")).toBeVisible();
+    expect(screen.getByText("Martín Códax")).not.toBeVisible();
 
-    fireEvent.mouseDown(screen.getByText("Blancos"));
-    expect(screen.getByText("Martín Códax")).toBeInTheDocument();
-    expect(screen.queryByText("Pesus")).not.toBeInTheDocument();
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Blancos" }));
+    expect(screen.getByText("Martín Códax")).toBeVisible();
+    expect(screen.getByText("Pesus")).not.toBeVisible();
   });
 
   it("dentro de una pestaña de vino, filtra por denominación de origen al elegir un filtro", () => {
@@ -558,7 +568,7 @@ describe("Carta — vinos con denominación de origen (Blancos/Tintos)", () => {
     );
 
     renderCarta();
-    fireEvent.mouseDown(screen.getByText("Tintos"));
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Tintos" }));
 
     // Con "Todos" (estado inicial del filtro) se ven las dos denominaciones.
     expect(screen.getByText("Pesus")).toBeInTheDocument();

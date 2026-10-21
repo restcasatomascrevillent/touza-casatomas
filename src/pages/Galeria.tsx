@@ -83,7 +83,7 @@ const Galeria = () => {
   return (
     <Layout>
       <Seo
-        title="Galería de Imágenes"
+        title="El bar por dentro · Touza Crevillente"
         description="Explora la galería de imágenes de Touza: nuestros cócteles artesanales, la barra y el ambiente del local en Crevillente."
         canonical={canonical("/galeria")}
         keywords={['fotos touza', 'galería cócteles', 'imágenes bar crevillente']}
@@ -115,6 +115,7 @@ const Galeria = () => {
               className="entrada-hero font-serif font-bold text-white leading-[0.9] text-5xl mb-3 md:text-7xl md:mb-6 lg:text-8xl"
             >
               Galería
+              <span className="sr-only"> · Así es Touza</span>
             </h1>
             <p
               style={{ animationDelay: "0.35s" }}

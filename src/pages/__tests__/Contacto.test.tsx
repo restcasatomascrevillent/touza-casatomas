@@ -61,7 +61,16 @@ describe("Contacto — renderizado", () => {
 
   it("muestra la dirección del local", () => {
     renderContacto();
-    expect(screen.getByText(/C\/ San Vicente, 14/i)).toBeInTheDocument();
+    // La dirección sale en el bloque de datos y en la respuesta de la FAQ.
+    expect(screen.getAllByText(/C\/ Santa María de la Cabeza, 4/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/San Vicente/i)).not.toBeInTheDocument();
+  });
+
+  it("muestra las preguntas frecuentes (sin reservas, al lado de Casa Tomás)", () => {
+    renderContacto();
+    expect(screen.getByRole("heading", { level: 2, name: /preguntas frecuentes/i })).toBeInTheDocument();
+    expect(screen.getByText(/no se reserva: ven directamente/i)).toBeInTheDocument();
+    expect(screen.getByText(/al lado del Restaurante Casa Tomás/i)).toBeInTheDocument();
   });
 
   it("muestra el número de teléfono", () => {

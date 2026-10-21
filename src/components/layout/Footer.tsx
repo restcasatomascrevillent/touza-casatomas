@@ -101,7 +101,7 @@ const Footer = () => {
                 Contacto
               </h4>
               <div className="space-y-1.5 md:space-y-3 text-white/70 text-[15px] md:text-sm font-light mb-5 md:mb-8">
-                <p className="leading-snug pt-2.5 md:pt-0">C/ San Vicente, 14<br />03330 Crevillente, Alicante</p>
+                <p className="leading-snug pt-2.5 md:pt-0">{NEGOCIO.calle}<br />{NEGOCIO.cp} {NEGOCIO.localidad}, {NEGOCIO.region}</p>
                 {/* Con prefijo internacional, como en el resto de la web: sin él
                     falla al llamar desde un móvil con SIM extranjera. */}
                 <a href={TELEFONO.href} className="flex min-h-11 items-center md:inline-block md:min-h-0 md:py-1 hover:text-white active:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">{TELEFONO.texto}</a>

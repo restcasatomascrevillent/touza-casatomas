@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, Navigation } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CURVA_CABECERA } from "@/lib/cabecera";
-import { URL_COMO_LLEGAR } from "@/lib/negocio";
+import { NEGOCIO, URL_COMO_LLEGAR } from "@/lib/negocio";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
@@ -214,7 +214,7 @@ const Header = () => {
                     <p className="text-[13px] leading-relaxed text-white/60 font-light text-center">
                       Jue - Sáb: 20:00 - 02:00 · Dom: 18:00 - 00:00
                       <br />
-                      C/ San Vicente, 14 · Crevillente
+                      {NEGOCIO.calle} · {NEGOCIO.localidad}
                     </p>
                   </div>
                 </div>

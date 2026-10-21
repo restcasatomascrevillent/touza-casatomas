@@ -32,8 +32,9 @@ const Seo = ({
     schema,
     noindex = false
 }: SeoProps) => {
-    const siteTitle = 'Touza - Cocktail Bar Premium en Crevillente';
-    const fullTitle = title === siteTitle ? title : `${title} | Touza Cocktail Bar`;
+    // Los titles con intención local ya llevan la marca ("… · Touza Crevillente");
+    // al resto se le añade el sufijo de siempre.
+    const fullTitle = /touza/i.test(title) ? title : `${title} | Touza Cocktail Bar`;
 
     return (
         <Head>

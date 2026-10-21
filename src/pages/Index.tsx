@@ -8,7 +8,7 @@ import Showcase from "@/components/home/Showcase";
 import Claves from "@/components/home/Claves";
 import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
-import { barSchema } from "@/lib/negocio";
+import { NEGOCIO, barSchema } from "@/lib/negocio";
 
 /**
  * Portada en UN solo árbol responsive.
@@ -25,10 +25,10 @@ const Index = () => {
   return (
     <Layout>
       <Seo
-        title="Touza - Cocktail Bar Premium en Crevillente"
-        description="Touza es un cocktail bar premium en Crevillente. Cócteles de autor, champagne, vinos y whisky en un local para alargar la noche."
+        title="Touza Cocktail Bar · Copas y cócteles en Crevillente"
+        description="Coctelería y bar de copas en Crevillent, junto a Casa Tomás: cócteles de autor, champagne, vinos y whisky. Sin reservas: ven directamente."
         canonical={canonical("/")}
-        keywords={["cocktail bar", "crevillente", "cócteles", "premium", "cócteles de autor", "copas"]}
+        keywords={["cocktail bar", "coctelería crevillente", "bar de copas crevillente", "cócteles", "cócteles de autor", "copas"]}
         schema={barSchema()}
       />
 
@@ -75,6 +75,38 @@ const Index = () => {
         ctaLink="/galeria"
         invertido
       />
+
+      {/* Texto con intención local (bar de copas, coctelería, Crevillente,
+          junto a Casa Tomás, sin reservas). Sin horarios, precios ni eventos:
+          solo lo que ya está confirmado en la web. */}
+      <section aria-labelledby="bar-copas-titulo" className="px-5 pt-12 pb-10 md:px-6 md:pt-24 md:pb-16">
+        <div className="max-w-3xl mx-auto">
+          <Reveal as="span" className="block text-primary text-[11px] md:text-xs tracking-[0.3em] uppercase font-medium mb-3 md:mb-5">
+            Crevillente
+          </Reveal>
+          <h2 id="bar-copas-titulo" className="font-serif text-3xl md:text-5xl text-foreground leading-[1.05] mb-6 md:mb-10">
+            Coctelería y bar de copas en Crevillente
+          </h2>
+          <div className="space-y-5 text-white/70 text-base md:text-lg font-light leading-relaxed">
+            <p>
+              Touza es una coctelería y bar de copas en el centro de Crevillente (Crevillent), en la{" "}
+              {NEGOCIO.calle}, justo al lado del Restaurante Casa Tomás, del que forma parte. Es el sitio para
+              tomar algo antes o después de cenar, quedar con amigos o alargar la noche con una buena copa.
+            </p>
+            <p>
+              La carta gira en torno a los cócteles: de autor, con recetas propias de la casa, y clásicos bien
+              hechos. También hay cócteles sin alcohol, una selección amplia de champagne y vinos, cervezas y
+              whiskies. Detrás de la barra hay cinco años de experiencia preparando copas, con ingredientes
+              seleccionados y una presentación cuidada.
+            </p>
+            <p>
+              En Touza no se reserva: ven directamente, con tu pareja, con amigos o después de cenar en Casa
+              Tomás. Si es tu primera vez, déjate aconsejar y empieza por un cóctel de autor; si prefieres algo
+              más clásico, en la carta encontrarás champagne, vino y whisky para acompañar la noche.
+            </p>
+          </div>
+        </div>
+      </section>
 
       <Claves />
 

@@ -7,7 +7,7 @@ import { useConsentimiento } from "@/lib/consentimiento";
 import Reveal from "@/components/Reveal";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { IMAGENES } from "@/assets/imagenes";
-import { DIRECCION_MAPS, TELEFONO, URL_COMO_LLEGAR } from "@/lib/negocio";
+import { DIRECCION_MAPS, NEGOCIO, PREGUNTAS_FRECUENTES, TELEFONO, URL_COMO_LLEGAR, faqSchema } from "@/lib/negocio";
 
 const URL_MAPS = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DIRECCION_MAPS)}`;
 // Embed clásico por dirección. El anterior llevaba un `pb=` con un place id
@@ -15,7 +15,7 @@ const URL_MAPS = `https://www.google.com/maps/search/?api=1&query=${encodeURICom
 const URL_MAPA_EMBEBIDO = `https://maps.google.com/maps?q=${encodeURIComponent(DIRECCION_MAPS)}&z=17&hl=es&output=embed`;
 
 const contactInfo = [
-  { icon: MapPin, title: "Dirección", content: "C/ San Vicente, 14\n03330 Crevillente, Alicante", link: URL_MAPS },
+  { icon: MapPin, title: "Dirección", content: `${NEGOCIO.calle}\n${NEGOCIO.cp} ${NEGOCIO.localidad}, ${NEGOCIO.region}`, link: URL_MAPS },
   { icon: Phone, title: "Teléfono", content: TELEFONO.texto, link: TELEFONO.href },
   { icon: Clock, title: "Horario", content: "Jue - Sáb: 20:00 - 02:00\nDom: 18:00 - 00:00", link: null },
   { icon: Mail, title: "Email", content: "info@touzabar.es", link: "mailto:info@touzabar.es" },
@@ -29,10 +29,11 @@ const Contacto = () => {
   return (
     <Layout>
       <Seo
-        title="Contacto y Ubicación"
-        description="Contacta con Touza Cocktail Bar en Crevillente: dirección, cómo llegar, horario, teléfono y email."
+        title="Cómo llegar · Touza, bar de copas en Crevillente"
+        description="Touza, bar de copas y coctelería en Crevillente: C/ Santa María de la Cabeza, 4, al lado de Casa Tomás. Cómo llegar, contacto y preguntas frecuentes."
         canonical={canonical("/contacto")}
-        keywords={['contacto touza', 'ubicación touza', 'cómo llegar', 'horario cocktail bar']}
+        keywords={['contacto touza', 'ubicación touza', 'cómo llegar', 'bar de copas crevillente']}
+        schema={faqSchema()}
       />
 
       {/* Cabecera con foto, como Carta (antes, un bloque negro
@@ -61,6 +62,7 @@ const Contacto = () => {
               className="entrada-hero font-serif font-bold text-white leading-[0.9] text-5xl mb-3 md:text-7xl md:mb-6 lg:text-8xl"
             >
               Contacto
+              <span className="sr-only"> · Dónde estamos</span>
             </h1>
             <p
               style={{ animationDelay: "0.35s" }}
@@ -199,6 +201,27 @@ const Contacto = () => {
               </div>
             )}
           </Reveal>
+        </div>
+      </section>
+
+      {/* Preguntas frecuentes: texto plano y siempre visible (sin acordeón),
+          para que lo lean igual las personas, Google y los asistentes de IA.
+          Mismo contenido que el FAQPage del JSON-LD (lib/negocio.ts). */}
+      <section aria-labelledby="faq-titulo" className="bg-black text-white px-5 pt-4 pb-16 md:px-6 md:pb-28">
+        <div className="max-w-6xl mx-auto grid gap-8 md:gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <h2 id="faq-titulo" className="font-serif text-3xl md:text-5xl text-white leading-[1.05]">
+              Preguntas frecuentes
+            </h2>
+          </div>
+          <dl className="lg:col-span-8 border-t border-white/10">
+            {PREGUNTAS_FRECUENTES.map((faq) => (
+              <div key={faq.pregunta} lang={faq.idioma} className="py-5 border-b border-white/10 md:py-7">
+                <dt className="font-serif text-xl md:text-2xl text-white leading-tight mb-2">{faq.pregunta}</dt>
+                <dd className="text-white/65 text-sm md:text-base font-light leading-relaxed">{faq.respuesta}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
     </Layout>

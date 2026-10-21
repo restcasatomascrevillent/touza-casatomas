@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { BARRA_BAJO_CABECERA } from "@/lib/cabecera";
 import { irA } from "@/lib/scroll";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
-import { useVinos, useVinosRestantes, transformVinosToUI, type VinoUI } from "@/hooks/useVinos";
+import { useVinos, useVinosRestantes, transformVinosToUI, type Vino, type VinoUI } from "@/hooks/useVinos";
 import { agruparVinosPorTipo, capitalizarEtiqueta } from "@/lib/vinos-carta";
 import { useBebidas, transformBebidasToUI, type BebidaUI } from "@/hooks/useBebidas";
 import { usePlatosTouza, transformPlatosToUI, useMostrarFotosPlatosTouza } from "@/hooks/usePlatos";
@@ -219,12 +219,28 @@ const Carta = () => {
     // legible de siempre). Reutiliza capitalizarEtiqueta (src/lib/vinos-carta.ts)
     // para el nombre de sección en vez de mostrar la categoría en bruto de
     // la base de datos ("VINOS TINTOS — RIBERA DEL DUERO").
-    const seccionesVinoResto = Object.entries(CARTA_SSG.vinos)
-      .filter(([categoria]) => !CATEGORIAS_VINO_FIJAS.includes(categoria))
-      .map(([categoria, vinosDeCategoria]) => ({
-        nombre: capitalizarEtiqueta(categoria),
-        items: vinosDeCategoria,
-      }));
+    //
+    // Agrupado por TIPO ("Vinos Tintos", "Vinos Blancos"...), no por
+    // categoría: antes salían 40+ secciones, algunas llamadas "… — Origen
+    // Pendiente" o "… — Sin D.o.". La denominación pasa a la descripción de
+    // cada vino, y solo cuando es una denominación real.
+    const vinosPorTipo = new Map<string, Vino[]>();
+    for (const [categoria, vinosDeCategoria] of Object.entries(CARTA_SSG.vinos)) {
+      if (CATEGORIAS_VINO_FIJAS.includes(categoria)) continue;
+      const [tipoCrudo, ...resto] = categoria.split(/\s*[-–—]\s*/);
+      const tipo = capitalizarEtiqueta(tipoCrudo.trim());
+      const denominacion = resto.join(" ").trim();
+      const denominacionValida = denominacion && !/pendiente|^sin d\.?\s*o/i.test(denominacion)
+        ? capitalizarEtiqueta(denominacion)
+        : null;
+      const vinos = vinosDeCategoria.map((vino) =>
+        denominacionValida
+          ? { ...vino, descripcion: [denominacionValida, vino.descripcion].filter(Boolean).join(". ") }
+          : vino
+      );
+      vinosPorTipo.set(tipo, [...(vinosPorTipo.get(tipo) ?? []), ...vinos]);
+    }
+    const seccionesVinoResto = Array.from(vinosPorTipo, ([nombre, items]) => ({ nombre, items }));
     return menuSchema([
       { nombre: "Cócteles", items: CARTA_SSG.cocteles },
       { nombre: "Champagnes", items: CARTA_SSG.vinos["CHAMPAGNES"] ?? [] },
@@ -298,13 +314,38 @@ const Carta = () => {
     }
   }, [activeMainCategory, champagneData, cavasData, cervezasData, copasData, whiskiesData, grupoVinoActivo, selectedCategory]);
 
+  // Lista completa (sin buscador ni filtros) de una pestaña que no es la
+  // activa: se pinta oculta para que su sección esté en el HTML.
+  const bebidasDePestana = (id: string): (VinoUI | BebidaUI)[] => {
+    switch (id) {
+      case "champagne": return champagneData;
+      case "cavas": return cavasData;
+      case "cervezas": return cervezasData;
+      case "copas": return copasData;
+      case "whiskies": return whiskiesData;
+      default: return gruposVino.find((grupo) => grupo.id === id)?.vinos ?? [];
+    }
+  };
+  // Blancos/Tintos no necesitan estado de carga: sus pestañas solo existen
+  // una vez que sus datos han llegado (ver tabsCarta).
+  const cargandoPestana = (id: string): boolean => {
+    switch (id) {
+      case "champagne": return loadingChampagnes;
+      case "cavas": return loadingCavas;
+      case "cervezas": return loadingCervezas;
+      case "copas": return loadingCopas;
+      case "whiskies": return loadingWhiskies;
+      default: return false;
+    }
+  };
+
   return (
     <Layout>
       <Seo
-        title="Carta de Cócteles y Bebidas"
-        description="Explora nuestra selección de cócteles de autor, vinos premium y más."
+        title="Carta de cócteles, vinos y champagne · Touza Crevillente"
+        description="Carta de Touza, bar de copas en Crevillente: cócteles de autor y clásicos, cócteles sin alcohol, champagne, vinos, cervezas y whiskies, con precios."
         canonical={canonical("/carta")}
-        keywords={['carta', 'menú', 'cócteles', 'precios']}
+        keywords={['carta touza', 'cócteles crevillente', 'coctelería crevillente', 'champagne', 'precios']}
         schema={schemaCarta}
       />
 
@@ -344,6 +385,7 @@ const Carta = () => {
               className="entrada-hero font-serif font-bold text-white leading-[0.9] text-4xl mb-4 md:text-7xl md:mb-6 lg:text-8xl"
             >
               Nuestra Carta
+              <span className="sr-only"> de cócteles y copas</span>
             </h1>
             <p
               style={{ animationDelay: "0.4s" }}
@@ -440,105 +482,111 @@ const Carta = () => {
           <span>{AVISO_ALERGENOS_CARTA}</span>
         </p>
 
+        {/* Todas las secciones de la carta van en el HTML (también el
+            prerenderizado), cada una con su <h2>, aunque en pantalla se vea
+            solo la pestaña activa: las demás se ocultan con `hidden`, no se
+            desmontan. Así Google y los asistentes de IA leen la carta entera.
+            Buscador y filtros solo afectan a la sección activa. */}
         <div className="min-h-[50vh]">
-          {/* Cocktails Grid */}
-          {activeMainCategory === "cocteles" && (
-            loadingCocteles ? <DrinksSkeleton /> : filteredCocktails.length === 0 ? (
-              <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />
-            ) :
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8">
-                {filteredCocktails.map((cocktail, index) => (
-                  // <Reveal> y no `whileInView`: el HTML del SSG ya no trae las
-                  // tarjetas con opacity:0. El retraso escalona por columna
-                  // (index % 4), no por posición: con `index * 0.06` la tarjeta
-                  // 12 esperaba 0,7 s después de entrar en pantalla.
-                  <Reveal
-                    key={cocktail.id}
-                    y={25}
-                    delay={(index % 4) * 0.06}
-                    className="group relative"
-                  >
-                    {/* Botón que cubre toda la tarjeta: antes el clic vivía en un
-                        <div> y con teclado no había forma de abrir el detalle. */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedCocktail(cocktail)}
-                      aria-label={`Ver detalle de ${cocktail.name}, ${cocktail.price}`}
-                      className="absolute inset-0 z-40 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
-                    />
-                    <div className="marco-zoom aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 relative mb-4">
-                      <OptimizedImage
-                        src={cocktail.image}
-                        alt={cocktail.name}
-                        className="foto-zoom w-full h-full object-cover group-hover:scale-105 group-hover:opacity-40 transition-all duration-700"
-                      />
-                      <CocktailHoverOutlineSVG />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent group-hover:from-black/90 transition-all duration-700" />
-                      <span className="absolute bottom-3 right-3 bg-white text-black text-[13px] md:text-xs font-medium tabular-nums px-3 py-1 rounded-full z-30">
-                        {cocktail.price}
-                      </span>
-                    </div>
-                    <h3 className="font-serif text-base md:text-lg text-white group-hover:text-primary transition-colors leading-tight mb-1">{cocktail.name}</h3>
-                    <p className="text-white/55 text-sm line-clamp-2 font-light">{cocktail.description}</p>
-                    {/* Solo las etiquetas reales. El "no consta" ya no se pinta
-                        aquí (eran 13 bloques idénticos en la rejilla): vive una
-                        vez en la cabecera de la carta y, por cóctel, en su
-                        diálogo de detalle. */}
-                    {cocktail.alergenos.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {cocktail.alergenos.map((alergeno) => (
-                          <span
-                            key={alergeno}
-                            className="px-2 py-0.5 rounded-full border border-white/10 text-[11px] text-white/60 font-light uppercase tracking-wide"
-                          >
-                            {alergeno}
+          {tabsCarta.map((pestana) => {
+            const activa = pestana.id === activeMainCategory;
+            const idTitulo = `carta-${pestana.id}-titulo`;
+
+            if (pestana.id === "cocteles") {
+              const coctelesPanel = activa ? filteredCocktails : cocktailsData;
+              return (
+                <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
+                  <h2 id={idTitulo} className="sr-only">{pestana.name}</h2>
+                  {loadingCocteles ? (activa ? <DrinksSkeleton /> : null) : coctelesPanel.length === 0 ? (
+                    activa ? <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} /> : null
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8">
+                    {coctelesPanel.map((cocktail, index) => (
+                      // <Reveal> y no `whileInView`: el HTML del SSG ya no trae las
+                      // tarjetas con opacity:0. El retraso escalona por columna
+                      // (index % 4), no por posición: con `index * 0.06` la tarjeta
+                      // 12 esperaba 0,7 s después de entrar en pantalla.
+                      <Reveal
+                        key={cocktail.id}
+                        y={25}
+                        delay={(index % 4) * 0.06}
+                        className="group relative"
+                      >
+                        {/* Botón que cubre toda la tarjeta: antes el clic vivía en un
+                            <div> y con teclado no había forma de abrir el detalle. */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCocktail(cocktail)}
+                          aria-label={`Ver detalle de ${cocktail.name}, ${cocktail.price}`}
+                          className="absolute inset-0 z-40 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+                        />
+                        <div className="marco-zoom aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 relative mb-4">
+                          <OptimizedImage
+                            src={cocktail.image}
+                            alt={cocktail.name}
+                            className="foto-zoom w-full h-full object-cover group-hover:scale-105 group-hover:opacity-40 transition-all duration-700"
+                          />
+                          <CocktailHoverOutlineSVG />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent group-hover:from-black/90 transition-all duration-700" />
+                          <span className="absolute bottom-3 right-3 bg-white text-black text-[13px] md:text-xs font-medium tabular-nums px-3 py-1 rounded-full z-30">
+                            {cocktail.price}
                           </span>
-                        ))}
-                      </div>
-                    )}
-                  </Reveal>
-                ))}
-              </div>
-          )}
+                        </div>
+                        <h3 className="font-serif text-base md:text-lg text-white group-hover:text-primary transition-colors leading-tight mb-1">{cocktail.name}</h3>
+                        <p className="text-white/55 text-sm line-clamp-2 font-light">{cocktail.description}</p>
+                        {/* Solo las etiquetas reales. El "no consta" ya no se pinta
+                            aquí (eran 13 bloques idénticos en la rejilla): vive una
+                            vez en la cabecera de la carta y, por cóctel, en su
+                            diálogo de detalle. */}
+                        {cocktail.alergenos.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {cocktail.alergenos.map((alergeno) => (
+                              <span
+                                key={alergeno}
+                                className="px-2 py-0.5 rounded-full border border-white/10 text-[11px] text-white/60 font-light uppercase tracking-wide"
+                              >
+                                {alergeno}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </Reveal>
+                    ))}
+                    </div>
+                  )}
+                </section>
+              );
+            }
 
-          {/* Generic Drinks */}
-          {activeMainCategory !== "cocteles" && (
-            <div className="max-w-4xl mx-auto">
-
-              {(
-                (activeMainCategory === "champagne" && loadingChampagnes) ||
-                (activeMainCategory === "cavas" && loadingCavas) ||
-                (activeMainCategory === "cervezas" && loadingCervezas) ||
-                (activeMainCategory === "copas" && loadingCopas) ||
-                (activeMainCategory === "whiskies" && loadingWhiskies)
-                // Blancos/Tintos no necesitan su propia condición aquí: al
-                // derivarse de gruposVino, esas pestañas solo existen (y por
-                // tanto solo se pueden seleccionar) una vez que sus datos ya
-                // han llegado — ver tabsCarta.
-              ) ? <DrinksSkeleton /> : filterBySearch(activeDrinkData).length === 0 ? (
-                <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />
-              ) : null}
-
-              {/* Sin retraso por posición: las filas entran de una en una al
-                  hacer scroll, y con `index * 0.04` el vino 60 de una lista
-                  esperaba 2,4 s después de llegar a la pantalla. */}
-              {filterBySearch(activeDrinkData).map((drink) => (
-                <Reveal
-                  key={drink.id}
-                  y={15}
-                  className="flex justify-between items-center gap-4 py-3.5 md:py-5 border-b border-white/5 group"
-                >
-                  <div>
-                    <h3 className="font-serif text-lg text-white group-hover:text-primary transition-colors duration-300">{drink.name}</h3>
-                    {(drink as GenericDrink).type && (
-                      <span className="text-xs text-white/50 uppercase tracking-wider font-light">{(drink as GenericDrink).type}</span>
-                    )}
-                  </div>
-                  <span className="text-primary font-medium text-lg whitespace-nowrap tabular-nums">{drink.price}</span>
-                </Reveal>
-              ))}
-            </div>
-          )}
+            const filasPanel = activa ? filterBySearch(activeDrinkData) : bebidasDePestana(pestana.id);
+            const cargando = cargandoPestana(pestana.id);
+            return (
+              <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo} className="max-w-4xl mx-auto">
+                <h2 id={idTitulo} className="sr-only">{pestana.name}</h2>
+                {activa && (cargando ? <DrinksSkeleton /> : filasPanel.length === 0 ? (
+                  <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />
+                ) : null)}
+                {/* Sin retraso por posición: las filas entran de una en una al
+                    hacer scroll, y con `index * 0.04` el vino 60 de una lista
+                    esperaba 2,4 s después de llegar a la pantalla. */}
+                    {filasPanel.map((drink) => (
+                      <Reveal
+                        key={drink.id}
+                        y={15}
+                        className="flex justify-between items-center gap-4 py-3.5 md:py-5 border-b border-white/5 group"
+                      >
+                        <div>
+                          <h3 className="font-serif text-lg text-white group-hover:text-primary transition-colors duration-300">{drink.name}</h3>
+                          {(drink as GenericDrink).type && (
+                            <span className="text-xs text-white/50 uppercase tracking-wider font-light">{(drink as GenericDrink).type}</span>
+                          )}
+                        </div>
+                        <span className="text-primary font-medium text-lg whitespace-nowrap tabular-nums">{drink.price}</span>
+                      </Reveal>
+                    ))}
+              </section>
+            );
+          })}
         </div>
       </div>
 
