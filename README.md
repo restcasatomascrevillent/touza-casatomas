@@ -60,14 +60,21 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Despliegue
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Vercel, equipo **Casa tomas**, proyecto `touza-casatomas` (repo
+`restcasatomascrevillent/touza-casatomas`):
 
-## Can I connect a custom domain to my Lovable project?
+| Rama | Entorno | URL | Supabase |
+|---|---|---|---|
+| `main` | Production | https://touza-casatomas.vercel.app | `haqmmdfdzzatdnrrcgez` (prod) |
+| `staging` | Preview | https://touza-casatomas-git-staging-casa-tomas.vercel.app (con login de Vercel) | `sfonaclosuafvlhutkon` (demo) |
 
-Yes, you can!
+Variables de entorno en Vercel: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y
+`VITE_SITE_URL`.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+La carta se prerenderiza al compilar. Cuando se guarda la carta en el panel,
+la función `rebuild-webs` de Supabase lanza el *deploy hook* de su rama
+(secret `VERCEL_DEPLOY_HOOK_TOUZA`: el de `main` en prod, el de `staging` en
+la demo). Vercel compila el último commit de la rama, y en el plan Hobby
+bloquea los commits cuyo autor tiene cuenta de Vercel pero no es del equipo.
