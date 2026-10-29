@@ -11,7 +11,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}", "scripts/__tests__/*.test.mjs"],
     // Cada fichero de test corre en su propio worker para evitar
     // que los mocks de un fichero contaminen a otro (necesario con
     // React.lazy y vi.mock de módulos complejos)

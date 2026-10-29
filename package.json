@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite-react-ssg build",
+    "build:ci": "node scripts/ci-build.mjs",
     "build:dev": "vite-react-ssg build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
