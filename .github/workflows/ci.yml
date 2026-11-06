@@ -1,0 +1,79 @@
+# Comprobaciones automáticas de Touza, como en la web y el panel. Ningún paso
+# necesita secretos ni habla con Supabase: los tests usan variables falsas y el
+# build SSG se hace contra un Supabase de mentira local (scripts/ci-build.mjs).
+#
+# BLOQUEAN: instalación reproducible, tests unitarios, tipos (0 errores) y el
+# build SSG completo. NO BLOQUEA todavía (deuda previa): ESLint con 36 errores.
+# Quitar `continue-on-error` cuando llegue a cero.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [staging, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests-y-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # la versión M.N se calcula con el historial
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Tests unitarios y de componentes
+        run: npm test
+        env:
+          # El cliente de Supabase no arranca sin ellas; los tests no llaman a la red.
+          VITE_SUPABASE_URL: http://127.0.0.1:54329
+          VITE_SUPABASE_PUBLISHABLE_KEY: ci-clave-publica-falsa
+      - name: Tipos
+        run: npm run typecheck
+      - name: Build SSG (contra un Supabase de mentira)
+        run: npm run build:ci
+
+  calidad-no-bloqueante:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # continue-on-error en el paso y no en el job: la deuda previa no bloquea y
+      # el check sale en verde, con los errores en las anotaciones y en el resumen.
+      - name: ESLint (36 errores previos)
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+      - name: Resumen
+        if: always()
+        run: |
+          {
+            echo "### Calidad (informativa, no bloquea)"
+            echo "- ESLint: ${{ steps.lint.outcome == 'success' && 'sin errores' || 'con errores previos, ver anotaciones' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  control-promocion:
+    name: Validar promoción a producción
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    steps:
+      - name: Solo staging puede promocionarse a main
+        env:
+          SOURCE_BRANCH: ${{ github.head_ref }}
+        run: |
+          if [ "$SOURCE_BRANCH" != "staging" ]; then
+            echo "::error::Producción solo admite PR desde staging (rama recibida: $SOURCE_BRANCH)"
+            exit 1
+          fi

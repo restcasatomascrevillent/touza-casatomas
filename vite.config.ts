@@ -1,11 +1,33 @@
 /// <reference types="vitest" />
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 import { VitePWA } from "vite-plugin-pwa";
 import { loadEnv } from "vite";
 import { cartaSSG } from "./scripts/carta-ssg-plugin.mjs";
+import { calcularVersion } from "./scripts/version.mjs";
+
+/**
+ * Publica /version.json con la versión M.N de Touza (docs/PROCESO-DE-CAMBIOS.md), para
+ * saber qué versión tiene la demo y cuál producción. Solo en el build del cliente: el SSG
+ * compila también para servidor y ahí no hace falta.
+ */
+function versionJsonPlugin(): Plugin {
+  let ssr = false;
+  const version = calcularVersion();
+  return {
+    name: "version-json",
+    apply: "build",
+    configResolved(config) {
+      ssr = !!config.build.ssr;
+      if (!ssr) console.log(`Versión ${version.version} · ${version.entorno} · ${version.commit ?? "sin commit"}${version.aviso ? ` · AVISO: ${version.aviso}` : ""}`);
+    },
+    generateBundle() {
+      if (!ssr) this.emitFile({ type: "asset", fileName: "version.json", source: JSON.stringify(version) });
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -43,6 +65,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     // Trae la carta de Supabase en build y la expone en `virtual:touza/carta`.
     cartaSSG(),
+    versionJsonPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       // robots.txt ya no está en public/: lo genera el build (ver ssgOptions).
