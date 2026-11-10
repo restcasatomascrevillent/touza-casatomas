@@ -90,6 +90,21 @@ const SinResultados = ({ termino, onLimpiar }: { termino: string; onLimpiar: () 
   </div>
 );
 
+/** Etiquetas de alérgenos de una tarjeta o fila (solo las que constan). */
+const EtiquetasAlergenos = ({ alergenos }: { alergenos: string[] }) =>
+  alergenos.length > 0 ? (
+    <div className="mt-2 flex flex-wrap gap-1">
+      {alergenos.map((alergeno) => (
+        <span
+          key={alergeno}
+          className="px-2 py-0.5 rounded-full border border-white/10 text-[11px] text-white/60 font-light uppercase tracking-wide"
+        >
+          {alergeno}
+        </span>
+      ))}
+    </div>
+  ) : null;
+
 const DrinksSkeleton = () => (
   <div className="w-full flex justify-center py-20 col-span-full">
     <LiquidLoaderSVG />
@@ -100,7 +115,14 @@ const Carta = () => {
   const [activeMainCategory, setActiveMainCategory] = useState("cocteles");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCocktail, setSelectedCocktail] = useState<CoctelUI | null>(null);
+  // Ficha del cóctel. El cóctel se guarda aparte de "abierta" para que, al
+  // cerrar, la hoja baje con su contenido en vez de vaciarse antes de irse.
+  const [fichaCoctel, setFichaCoctel] = useState<CoctelUI | null>(null);
+  const [fichaAbierta, setFichaAbierta] = useState(false);
+  const abrirFicha = (coctel: CoctelUI) => {
+    setFichaCoctel(coctel);
+    setFichaAbierta(true);
+  };
 
   // El filtro secundario (pills bajo el buscador) cambia de significado según
   // la pestaña activa: categoría de cóctel, o denominación de vino. Si no se
@@ -479,59 +501,88 @@ const Carta = () => {
                   {loadingCocteles ? (activa ? <DrinksSkeleton /> : null) : coctelesPanel.length === 0 ? (
                     activa ? <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} /> : null
                   ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8">
-                    {coctelesPanel.map((cocktail, index) => (
-                      // <Reveal> y no `whileInView`: el HTML del SSG ya no trae las
-                      // tarjetas con opacity:0. El retraso escalona por columna
-                      // (index % 4), no por posición: con `index * 0.06` la tarjeta
-                      // 12 esperaba 0,7 s después de entrar en pantalla.
-                      <Reveal
-                        key={cocktail.id}
-                        y={25}
-                        delay={(index % 4) * 0.06}
-                        className="group relative"
-                      >
-                        {/* Botón que cubre toda la tarjeta: antes el clic vivía en un
-                            <div> y con teclado no había forma de abrir el detalle. */}
-                        <button
-                          type="button"
-                          onClick={() => setSelectedCocktail(cocktail)}
-                          aria-label={`Ver detalle de ${cocktail.name}, ${cocktail.price}`}
-                          className="absolute inset-0 z-40 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
-                        />
-                        <div className="marco-zoom aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 relative mb-4">
-                          <OptimizedImage
-                            src={cocktail.image}
-                            alt={cocktail.name}
-                            className="foto-zoom w-full h-full object-cover group-hover:scale-105 group-hover:opacity-40 transition-all duration-700"
-                          />
-                          <CocktailHoverOutlineSVG />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent group-hover:from-black/90 transition-all duration-700" />
-                          <span className="absolute bottom-3 right-3 bg-white text-black text-[13px] md:text-xs font-medium tabular-nums px-3 py-1 rounded-full z-30">
-                            {cocktail.price}
-                          </span>
+                    // Con foto: tarjeta con la foto. Sin foto (`imagen_url` vacío en
+                    // el panel): fila de texto con un botón ⓘ que abre la misma ficha,
+                    // sin hueco ni relleno de marca en lugar de la foto. Cada grupo
+                    // conserva el orden del panel; en cuanto se sube la foto de un
+                    // cóctel, pasa solo a la rejilla de fotos.
+                    <>
+                      {coctelesPanel.some((c) => c.image) && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8">
+                          {coctelesPanel.filter((c) => c.image).map((cocktail, index) => (
+                            // <Reveal> y no `whileInView`: el HTML del SSG ya no trae las
+                            // tarjetas con opacity:0. El retraso escalona por columna
+                            // (index % 4), no por posición: con `index * 0.06` la tarjeta
+                            // 12 esperaba 0,7 s después de entrar en pantalla.
+                            <Reveal
+                              key={cocktail.id}
+                              y={25}
+                              delay={(index % 4) * 0.06}
+                              className="tarjeta-pulsable group relative"
+                            >
+                              {/* Botón que cubre toda la tarjeta: antes el clic vivía en un
+                                  <div> y con teclado no había forma de abrir el detalle. */}
+                              <button
+                                type="button"
+                                onClick={() => abrirFicha(cocktail)}
+                                aria-label={`Ver detalle de ${cocktail.name}, ${cocktail.price}`}
+                                className="absolute inset-0 z-40 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+                              />
+                              <div className="marco-zoom aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 relative mb-4">
+                                <OptimizedImage
+                                  src={cocktail.image}
+                                  alt={cocktail.name}
+                                  className="foto-zoom w-full h-full object-cover group-hover:scale-105 group-hover:opacity-40 transition-all duration-700"
+                                />
+                                <CocktailHoverOutlineSVG />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent group-hover:from-black/90 transition-all duration-700" />
+                                <span className="absolute bottom-3 right-3 bg-white text-black text-[13px] md:text-xs font-medium tabular-nums px-3 py-1 rounded-full z-30">
+                                  {cocktail.price}
+                                </span>
+                              </div>
+                              <h3 className="font-serif text-base md:text-lg text-white group-hover:text-primary transition-colors leading-tight mb-1">{cocktail.name}</h3>
+                              <p className="text-white/55 text-sm line-clamp-2 font-light">{cocktail.description}</p>
+                              {/* Solo las etiquetas reales. El "no consta" ya no se pinta
+                                  aquí (eran 13 bloques idénticos en la rejilla): vive una
+                                  vez en la cabecera de la carta y, por cóctel, en su
+                                  diálogo de detalle. */}
+                              <EtiquetasAlergenos alergenos={cocktail.alergenos} />
+                            </Reveal>
+                          ))}
                         </div>
-                        <h3 className="font-serif text-base md:text-lg text-white group-hover:text-primary transition-colors leading-tight mb-1">{cocktail.name}</h3>
-                        <p className="text-white/55 text-sm line-clamp-2 font-light">{cocktail.description}</p>
-                        {/* Solo las etiquetas reales. El "no consta" ya no se pinta
-                            aquí (eran 13 bloques idénticos en la rejilla): vive una
-                            vez en la cabecera de la carta y, por cóctel, en su
-                            diálogo de detalle. */}
-                        {cocktail.alergenos.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {cocktail.alergenos.map((alergeno) => (
-                              <span
-                                key={alergeno}
-                                className="px-2 py-0.5 rounded-full border border-white/10 text-[11px] text-white/60 font-light uppercase tracking-wide"
+                      )}
+                      {coctelesPanel.some((c) => !c.image) && (
+                        <ul className={cn("max-w-4xl", coctelesPanel.some((c) => c.image) && "mt-10 md:mt-14")}>
+                          {coctelesPanel.filter((c) => !c.image).map((cocktail) => (
+                            <Reveal
+                              as="li"
+                              key={cocktail.id}
+                              y={15}
+                              className="fila-coctel group relative flex items-start gap-4 py-4 md:py-5 border-b border-white/5"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-baseline justify-between gap-4">
+                                  <h3 className="font-serif text-lg md:text-xl text-white leading-tight group-hover:text-primary transition-colors duration-300">{cocktail.name}</h3>
+                                  <span className="text-primary font-medium text-lg whitespace-nowrap tabular-nums">{cocktail.price}</span>
+                                </div>
+                                <p className="mt-1 text-white/55 text-sm line-clamp-2 font-light">{cocktail.description}</p>
+                                <EtiquetasAlergenos alergenos={cocktail.alergenos} />
+                              </div>
+                              {/* El ⓘ es el botón; su ::after cubre toda la fila para que
+                                  también se pueda tocar el nombre o el precio. */}
+                              <button
+                                type="button"
+                                onClick={() => abrirFicha(cocktail)}
+                                aria-label={`Ver descripción de ${cocktail.name}`}
+                                className="boton-info -mr-1.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-white/60 ring-1 ring-inset ring-white/15 transition-colors duration-300 group-hover:text-primary group-hover:ring-primary/50 after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                               >
-                                {alergeno}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </Reveal>
-                    ))}
-                    </div>
+                                <Info className="h-[18px] w-[18px]" aria-hidden="true" />
+                              </button>
+                            </Reveal>
+                          ))}
+                        </ul>
+                      )}
+                    </>
                   )}
                 </section>
               );
@@ -632,49 +683,66 @@ const Carta = () => {
       )}
 
       {/* Detail Modal */}
-      <Dialog open={!!selectedCocktail} onOpenChange={() => setSelectedCocktail(null)}>
-        {/* En móvil, a pantalla completa y con scroll en el propio diálogo: antes
-            el texto largo (ingredientes + alérgenos) se salía por abajo sin
-            poder llegar a él. */}
-        <DialogContent className="p-0 gap-0 bg-black border-white/5 text-white w-full max-w-[100vw] h-[100dvh] overflow-y-auto rounded-none md:h-auto md:max-h-[90vh] md:max-w-4xl md:overflow-hidden md:rounded-2xl">
-          <div className="grid grid-rows-[40vh_auto] md:grid-rows-none md:grid-cols-2">
-            <div className="relative bg-white/5 md:min-h-[480px]">
-              {selectedCocktail && (
+      <Dialog open={fichaAbierta} onOpenChange={setFichaAbierta}>
+        {/* En el móvil, hoja que sube desde abajo (`.ficha-coctel` en
+            index.css) hasta, como mucho, el 92 % de la pantalla, con scroll
+            propio: antes era un diálogo a pantalla completa que aparecía con
+            un zoom descentrado. Sin foto (`imagen_url` vacío) no hay bloque de
+            imagen: la hoja mide lo que mide el texto. En escritorio, diálogo
+            centrado como antes (más estrecho si no hay foto). Radix atrapa el
+            foco, cierra con Escape y devuelve el foco al botón que la abrió. */}
+        <DialogContent
+          className={cn(
+            "ficha-coctel p-0 gap-0 bg-black border-white/5 text-white overflow-y-auto overscroll-contain",
+            "max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:w-full max-md:max-w-none max-md:translate-x-0 max-md:translate-y-0 max-md:max-h-[92dvh] max-md:rounded-none max-md:rounded-t-[1.75rem] max-md:border-x-0 max-md:border-b-0",
+            "md:max-h-[90vh] md:overflow-hidden md:rounded-2xl",
+            fichaCoctel?.image ? "md:max-w-4xl" : "md:max-w-xl"
+          )}
+        >
+          <div className={cn("grid", fichaCoctel?.image && "grid-rows-[36vh_auto] md:grid-rows-none md:grid-cols-2")}>
+            {fichaCoctel?.image && (
+              <div className="relative bg-white/5 md:min-h-[480px]">
                 <OptimizedImage
-                  src={selectedCocktail.image}
-                  alt={selectedCocktail.name}
+                  src={fichaCoctel.image}
+                  alt={fichaCoctel.name}
                   className="w-full h-full object-cover"
                 />
-              )}
-            </div>
-            <div className="px-6 pt-7 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] md:p-12 flex flex-col justify-center md:max-h-[90vh] md:overflow-y-auto">
-              {selectedCocktail && (
+              </div>
+            )}
+            <div className={cn(
+              "px-6 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] md:p-12 flex flex-col justify-center md:max-h-[90vh] md:overflow-y-auto",
+              fichaCoctel?.image ? "pt-7" : "pt-10"
+            )}>
+              {fichaCoctel && (
                 <>
                   <span className="text-primary text-xs uppercase tracking-widest mb-3">
                     {/* El nombre legible ("Clásicos"), no el id interno ("clasicos"). */}
-                    {cocktailCategories.find((c) => c.id === selectedCocktail.category)?.name ?? selectedCocktail.category}
+                    {cocktailCategories.find((c) => c.id === fichaCoctel.category)?.name ?? fichaCoctel.category}
                   </span>
                   <DialogTitle className="font-serif text-3xl md:text-5xl mb-6 leading-[0.9] text-white">
-                    {selectedCocktail.name}
+                    {fichaCoctel.name}
                   </DialogTitle>
                   <DialogDescription className="text-lg text-white/70 font-light leading-relaxed mb-8">
-                    {selectedCocktail.description}
+                    {fichaCoctel.description}
                   </DialogDescription>
-                  <div>
-                    <h4 className="text-xs uppercase tracking-widest text-white/55 mb-3">Notas de cata</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedCocktail.ingredients.map((ing, i) => (
-                        <span key={i} className="px-3 py-1 rounded-full border border-white/10 text-sm text-white/60 font-light">
-                          {ing}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="mt-6">
-                    <h4 className="text-xs uppercase tracking-widest text-white/55 mb-3">Alérgenos</h4>
-                    {selectedCocktail.alergenos.length > 0 ? (
+                  {/* Sin ingredientes en el panel no se pinta un título vacío. */}
+                  {fichaCoctel.ingredients.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-xs uppercase tracking-widest text-white/55 mb-3">Notas de cata</h4>
                       <div className="flex flex-wrap gap-2">
-                        {selectedCocktail.alergenos.map((alergeno, i) => (
+                        {fichaCoctel.ingredients.map((ing, i) => (
+                          <span key={i} className="px-3 py-1 rounded-full border border-white/10 text-sm text-white/60 font-light">
+                            {ing}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="text-xs uppercase tracking-widest text-white/55 mb-3">Alérgenos</h4>
+                    {fichaCoctel.alergenos.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {fichaCoctel.alergenos.map((alergeno, i) => (
                           <span key={i} className="px-3 py-1 rounded-full border border-white/10 text-sm text-white/60 font-light">
                             {alergeno}
                           </span>
@@ -683,13 +751,13 @@ const Carta = () => {
                     ) : (
                       <p className="text-sm text-red-300">{AVISO_SIN_ALERGENOS}</p>
                     )}
-                    {selectedCocktail.alergenosNota && (
-                      <p className="mt-2 text-xs italic text-red-300">{selectedCocktail.alergenosNota}</p>
+                    {fichaCoctel.alergenosNota && (
+                      <p className="mt-2 text-xs italic text-red-300">{fichaCoctel.alergenosNota}</p>
                     )}
                   </div>
                   <div className="flex items-center justify-between pt-8 mt-8 border-t border-white/5">
-                    <span className="text-xs text-white/55">Base: <span className="text-white/80 capitalize">{selectedCocktail.base}</span></span>
-                    <span className="text-3xl font-serif text-primary">{selectedCocktail.price}</span>
+                    <span className="text-xs text-white/55">Base: <span className="text-white/80 capitalize">{fichaCoctel.base}</span></span>
+                    <span className="text-3xl font-serif text-primary">{fichaCoctel.price}</span>
                   </div>
                 </>
               )}

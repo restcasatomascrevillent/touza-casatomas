@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within, fireEvent } from "@testing-library/react";
+import { render, screen, within, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import React from "react";
@@ -419,6 +419,37 @@ describe("Carta — alérgenos en cócteles", () => {
     expect(screen.getByText("Negroni Touza")).toBeInTheDocument();
     expect(screen.queryByText(/sin información de alérgenos/i)).not.toBeInTheDocument();
     expect(screen.getByText(AVISO_ALERGENOS_CARTA)).toBeInTheDocument();
+  });
+
+  it("un cóctel sin foto no pinta hueco de imagen: fila con botón ⓘ que abre su descripción", async () => {
+    vi.mocked(useCoctelesModule.useCocteles).mockReturnValue({
+      data: [{}] as any,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as any);
+    vi.mocked(useCoctelesModule.transformCoctelesToUI).mockReturnValue([
+      mockCoctel(),
+      mockCoctel({ id: "c2", name: "Green Dream", image: "", description: "Kiwi y manzana verde" }),
+    ]);
+
+    renderCarta();
+
+    // El de foto sigue como tarjeta con su imagen.
+    expect(screen.getByRole("button", { name: "Ver detalle de Negroni Touza, 9,50€" })).toBeInTheDocument();
+    expect(screen.getByAltText("Negroni Touza")).toBeInTheDocument();
+    // El de sin foto: ni <img> ni relleno, y un botón con nombre propio.
+    expect(screen.queryByAltText("Green Dream")).not.toBeInTheDocument();
+    const info = screen.getByRole("button", { name: "Ver descripción de Green Dream" });
+
+    fireEvent.click(info);
+    const ficha = await screen.findByRole("dialog");
+    expect(within(ficha).getByText("Green Dream")).toBeInTheDocument();
+    expect(within(ficha).getByText("Kiwi y manzana verde")).toBeInTheDocument();
+    expect(within(ficha).queryByRole("img")).not.toBeInTheDocument();
+
+    fireEvent.keyDown(ficha, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 });
 

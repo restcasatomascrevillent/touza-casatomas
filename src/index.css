@@ -751,6 +751,42 @@
     }
   }
 
+  /* Ficha del cóctel en el móvil: hoja que sube desde abajo con la curva de
+     las hojas de iOS (arranca rápida y se posa despacio) y baja más deprisa
+     al cerrar. Radix espera a que acabe `animationend` para desmontarla.
+     Doble clase para ganar a las utilidades `data-[state=…]:animate-*` del
+     diálogo base (mismo peso: clase + atributo). En escritorio sigue el
+     diálogo centrado de siempre. */
+  @media (max-width: 767.98px) and (prefers-reduced-motion: no-preference) {
+    .ficha-coctel.ficha-coctel[data-state="open"] {
+      animation: hoja-sube 0.55s cubic-bezier(0.32, 0.72, 0, 1) both;
+    }
+
+    .ficha-coctel.ficha-coctel[data-state="closed"] {
+      animation: hoja-baja 0.32s cubic-bezier(0.4, 0, 1, 1) both;
+    }
+  }
+
+  @keyframes hoja-sube {
+    from {
+      transform: translate3d(0, 100%, 0);
+    }
+
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes hoja-baja {
+    from {
+      transform: none;
+    }
+
+    to {
+      transform: translate3d(0, 100%, 0);
+    }
+  }
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
 
