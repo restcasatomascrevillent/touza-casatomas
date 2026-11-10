@@ -1,18 +1,19 @@
-import { Suspense, type ComponentType } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Suspense, useEffect, useLayoutEffect, useRef, type ComponentType } from "react";
+import { Outlet, useLocation, useNavigationType } from "react-router-dom";
 import type { RouteRecord } from "vite-react-ssg";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AnimatePresence, MotionConfig } from "framer-motion";
+import { MotionConfig } from "framer-motion";
 import { Analytics } from "@vercel/analytics/react";
 import ErrorBoundary from "./components/ui/error-boundary";
 import PageTransition from "./components/PageTransition";
 import SmoothScroll from "./components/SmoothScroll";
 import CookieConsent from "./components/CookieConsent";
 import BarraAccionesMovil from "./components/BarraAccionesMovil";
-import { irArriba } from "./lib/scroll";
+import { irA, irArriba } from "./lib/scroll";
+import { PAGINAS, precargarAlApuntar, precargarRuta } from "./lib/precarga";
 import { SIN_BARRA_MOVIL } from "./lib/barra-movil";
 
 const queryClient = new QueryClient();
@@ -30,10 +31,82 @@ const PageLoader = () => (
   </div>
 );
 
+// En el prerender (SSG) no hay ventana y useLayoutEffect solo avisaría.
+const useEfectoDeMaqueta = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+/**
+ * Por encima de esta altura de scroll, la foto de cabecera de la página que se
+ * deja ya no está a la vista y no debe "volar" hacia la página nueva en la
+ * transición (ver `.vt-foto` en index.css): se marca `<html data-vt-lejos>`.
+ */
+const marcarLejosDeArriba = () => {
+  const lejos = window.scrollY > window.innerHeight * 0.5;
+  document.documentElement.toggleAttribute("data-vt-lejos", lejos);
+};
+
+/**
+ * Scroll al cambiar de página. Antes se subía arriba al terminar el fundido de
+ * salida de framer-motion; ahora la transición la hace el navegador (View
+ * Transitions, ver main.tsx) y esto corre DENTRO de la actualización, antes de
+ * que el navegador fotografíe la página nueva: la nueva entra ya arriba.
+ * - Enlace (PUSH/REPLACE): arriba del todo.
+ * - Atrás/adelante (POP): vuelve a donde estaba el visitante en esa página
+ *   (antes se perdía: volver de la carta a la portada abría arriba).
+ */
+const useScrollDePagina = () => {
+  const location = useLocation();
+  const tipo = useNavigationType();
+  const posiciones = useRef(new Map<string, number>());
+  const claveActual = useRef(location.key);
+  const primera = useRef(true);
+
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
+    const guardar = () => {
+      posiciones.current.set(claveActual.current, window.scrollY);
+      marcarLejosDeArriba();
+    };
+    window.addEventListener("scroll", guardar, { passive: true });
+    return () => window.removeEventListener("scroll", guardar);
+  }, []);
+
+  useEfectoDeMaqueta(() => {
+    claveActual.current = location.key;
+    // La primera página la deja como está el navegador (recarga, ancla...).
+    if (primera.current) {
+      primera.current = false;
+      return;
+    }
+    // Para que las animaciones distingan ir de volver (index.css).
+    document.documentElement.dataset.navegacion = tipo === "POP" ? "atras" : "adelante";
+    const guardada = tipo === "POP" ? posiciones.current.get(location.key) : undefined;
+    if (guardada !== undefined) irA(guardada);
+    else irArriba();
+    marcarLejosDeArriba();
+  }, [location.key, tipo]);
+};
+
 // Layout raíz: providers globales + transición de página alrededor del <Outlet />.
 // vite-react-ssg construye el router internamente a partir de `routes`.
 const RootLayout = () => {
   const location = useLocation();
+  useScrollDePagina();
+
+  // Precarga: el JS (y la foto de cabecera) de una página se pide al apuntar
+  // a su enlace, y la carta —el destino de casi todas las visitas desde la
+  // portada— en cuanto el navegador queda libre. Así el toque en "Nuestra
+  // Carta" cambia de página al momento, sin hueco en negro.
+  useEffect(() => precargarAlApuntar(), []);
+  useEffect(() => {
+    const precargarCarta = () => precargarRuta("/carta");
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(precargarCarta, { timeout: 2000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(precargarCarta, 1500);
+    return () => window.clearTimeout(id);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background font-sans antialiased">
       <ErrorBoundary>
@@ -47,16 +120,16 @@ const RootLayout = () => {
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              {/* Al terminar de salir la página anterior (y antes de que entre la
-                  nueva) se vuelve arriba: si no, la página nueva se abría a la
-                  altura de scroll de la anterior. */}
-              <AnimatePresence mode="wait" onExitComplete={irArriba}>
-                <PageTransition key={location.pathname}>
-                  <Suspense fallback={<PageLoader />}>
-                    <Outlet />
-                  </Suspense>
-                </PageTransition>
-              </AnimatePresence>
+              {/* Sin AnimatePresence: antes la página vieja se fundía a negro
+                  (0,45 s) y solo entonces entraba la nueva, con un fotograma
+                  en negro entre las dos. Ahora el cambio lo anima el navegador
+                  (View Transitions, ver main.tsx y index.css) y PageTransition
+                  solo pone un fundido de entrada donde no las hay. */}
+              <PageTransition key={location.pathname}>
+                <Suspense fallback={<PageLoader />}>
+                  <Outlet />
+                </Suspense>
+              </PageTransition>
               {/* Fuera de <PageTransition>: su transform de framer-motion crearía
                   un containing block y la barra `fixed` dejaría de anclarse al viewport. */}
               <BarraAccionesMovil />
@@ -79,6 +152,7 @@ const RootLayout = () => {
 };
 
 // Adapta el `export default` de cada página al contrato `lazy` de react-router.
+// Las fábricas `import()` están en src/lib/precarga.ts (para poder precargarlas).
 // vite-react-ssg espera (await) este `lazy` antes de renderizar → el HTML del
 // SSG contiene el contenido real (a diferencia de React.lazy + Suspense).
 const lazyRoute =
@@ -90,28 +164,28 @@ export const routes: RouteRecord[] = [
     path: "/",
     element: <RootLayout />,
     children: [
-      { index: true, lazy: lazyRoute(() => import("./pages/Index")) },
-      { path: "carta", lazy: lazyRoute(() => import("./pages/Carta")) },
-      { path: "galeria", lazy: lazyRoute(() => import("./pages/Galeria")) },
+      { index: true, lazy: lazyRoute(PAGINAS["/"]) },
+      { path: "carta", lazy: lazyRoute(PAGINAS["/carta"]) },
+      { path: "galeria", lazy: lazyRoute(PAGINAS["/galeria"]) },
       // `handle: SIN_BARRA_MOVIL`: sin la barra fija "Cómo llegar"
       // del móvil (ver src/lib/barra-movil.ts). Contacto ya lleva ese mismo botón
       // arriba del todo.
       // Touza no acepta reservas por la web (decisión del dueño, 01/10/2026):
       // /reservado y /reserva/respuesta ya no existen y vercel.json las
       // redirige (301) a /contacto.
-      { path: "contacto", handle: SIN_BARRA_MOVIL, lazy: lazyRoute(() => import("./pages/Contacto")) },
+      { path: "contacto", handle: SIN_BARRA_MOVIL, lazy: lazyRoute(PAGINAS["/contacto"]) },
       // Textos legales (LSSI-CE, RGPD/LOPDGDD y cookies). Datos del titular en
       // src/lib/legal.ts; el pie y el aviso de cookies enlazan aquí.
-      { path: "aviso-legal", lazy: lazyRoute(() => import("./pages/AvisoLegal")) },
-      { path: "privacidad", lazy: lazyRoute(() => import("./pages/Privacidad")) },
-      { path: "cookies", lazy: lazyRoute(() => import("./pages/Cookies")) },
+      { path: "aviso-legal", lazy: lazyRoute(PAGINAS["/aviso-legal"]) },
+      { path: "privacidad", lazy: lazyRoute(PAGINAS["/privacidad"]) },
+      { path: "cookies", lazy: lazyRoute(PAGINAS["/cookies"]) },
       // Ruta literal para que el SSG prerenderice `404.html` (vite-react-ssg
       // descarta la ruta "*" al recolectar paths). Vercel sirve ese fichero con
       // status 404 para cualquier URL que no resuelva en el filesystem.
       // Las dos rutas del 404 llevan la barra del móvil (sin `handle`): así
       // `/404` y una URL inventada se ven igual (ver src/lib/barra-movil.ts).
-      { path: "404", lazy: lazyRoute(() => import("./pages/NotFound")) },
-      { path: "*", lazy: lazyRoute(() => import("./pages/NotFound")) },
+      { path: "404", lazy: lazyRoute(PAGINAS["/404"]) },
+      { path: "*", lazy: lazyRoute(PAGINAS["/404"]) },
     ],
   },
 ];

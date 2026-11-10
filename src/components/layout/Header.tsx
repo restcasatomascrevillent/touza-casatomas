@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, Navigation } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CURVA_CABECERA } from "@/lib/cabecera";
+import { precargarRuta } from "@/lib/precarga";
 import { NEGOCIO, URL_COMO_LLEGAR } from "@/lib/negocio";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -81,7 +82,9 @@ const Header = () => {
     <header
       ref={headerRef}
       className={cn(
-        "safe-x fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        // `cabecera` en las transiciones de página: queda quieta mientras la
+        // página cambia por debajo, en vez de fundirse y volver a aparecer.
+        "safe-x fixed top-0 left-0 right-0 z-50 transition-all duration-500 [view-transition-name:cabecera]",
         isScrolled
           ? "bg-black/80 backdrop-blur-2xl border-b border-white/5 py-3"
           : "bg-transparent py-5",
@@ -128,7 +131,15 @@ const Header = () => {
 
           {/* Mobile Menu */}
           <div className="lg:hidden">
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            {/* Al abrir el menú se piden ya las páginas a las que lleva: el
+                toque en una de ellas cambia de página sin esperar a la red. */}
+            <Sheet
+              open={isOpen}
+              onOpenChange={(abierto) => {
+                setIsOpen(abierto);
+                if (abierto) navLinks.forEach((link) => precargarRuta(link.path));
+              }}
+            >
               <SheetTrigger asChild>
                 <button
                   className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -144,15 +155,22 @@ const Header = () => {
                   atrapa el foco, cierra con Escape y bloquea el scroll.
                   Al abrir, enlaces y pie entran escalonados (`.menu-entrada`
                   con su orden en `--i`, CSS en index.css). */}
+              {/* Al ir a otra página desde el menú, el menú NO se cierra antes
+                  de navegar: se va con la página vieja dentro de la
+                  transición (desliza a la derecha mientras entra la nueva,
+                  `menu-movil` y `menu-velo` en index.css). Antes se cerraba
+                  con su animación de 0,3 s y a la vez la página se fundía a
+                  negro: dos movimientos peleándose. */}
               <SheetContent
                 side="right"
-                className="w-full sm:max-w-sm bg-black border-l border-white/5 p-0"
+                className="w-full sm:max-w-sm bg-black border-l border-white/5 p-0 [view-transition-name:menu-movil]"
+                overlayClassName="[view-transition-name:menu-velo]"
               >
                 <SheetTitle className="sr-only">Menú</SheetTitle>
                 <SheetDescription className="sr-only">Secciones de la web de Touza</SheetDescription>
                 <div className="flex flex-col h-full">
                   <div className="flex items-center h-[4.5rem] px-6 border-b border-white/5">
-                    <Link to="/" onClick={() => setIsOpen(false)} className="inline-flex items-center min-h-11">
+                    <Link to="/" onClick={() => location.pathname === "/" && setIsOpen(false)} className="inline-flex items-center min-h-11">
                       <span className="font-serif text-xl font-bold tracking-wider text-primary">
                         TOUZA
                       </span>
@@ -168,7 +186,8 @@ const Header = () => {
                             <Link
                               to={link.path}
                               aria-current={isActive ? "page" : undefined}
-                              onClick={() => setIsOpen(false)}
+                              // A la página en la que ya se está: solo cerrar.
+                              onClick={() => isActive && setIsOpen(false)}
                               className={cn(
                                 "group flex items-baseline gap-4 py-3 min-h-[3.5rem] transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                                 isActive ? "text-primary" : "text-white/85 hover:text-white active:text-white"

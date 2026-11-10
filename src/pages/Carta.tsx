@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from "react";
 import { Search, Wine, Beer, Martini, GlassWater, Sparkles, X, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import Reveal from "@/components/Reveal";
@@ -26,6 +26,9 @@ import { menuSchema } from "@/lib/negocio";
 import { CARTA_SSG, platosParaJsonLd } from "@/lib/carta-ssg";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
+
+// En el prerender (SSG) no hay ventana y useLayoutEffect solo avisaría.
+const useEfectoDeMaqueta = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 interface GenericDrink {
   id: number | string;
@@ -139,8 +142,12 @@ const Carta = () => {
   const filaPestanasRef = useRef<HTMLDivElement>(null);
   const barraPestanasRef = useRef<HTMLDivElement>(null);
   const inicioListaRef = useRef<HTMLDivElement>(null);
+  // Hasta el primer cambio de pestaña la sección activa no se anima (es la
+  // que llega en el HTML); después, cada sección entra subiendo (index.css).
+  const [pestanasTocadas, setPestanasTocadas] = useState(false);
   const cambiarPestana = (id: string) => {
     setActiveMainCategory(id);
+    setPestanasTocadas(true);
     const barra = barraPestanasRef.current;
     const inicio = inicioListaRef.current;
     if (barra && inicio) {
@@ -164,6 +171,7 @@ const Carta = () => {
       behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
     });
   }, [activeMainCategory]);
+
 
   const { data: coctelesData, isLoading: loadingCocteles } = useCocteles();
   const cocktailsData = useMemo(() => transformCoctelesToUI(coctelesData), [coctelesData]);
@@ -199,6 +207,32 @@ const Carta = () => {
     ],
     [gruposVino]
   );
+  // Píldora blanca que se desliza bajo la pestaña activa (`.pildora-pestana`
+  // en index.css). Se recoloca al cambiar de pestaña, al cambiar la lista de
+  // pestañas (llegan las de vino) y al cambiar de ancho la fila (carga de la
+  // fuente, giro del móvil). Hasta entonces, la pestaña activa pinta su
+  // propio fondo, así el HTML del SSG se ve igual.
+  const listaPestanasRef = useRef<HTMLDivElement>(null);
+  const [pildoraLista, setPildoraLista] = useState(false);
+  const colocarPildora = useCallback(() => {
+    const lista = listaPestanasRef.current;
+    const activa = lista?.querySelector<HTMLElement>('[data-state="active"]');
+    if (!lista || !activa) return;
+    lista.style.setProperty("--pildora-x", `${activa.offsetLeft}px`);
+    lista.style.setProperty("--pildora-w", `${activa.offsetWidth}px`);
+    lista.style.setProperty("--pildora-y", `${activa.offsetTop}px`);
+    lista.style.setProperty("--pildora-h", `${activa.offsetHeight}px`);
+    setPildoraLista(true);
+  }, []);
+  useEfectoDeMaqueta(colocarPildora, [activeMainCategory, tabsCarta, colocarPildora]);
+  useEffect(() => {
+    const lista = listaPestanasRef.current;
+    if (!lista || typeof ResizeObserver === "undefined") return;
+    const observador = new ResizeObserver(colocarPildora);
+    observador.observe(lista);
+    return () => observador.disconnect();
+  }, [colocarPildora]);
+
   const { data: cervezasRaw, isLoading: loadingCervezas } = useBebidas('Cervezas');
   const { data: copasRaw, isLoading: loadingCopas } = useBebidas('Copas');
   const { data: whiskiesRaw, isLoading: loadingWhiskies } = useBebidas('Whiskies');
@@ -361,7 +395,8 @@ const Carta = () => {
           initial={{ scale: 1.05 }}
           animate={{ scale: 1 }}
           transition={{ duration: 1.5, ease: appleEase }}
-          className="escena-foto absolute inset-0"
+          // `vt-foto`: recibe la foto de la página anterior (index.css).
+          className="vt-foto escena-foto absolute inset-0"
         >
           <OptimizedImage
             imagen={IMAGENES.barra}
@@ -373,7 +408,7 @@ const Carta = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black" />
         </motion.div>
 
-        <div className="escena-texto absolute inset-0 z-10 flex items-end pb-12 md:pb-20 px-6">
+        <div className="vt-titulo escena-texto absolute inset-0 z-10 flex items-end pb-12 md:pb-20 px-6">
           <div className="max-w-6xl mx-auto w-full text-center text-shadow">
             <span
               style={{ animationDelay: "0.15s" }}
@@ -403,14 +438,19 @@ const Carta = () => {
         <div ref={filaPestanasRef} className="relative max-w-6xl mx-auto overflow-x-auto scrollbar-hide px-4">
           <div className="flex justify-start md:justify-center min-w-max">
             <Tabs value={activeMainCategory} onValueChange={cambiarPestana}>
-              <TabsList className="bg-transparent p-0 gap-1">
+              <TabsList ref={listaPestanasRef} className="relative bg-transparent p-0 gap-1">
+                {pildoraLista && (
+                  <span aria-hidden="true" className="pildora-pestana pointer-events-none absolute left-0 top-0 rounded-full bg-white" />
+                )}
                 {tabsCarta.map((cat) => (
                   <TabsTrigger
                     key={cat.id}
                     value={cat.id}
                     className={cn(
-                      "rounded-full px-5 min-h-11 text-[15px] md:text-sm font-light transition-all duration-300",
-                      "data-[state=active]:bg-white data-[state=active]:text-black",
+                      "relative rounded-full px-5 min-h-11 text-[15px] md:text-sm font-light transition-colors duration-300 active:scale-[0.97]",
+                      pildoraLista
+                        ? "data-[state=active]:bg-transparent data-[state=active]:text-black data-[state=active]:shadow-none"
+                        : "data-[state=active]:bg-white data-[state=active]:text-black",
                       "data-[state=inactive]:text-white/60 data-[state=inactive]:hover:text-white",
                       "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0"
                     )}
@@ -488,7 +528,7 @@ const Carta = () => {
             solo la pestaña activa: las demás se ocultan con `hidden`, no se
             desmontan. Así Google y los asistentes de IA leen la carta entera.
             Buscador y filtros solo afectan a la sección activa. */}
-        <div className="min-h-[50vh]">
+        <div className="min-h-[50vh]" data-pestanas-tocadas={pestanasTocadas || undefined}>
           {tabsCarta.map((pestana) => {
             const activa = pestana.id === activeMainCategory;
             const idTitulo = `carta-${pestana.id}-titulo`;
@@ -496,7 +536,7 @@ const Carta = () => {
             if (pestana.id === "cocteles") {
               const coctelesPanel = activa ? filteredCocktails : cocktailsData;
               return (
-                <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
+                <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo} className="panel-carta">
                   <h2 id={idTitulo} className="sr-only">{pestana.name}</h2>
                   {loadingCocteles ? (activa ? <DrinksSkeleton /> : null) : coctelesPanel.length === 0 ? (
                     activa ? <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} /> : null
@@ -591,7 +631,7 @@ const Carta = () => {
             const filasPanel = activa ? filterBySearch(activeDrinkData) : bebidasDePestana(pestana.id);
             const cargando = cargandoPestana(pestana.id);
             return (
-              <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo} className="max-w-4xl mx-auto">
+              <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo} className="panel-carta max-w-4xl mx-auto">
                 <h2 id={idTitulo} className="sr-only">{pestana.name}</h2>
                 {activa && (cargando ? <DrinksSkeleton /> : filasPanel.length === 0 ? (
                   <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />

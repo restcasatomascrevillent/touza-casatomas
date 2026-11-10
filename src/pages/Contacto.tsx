@@ -39,7 +39,7 @@ const Contacto = () => {
       {/* Cabecera con foto, como Carta (antes, un bloque negro
           con el titular). Foto con priority y sin fundido: es el LCP. */}
       <section className="escena-scroll relative overflow-hidden h-[44vh] min-h-[19rem] md:h-[62vh]">
-        <div className="escena-foto absolute inset-0">
+        <div className="vt-foto escena-foto absolute inset-0">
           <OptimizedImage
             imagen={IMAGENES.interior}
             alt=""
@@ -49,7 +49,7 @@ const Contacto = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background" />
         </div>
-        <div className="escena-texto absolute inset-0 z-10 flex items-end px-6 pb-10 md:pb-16">
+        <div className="vt-titulo escena-texto absolute inset-0 z-10 flex items-end px-6 pb-10 md:pb-16">
           <div className="max-w-4xl mx-auto w-full text-center text-shadow">
             <span
               style={{ animationDelay: "0.1s" }}

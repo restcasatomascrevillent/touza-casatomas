@@ -46,7 +46,9 @@ const Hero = () => {
       ref={ref}
       className="escena-scroll alto-pantalla relative flex items-end justify-center overflow-hidden px-5 pt-28 pb-[calc(var(--barra-movil)+1.75rem)] md:h-[100dvh] md:min-h-[34rem] md:items-center md:px-6 md:pt-0 md:pb-0 apaisado:h-auto apaisado:min-h-[100svh] apaisado:pt-[4.5rem] apaisado:pb-[calc(var(--barra-movil)+1.5rem)]"
     >
-      <motion.div style={efectos ? { y } : undefined} className="absolute inset-0 z-0 bg-black">
+      {/* `vt-foto`: la foto viaja a la cabecera de la página siguiente
+          (portada → carta: se recoge hacia arriba). Ver index.css. */}
+      <motion.div style={efectos ? { y } : undefined} className="vt-foto absolute inset-0 z-0 bg-black">
         <div className="escena-foto absolute inset-0 md:ken-burns">
           <OptimizedImage
             imagen={IMAGENES.interior}
@@ -85,7 +87,7 @@ const Hero = () => {
           debajo. Con `transform`: no mueve el diseño ni cuenta para el CLS. */}
       <motion.div
         style={efectos ? { opacity } : undefined}
-        className="escena-texto relative z-10 w-full text-center md:w-auto -translate-y-[var(--aviso-cookies,0px)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:translate-y-0 apaisado:translate-y-0"
+        className="vt-titulo-portada escena-texto relative z-10 w-full text-center md:w-auto -translate-y-[var(--aviso-cookies,0px)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:translate-y-0 apaisado:translate-y-0"
       >
         {/* El h1 ya dice "Coctelería y bar de copas en Crevillente" para lectores de
             pantalla; esta línea es solo visual. */}

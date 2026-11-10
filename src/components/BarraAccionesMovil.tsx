@@ -29,7 +29,8 @@ const BarraAccionesMovil = () => {
 
       <nav
         aria-label="Acciones rápidas"
-        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden h-[var(--barra-movil)] bg-black/90 backdrop-blur-2xl shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] safe-bottom safe-x"
+        // `barra-movil` en las transiciones de página: no parpadea al cambiar.
+        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden h-[var(--barra-movil)] [view-transition-name:barra-movil] bg-black/90 backdrop-blur-2xl shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] safe-bottom safe-x"
       >
         {/* En tablet y en horizontal, un botón de 400 px pesaba demasiado: se
             queda en una columna centrada. */}

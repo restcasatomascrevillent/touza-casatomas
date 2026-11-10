@@ -751,6 +751,246 @@
     }
   }
 
+  /* ── Transiciones entre páginas (View Transitions) ─────────────────────
+     main.tsx pide a react-router `viewTransition` en cada navegación: la
+     página vieja sigue en pantalla hasta que la nueva está lista y el
+     navegador anima el paso de una a otra. Coreografía:
+
+     - La página (root) que se va se apaga y se recoge un poco (0,26 s, curva
+       de salida); la que llega sube 20 px y aparece (0,55 s, curva que se
+       posa despacio), solapadas para que nunca haya un fotograma vacío. Al
+       volver atrás, la nueva baja en vez de subir.
+     - La cabecera y la barra «Cómo llegar» son elementos aparte
+       (`cabecera`, `barra-movil`): se quedan quietas.
+     - La foto de cabecera (`.vt-foto`) viaja de una página a otra: de la
+       portada a la carta pasa de pantalla completa a la franja de arriba,
+       cambiando de foto por el camino. Solo si se veía al pulsar
+       (`data-vt-lejos`, App.tsx): con la página ya bajada no vuela nada.
+     - El menú del móvil se va deslizando a la derecha mientras entra la
+       página elegida.
+
+     Solo `opacity` y transformaciones (compositor). El fondo del pseudo-árbol
+     es el negro de la web: si algo se transparenta, se ve negro, nunca el
+     blanco del lienzo. Sin la API no se aplica nada de esto. */
+  ::view-transition {
+    background: hsl(var(--background));
+  }
+
+  :root:not([data-vt-lejos]) .vt-foto {
+    view-transition-name: foto-cabecera;
+  }
+
+  /* El titular de la cabecera va aparte, por encima de la foto que viaja: si
+     no, la foto (que se pinta sobre la página) lo taparía hasta el final.
+     La portada tiene el suyo (no se transforma en "Nuestra Carta": sale y
+     entra el otro); Carta, Galería y Contacto comparten nombre y se funden
+     de uno a otro en su sitio. */
+  :root:not([data-vt-lejos]) .vt-titulo {
+    view-transition-name: titulo-cabecera;
+  }
+
+  :root:not([data-vt-lejos]) .vt-titulo-portada {
+    view-transition-name: titulo-portada;
+  }
+
+  /* Orden de las capas durante la transición. */
+  ::view-transition-group(foto-cabecera) {
+    z-index: 1;
+  }
+
+  ::view-transition-group(titulo-cabecera),
+  ::view-transition-group(titulo-portada) {
+    z-index: 2;
+  }
+
+  ::view-transition-group(cabecera),
+  ::view-transition-group(barra-movil) {
+    z-index: 3;
+  }
+
+  ::view-transition-group(menu-velo) {
+    z-index: 4;
+  }
+
+  ::view-transition-group(menu-movil) {
+    z-index: 5;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    ::view-transition-old(root) {
+      animation: vt-pagina-sale 0.26s cubic-bezier(0.4, 0, 1, 1) both;
+    }
+
+    ::view-transition-new(root) {
+      animation: vt-pagina-entra 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+    }
+
+    :root[data-navegacion="atras"]::view-transition-new(root) {
+      animation-name: vt-pagina-vuelve;
+    }
+
+    ::view-transition-group(foto-cabecera) {
+      animation-duration: 0.6s;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Las dos fotos tienen proporciones distintas (pantalla completa → franja):
+       recortadas como `object-fit: cover` en vez de estiradas. */
+    ::view-transition-old(foto-cabecera),
+    ::view-transition-new(foto-cabecera) {
+      height: 100%;
+      object-fit: cover;
+      animation-duration: 0.6s;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    ::view-transition-group(cabecera),
+    ::view-transition-group(barra-movil) {
+      animation-duration: 0.45s;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Cabecera y barra presentes en las dos páginas: se enseña ya la nueva,
+       sin fundido cruzado (el cruce de dos copias casi iguales las dejaba un
+       fotograma en gris). Si solo están en una de las dos, se funden. */
+    ::view-transition-old(cabecera):not(:only-child),
+    ::view-transition-old(barra-movil):not(:only-child) {
+      display: none;
+    }
+
+    ::view-transition-new(cabecera):not(:only-child),
+    ::view-transition-new(barra-movil):not(:only-child) {
+      animation: none;
+    }
+
+    /* Titular que llega sin pareja (de la portada a la carta y al revés):
+       aparece cuando la foto ya casi se ha posado. El que se va sin pareja,
+       se apaga deprisa. */
+    ::view-transition-new(titulo-cabecera):only-child,
+    ::view-transition-new(titulo-portada):only-child {
+      animation: vt-titulo-entra 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+    }
+
+    ::view-transition-old(titulo-cabecera):only-child,
+    ::view-transition-old(titulo-portada):only-child {
+      animation: vt-fundido-sale 0.2s cubic-bezier(0.4, 0, 1, 1) both;
+    }
+
+    ::view-transition-old(menu-movil) {
+      animation: vt-menu-sale 0.42s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    ::view-transition-old(menu-velo) {
+      animation: vt-fundido-sale 0.42s ease-out both;
+    }
+  }
+
+  /* Con "reducir movimiento": la página cambia de golpe, sin hueco en negro
+     (sigue valiendo que la vieja espere a la nueva). */
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation: none !important;
+    }
+  }
+
+  @keyframes vt-pagina-sale {
+    to {
+      opacity: 0;
+      transform: scale(0.985);
+    }
+  }
+
+  @keyframes vt-pagina-entra {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 20px, 0);
+    }
+  }
+
+  @keyframes vt-pagina-vuelve {
+    from {
+      opacity: 0;
+      transform: translate3d(0, -14px, 0);
+    }
+  }
+
+  @keyframes vt-titulo-entra {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 10px, 0);
+    }
+  }
+
+  @keyframes vt-menu-sale {
+    to {
+      opacity: 0;
+      transform: translate3d(35%, 0, 0);
+    }
+  }
+
+  @keyframes vt-fundido-sale {
+    to {
+      opacity: 0;
+    }
+  }
+
+  /* Respaldo sin View Transitions: la página nueva entra con un fundido
+     (PageTransition). Solo opacidad: un transform en el envoltorio haría de
+     bloque contenedor de la cabecera fija. */
+  .pagina-entrada {
+    animation: fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* ── Carta: pestañas ──────────────────────────────────────────────────
+     Píldora blanca que se desliza de la pestaña anterior a la elegida (la
+     coloca Carta.tsx con --pildora-x/--pildora-w). Hasta que el JS la
+     coloca (HTML del SSG), la pestaña activa lleva su propio fondo blanco. */
+  .pildora-pestana {
+    transform: translate3d(var(--pildora-x, 0px), var(--pildora-y, 0px), 0);
+    width: var(--pildora-w, 0px);
+    height: var(--pildora-h, 100%);
+    transition:
+      transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* La sección elegida entra subiendo un poco. Las secciones van todas en el
+     HTML con `hidden` y al quitárselo la animación vuelve a empezar, sin JS.
+     Solo después del primer cambio de pestaña (`data-pestanas-tocadas`): la
+     sección que llega en el HTML se ve tal cual, sin esperar a nada. */
+  @media (prefers-reduced-motion: no-preference) {
+    [data-pestanas-tocadas] > .panel-carta:not([hidden]) {
+      animation: panel-entra 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+  }
+
+  @keyframes panel-entra {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 14px, 0);
+    }
+  }
+
+  /* Respuesta al toque en tarjetas y filas de la carta: la foto (o la fila)
+     cede un poco mientras el dedo está encima. */
+  .tarjeta-pulsable .marco-zoom {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .tarjeta-pulsable:active .marco-zoom {
+    transform: scale(0.97);
+  }
+
+  .fila-coctel {
+    transition: background-color 0.2s ease-out;
+  }
+
+  .fila-coctel:active {
+    background-color: rgb(255 255 255 / 0.03);
+  }
+
   /* Ficha del cóctel en el móvil: hoja que sube desde abajo con la curva de
      las hojas de iOS (arranca rápida y se posa despacio) y baja más deprisa
      al cerrar. Radix espera a que acabe `animationend` para desmontarla.
