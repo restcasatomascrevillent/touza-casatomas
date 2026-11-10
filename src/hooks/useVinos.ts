@@ -25,6 +25,8 @@ export interface VinoUI {
   region?: string;
   country?: string;
   denomination?: string;
+  /** Línea pequeña bajo el nombre (p. ej. la denominación en "Otros" espumosos). */
+  type?: string;
 }
 
 export const useVinos = (categoria: string, soloTouza: boolean = true) => {
@@ -65,8 +67,9 @@ export const useVinos = (categoria: string, soloTouza: boolean = true) => {
 
 /**
  * Trae TODOS los vinos touza+activado cuya `categoria` NO esté en
- * `excluidas` (Carta.tsx la usa para excluir CHAMPAGNES y CAVAS Y OTROS
- * ESPUMOSOS, que ya tienen su propia pestaña fija vía `useVinos`).
+ * `excluidas`. Carta.tsx la llama sin exclusiones: hasta el 10/11/2026
+ * excluía CHAMPAGNES y CAVAS Y OTROS ESPUMOSOS, categorías antiguas que ya no
+ * existen en la tabla (los espumosos son "VINOS ESPUMOSOS — …").
  *
  * Existe porque `categoria` en Vinos mezcla tipo y denominación de origen
  * ("VINOS TINTOS — RIBERA DEL DUERO") y esa lista de denominaciones cambia

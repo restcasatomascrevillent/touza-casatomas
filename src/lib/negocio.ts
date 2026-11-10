@@ -152,7 +152,7 @@ export function sinDuplicados<T extends { nombre: string | null }>(items: T[]): 
 
 /**
  * `Menu` con todos los productos de la carta. Es lo que permite que los
- * champagnes, cavas, cervezas, copas y whiskies —que en pantalla viven tras
+ * vinos, cervezas, copas y whiskies —que en pantalla viven tras
  * una pestaña y por tanto no están en el HTML inicial— sí lleguen al HTML de
  * forma legible por buscadores y por asistentes de IA.
  */

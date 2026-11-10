@@ -137,4 +137,32 @@ describe("agruparVinosPorTipo", () => {
     expect(new Set(ids).size).toBe(ids.length);
     expect(tintos.id).toBe("tintos");
   });
+
+  it("espumosos: pestaña primera y filtro Champagne / Cava / Otros (el resto, con su denominación)", () => {
+    const vinos = [
+      vino("VINOS TINTOS — RIOJA"),
+      vino("VINOS ESPUMOSOS — MOSCATO D'ASTI", { nombre: "Saracco" }),
+      ...Array.from({ length: 3 }, () => vino("VINOS ESPUMOSOS — CHAMPAGNE")),
+      vino("VINOS ESPUMOSOS — CAVA"),
+      vino("VINOS ESPUMOSOS — CRÉMANT DE LOIRE"),
+    ];
+    const grupos = agruparVinosPorTipo(vinos);
+    expect(grupos.map((g) => g.etiqueta)).toEqual(["Espumosos", "Tintos"]);
+
+    const [espumosos] = grupos;
+    expect(espumosos.id).toBe("espumosos");
+    expect(espumosos.denominaciones.map((d) => [d.etiqueta, d.vinos.length])).toEqual([
+      ["Champagne", 3],
+      ["Cava", 1],
+      ["Otros", 2],
+    ]);
+    expect(espumosos.vinos).toHaveLength(6);
+    const otros = espumosos.denominaciones.find((d) => d.id === "otros")!;
+    expect(otros.vinos.map((v) => v.type)).toEqual(["Moscato d'Asti", "Crémant de Loire"]);
+  });
+
+  it("espumosos sin cava: no sale un filtro vacío", () => {
+    const [espumosos] = agruparVinosPorTipo([vino("VINOS ESPUMOSOS — CHAMPAGNE"), vino("VINOS ESPUMOSOS — PROSECCO")]);
+    expect(espumosos.denominaciones.map((d) => d.etiqueta)).toEqual(["Champagne", "Otros"]);
+  });
 });

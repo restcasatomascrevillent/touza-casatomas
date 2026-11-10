@@ -1,7 +1,13 @@
 /**
- * Agrupación de vinos "resto" (todo lo que no es CHAMPAGNES ni CAVAS Y OTROS
- * ESPUMOSOS, que ya tienen su propia pestaña fija en Carta.tsx) para la
- * pestaña "Blancos" y "Tintos" de la carta de Touza.
+ * Agrupación de TODOS los vinos de Touza en las pestañas de la carta
+ * (Espumosos, Blancos, Rosados, Tintos...) y sus filtros internos.
+ *
+ * Hasta el 10/11/2026 Carta.tsx tenía además dos pestañas fijas, "Champagne"
+ * y "Cavas", que pedían las categorías antiguas CHAMPAGNES y CAVAS Y OTROS
+ * ESPUMOSOS. Esas categorías ya no existen en la tabla (ahora son "VINOS
+ * ESPUMOSOS — CHAMPAGNE", "— CAVA"...): las dos pestañas salían vacías y los
+ * espumosos reales caían aquí, en "Espumosos". Ahora solo queda "Espumosos",
+ * con su filtro Champagne / Cava / Otros (ver DENOMINACIONES_PRINCIPALES).
  *
  * La tabla Vinos no tiene una columna de "tipo" (tinto/blanco) separada: el
  * tipo y la denominación de origen viven juntos en `categoria`, como
@@ -40,6 +46,9 @@ export function capitalizarEtiqueta(texto: string): string {
       const nucleo = apertura ? palabra.slice(1) : palabra;
       if (!nucleo) return palabra;
       if (indice > 0 && CONECTORES.has(nucleo)) return apertura + nucleo;
+      // Elisión: "D'ASTI" -> "d'Asti", "L'EMPORDÀ" -> "l'Empordà".
+      const elision = /^([dl])['’](.+)$/.exec(nucleo);
+      if (indice > 0 && elision) return apertura + elision[1] + "'" + elision[2].charAt(0).toUpperCase() + elision[2].slice(1);
       return apertura + nucleo.charAt(0).toUpperCase() + nucleo.slice(1);
     })
     .join(" ");
@@ -61,13 +70,23 @@ function idDesde(texto: string): string {
 }
 
 /**
- * Orden de servicio habitual (de más ligero a más cuerpo): espumosos ya
- * tienen sus propias pestañas antes que esto, así que aquí solo hace falta
- * blanco antes que tinto. Cualquier tipo que no esté en esta lista (un
+ * Orden de servicio habitual (de más ligero a más cuerpo): espumosos,
+ * blancos, rosados y tintos. Cualquier tipo que no esté en esta lista (un
  * "VINOS ROSADOS" el día de mañana, o cualquier otra cosa) se añade al
  * final, ordenado por número de vinos, en vez de desaparecer.
  */
-const ORDEN_TIPOS = ["VINOS BLANCOS", "VINOS ROSADOS", "VINOS TINTOS"];
+const ORDEN_TIPOS = ["VINOS ESPUMOSOS", "VINOS BLANCOS", "VINOS ROSADOS", "VINOS TINTOS"];
+
+/**
+ * Tipos cuyo filtro interno no enseña cada denominación suelta, sino unas
+ * pocas fijas (en este orden) y un "Otros" con el resto. En espumosos el
+ * dueño quiere Champagne / Cava / Otros: un filtro por cada crémant o
+ * moscato con un solo vino no ayuda a elegir. En "Otros" cada vino lleva su
+ * denominación debajo del nombre, para que no se pierda.
+ */
+const DENOMINACIONES_PRINCIPALES: Record<string, string[]> = {
+  "VINOS ESPUMOSOS": ["CHAMPAGNE", "CAVA"],
+};
 
 export interface DenominacionVino {
   id: string;
@@ -108,6 +127,8 @@ export function agruparVinosPorTipo(vinos: Vino[]): TipoVino[] {
   });
 
   return entradas.map(([tipo, vinosDelTipo]) => {
+    const principales = DENOMINACIONES_PRINCIPALES[tipo.toUpperCase()];
+    if (principales) return agruparConPrincipales(tipo, vinosDelTipo, principales);
     const porDenominacion = new Map<string, Vino[]>();
     for (const vino of vinosDelTipo) {
       const partes = (vino.categoria as string).split(SEPARADOR_DENOMINACION);
@@ -133,13 +154,61 @@ export function agruparVinosPorTipo(vinos: Vino[]): TipoVino[] {
         return b.vinos.length - a.vinos.length || compararTexto(a.categoria, b.categoria);
       });
 
-    const tipoSinPrefijo = tipo.replace(/^VINOS\s+/i, "").trim() || tipo;
-
-    return {
-      id: idDesde(tipoSinPrefijo),
-      etiqueta: capitalizarEtiqueta(tipoSinPrefijo),
-      vinos: denominaciones.flatMap((d) => d.vinos),
-      denominaciones,
-    };
+    return tipoVino(tipo, denominaciones);
   });
+}
+
+function tipoVino(tipo: string, denominaciones: DenominacionVino[]): TipoVino {
+  const tipoSinPrefijo = tipo.replace(/^VINOS\s+/i, "").trim() || tipo;
+  return {
+    id: idDesde(tipoSinPrefijo),
+    etiqueta: capitalizarEtiqueta(tipoSinPrefijo),
+    vinos: denominaciones.flatMap((d) => d.vinos),
+    denominaciones,
+  };
+}
+
+/**
+ * Filtros fijos (`principales`, en su orden) más "Otros" con el resto de
+ * denominaciones; los filtros sin vinos no salen. Ver DENOMINACIONES_PRINCIPALES.
+ */
+function agruparConPrincipales(tipo: string, vinosDelTipo: Vino[], principales: string[]): TipoVino {
+  const denominacionDe = (vino: Vino) =>
+    (vino.categoria as string).split(SEPARADOR_DENOMINACION).slice(1).join(" ").trim();
+  const grupos = new Map<string, Vino[]>(principales.map((p) => [p, []]));
+  const otros: Vino[] = [];
+  for (const vino of vinosDelTipo) {
+    const denom = denominacionDe(vino).toUpperCase();
+    const grupo = grupos.get(denom);
+    if (grupo) grupo.push(vino);
+    else otros.push(vino);
+  }
+
+  const denominaciones: DenominacionVino[] = principales
+    .filter((p) => grupos.get(p)!.length > 0)
+    .map((p) => {
+      const vinos = grupos.get(p)!;
+      return {
+        id: idDesde(p),
+        categoria: vinos[0].categoria as string,
+        etiqueta: capitalizarEtiqueta(p),
+        vinos: transformVinosToUI(vinos),
+      };
+    });
+
+  if (otros.length > 0) {
+    const ui = transformVinosToUI(otros);
+    denominaciones.push({
+      id: "otros",
+      categoria: otros[0].categoria as string,
+      etiqueta: "Otros",
+      // Cada vino de "Otros" enseña su denominación ("Crémant de Loire").
+      vinos: ui.map((vino, i) => {
+        const denom = denominacionDe(otros[i]);
+        return denom ? { ...vino, type: capitalizarEtiqueta(denom) } : vino;
+      }),
+    });
+  }
+
+  return tipoVino(tipo, denominaciones);
 }

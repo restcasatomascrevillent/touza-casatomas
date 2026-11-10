@@ -444,8 +444,10 @@ describe("Carta — estructura general", () => {
   it("muestra todas las categorías principales en los tabs", () => {
     renderCarta();
     expect(screen.getByRole("tab", { name: "Cócteles" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Champagne" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Cavas" })).toBeInTheDocument();
+    // Sin pestañas fijas de vino: Champagne y Cavas eran categorías antiguas
+    // que ya no existen y salían vacías (ahora son filtros de "Espumosos").
+    expect(screen.queryByRole("tab", { name: "Champagne" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "Cavas" })).not.toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Cervezas" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Copas de Vino" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Whiskies" })).toBeInTheDocument();
@@ -453,7 +455,7 @@ describe("Carta — estructura general", () => {
 
   it("pinta TODAS las secciones con su <h2> aunque solo se vea la activa (carta indexable)", () => {
     renderCarta();
-    for (const nombre of ["Cócteles", "Champagne", "Cavas", "Cervezas", "Copas de Vino", "Whiskies"]) {
+    for (const nombre of ["Cócteles", "Cervezas", "Copas de Vino", "Whiskies"]) {
       expect(screen.getByRole("heading", { level: 2, name: nombre, hidden: true })).toBeInTheDocument();
     }
     expect(screen.getByRole("heading", { level: 2, name: "Cócteles" })).toBeVisible();
@@ -577,5 +579,49 @@ describe("Carta — vinos con denominación de origen (Blancos/Tintos)", () => {
     fireEvent.click(screen.getByText("Ribera del Duero"));
     expect(screen.getByText("Pesus")).toBeInTheDocument();
     expect(screen.queryByText("Muga Reserva")).not.toBeInTheDocument();
+  });
+
+  it("una sola pestaña 'Espumosos' con el filtro Champagne / Cava / Otros", () => {
+    vi.mocked(useVinosModule.useVinosRestantes).mockReturnValue({
+      data: [
+        mockVino({ id: "e1", nombre: "Krug", categoria: "VINOS ESPUMOSOS — CHAMPAGNE" }),
+        mockVino({ id: "e2", nombre: "Gramona", categoria: "VINOS ESPUMOSOS — CAVA" }),
+        mockVino({ id: "e3", nombre: "Langlois", categoria: "VINOS ESPUMOSOS — CRÉMANT DE LOIRE" }),
+        mockVino({ id: "t1", nombre: "Pesus", categoria: "VINOS TINTOS — RIBERA DEL DUERO" }),
+      ],
+      isLoading: false,
+    } as any);
+    vi.mocked(useVinosModule.transformVinosToUI).mockImplementation(
+      (vinos) =>
+        (vinos ?? []).map((v) => ({
+          id: v.id as string,
+          name: v.nombre as string,
+          price: `${v.precio_eur}€`,
+          featured: false,
+        })) as never
+    );
+
+    renderCarta();
+    const pestanas = screen.getAllByRole("tab").map((t) => t.textContent);
+    expect(pestanas).toEqual(["Cócteles", "Espumosos", "Tintos", "Cervezas", "Copas de Vino", "Whiskies"]);
+
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Espumosos" }));
+    const filtros = within(screen.getByRole("group", { name: "Filtrar" }))
+      .getAllByRole("button")
+      .map((b) => b.textContent);
+    expect(filtros).toEqual(["Todos", "Champagne", "Cava", "Otros"]);
+    expect(screen.getByText("Krug")).toBeVisible();
+    expect(screen.getByText("Gramona")).toBeVisible();
+    expect(screen.getByText("Langlois")).toBeVisible();
+    // En "Otros" cada vino dice su denominación.
+    expect(screen.getByText("Crémant de Loire")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "Cava" }));
+    expect(screen.getByText("Gramona")).toBeVisible();
+    expect(screen.queryByText("Krug")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Otros" }));
+    expect(screen.getByText("Langlois")).toBeVisible();
+    expect(screen.queryByText("Gramona")).not.toBeInTheDocument();
   });
 });
