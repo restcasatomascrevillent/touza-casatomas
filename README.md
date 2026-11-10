@@ -67,7 +67,7 @@ Vercel, equipo **Casa tomas**, proyecto `touza-casatomas` (repo
 
 | Rama | Entorno | URL | Supabase |
 |---|---|---|---|
-| `main` | Production | https://touza-casatomas.vercel.app | `haqmmdfdzzatdnrrcgez` (prod) |
+| `main` | Production | https://touza.restaurantecasatomascrevillente.es (`touza-casatomas.vercel.app` redirige ahí con 308) | `haqmmdfdzzatdnrrcgez` (prod) |
 | `staging` | Preview | https://touza-casatomas-git-staging-casa-tomas.vercel.app (con login de Vercel) | `sfonaclosuafvlhutkon` (demo) |
 
 Variables de entorno en Vercel: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y

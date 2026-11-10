@@ -46,13 +46,13 @@ export default defineConfig(({ mode }) => ({
       const { generarSitemapYRobots } = await import("./scripts/generar-sitemap.mjs");
       // OJO: este respaldo debe coincidir con el de `src/lib/site.ts`. Son dos
       // porque aquel corre en el bundle (`import.meta.env`) y este en Node
-      // (`loadEnv`), y no pueden compartir módulo. El dominio real está sin
-      // decidir; mientras tanto se usa la URL de Vercel, que existe. Antes
+      // (`loadEnv`), y no pueden compartir módulo. Dominio real desde el
+      // 10/11/2026: touza.restaurantecasatomascrevillente.es. Antes
       // caía en `https://touzabar.es`, que no resuelve, y el sitemap listaba
       // 5 URLs de un dominio inexistente aunque el HTML ya fuera correcto.
       await generarSitemapYRobots(
         dir,
-        env.VITE_SITE_URL || "https://touza-restaurant-website.vercel.app",
+        env.VITE_SITE_URL || "https://touza.restaurantecasatomascrevillente.es",
       );
       // vite-react-ssg necesita dist/.vite/{manifest,ssr-manifest}.json para
       // prerenderizar, pero ya ha terminado: si se quedan, Vercel los publica

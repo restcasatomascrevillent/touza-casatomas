@@ -13,7 +13,7 @@ Nada llega a producción sin el paso 5, y el paso 5 solo lo da el dueño, a mano
 | | Rama | Supabase | Web | Panel | Touza |
 |---|---|---|---|---|---|
 | **Demo** | `staging` | `sfonaclosuafvlhutkon` (casatomas-staging) | https://web-casatomas-git-staging-casa-tomas.vercel.app | https://admin-casatomas-git-staging-casa-tomas.vercel.app | https://touza-casatomas-git-staging-casa-tomas.vercel.app |
-| **Producción** | `main` | `haqmmdfdzzatdnrrcgez` (casatomas-prod) | https://web-casatomas.vercel.app | https://admin-casatomas.vercel.app | https://touza-casatomas.vercel.app |
+| **Producción** | `main` | `haqmmdfdzzatdnrrcgez` (casatomas-prod) | https://web-casatomas.vercel.app | https://admin-casatomas.vercel.app | https://touza.restaurantecasatomascrevillente.es |
 
 - La demo es una **copia de los datos reales**, pero sin Stripe ni Resend: no cobra ni manda correos. Las URL de demo piden entrar con la cuenta de Vercel.
 - El proyecto viejo (`jeamoczmbfsnwkfjxcyo`, repos de `oficiososia`) ya no es producción. No se toca.

@@ -4,6 +4,12 @@
   "cleanUrls": true,
   "regions": ["fra1"],
   "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "touza-casatomas.vercel.app" }],
+      "destination": "https://touza.restaurantecasatomascrevillente.es/:path*",
+      "permanent": true
+    },
     { "source": "/reservado", "destination": "/contacto", "statusCode": 301 },
     { "source": "/reserva/respuesta", "destination": "/contacto", "statusCode": 301 },
     { "source": "/reserva/respuesta/:ruta*", "destination": "/contacto", "statusCode": 301 }
