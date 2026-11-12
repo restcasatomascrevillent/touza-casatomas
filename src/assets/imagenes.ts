@@ -135,7 +135,7 @@ export const IMAGENES = {
   kiwiVasoBajo: construir("touza-kiwi-vaso-bajo"),
   /** Moscow Mule en taza de cobre con pajita negra, sobre el mármol. Vertical. */
   moscowMule2: construir("touza-moscow-mule-2"),
-  /** El bartender agitando la coctelera detrás de la barra. Vertical. */
+  /** El bartender agitando la coctelera en la barra, con la estantería detrás. Vertical. */
   agitando: construir("touza-agitando"),
   /** Copa coupé roja con espuma y arándanos sobre el mármol, en primer plano. Vertical. */
   copaRoja2: construir("touza-copa-roja-2"),

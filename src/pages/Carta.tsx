@@ -363,8 +363,8 @@ const Carta = () => {
           className="escena-foto absolute inset-0"
         >
           <OptimizedImage
-            imagen={IMAGENES.barra}
-            alt="Barra de Touza"
+            imagen={IMAGENES.sirviendo}
+            alt="El bartender de Touza sirviendo un cóctel en copa coupé"
             className="w-full h-full object-cover"
             sizes="100vw"
             priority={true}

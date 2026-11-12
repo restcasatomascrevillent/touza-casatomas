@@ -8,7 +8,6 @@ import Seo from "@/components/Seo";
 // horario tenía que empezar desde la portada.
 const salidas = [
   { to: "/carta", texto: "Ver la carta" },
-  { to: "/galeria", texto: "Galería" },
   { to: "/contacto", texto: "Contacto y horario" },
 ];
 

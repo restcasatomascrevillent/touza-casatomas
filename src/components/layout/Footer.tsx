@@ -6,7 +6,6 @@ import { NEGOCIO, TELEFONO, URL_COMO_LLEGAR } from "@/lib/negocio";
 
 const footerLinks = [
   { name: "Carta", path: "/carta" },
-  { name: "Galería", path: "/galeria" },
   { name: "Contacto", path: "/contacto" },
 ];
 

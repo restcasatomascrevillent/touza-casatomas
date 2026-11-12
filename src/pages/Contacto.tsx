@@ -41,7 +41,7 @@ const Contacto = () => {
       <section className="escena-scroll relative overflow-hidden h-[44vh] min-h-[19rem] md:h-[62vh]">
         <div className="escena-foto absolute inset-0">
           <OptimizedImage
-            imagen={IMAGENES.interior}
+            imagen={IMAGENES.estanteria}
             alt=""
             className="w-full h-full object-cover"
             sizes="100vw"

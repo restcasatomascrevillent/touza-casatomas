@@ -13,7 +13,6 @@ const useEfectoDeMaqueta = typeof window === "undefined" ? useEffect : useLayout
 const navLinks = [
   { name: "Inicio", path: "/" },
   { name: "Carta", path: "/carta" },
-  { name: "Galería", path: "/galeria" },
   { name: "Contacto", path: "/contacto" },
 ];
 

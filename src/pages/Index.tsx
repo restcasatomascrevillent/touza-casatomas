@@ -6,6 +6,8 @@ import VisitUs from "@/components/VisitUs";
 import Hero from "@/components/home/Hero";
 import Showcase from "@/components/home/Showcase";
 import Claves from "@/components/home/Claves";
+import CoctelesDeLaCarta from "@/components/home/CoctelesDeLaCarta";
+import EnLaBarra from "@/components/home/EnLaBarra";
 import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
 import { NEGOCIO, barSchema } from "@/lib/negocio";
@@ -60,10 +62,15 @@ const Index = () => {
         ctaLink="/carta"
       />
 
+      <CoctelesDeLaCarta />
+
+      <EnLaBarra />
+
       {/* Hasta el 01/10/2026 esta vitrina era "El Reservado". Touza ya no
           acepta reservas por la web y no hay fotos de esa sala: ahora habla
           del local con lo que enseñan las fotos (mármol, champagne, la barra)
-          y lo que ya está en la carta, y lleva a la galería. */}
+          y lo que ya está en la carta. Desde el 12/11/2026 ya no hay galería:
+          lleva a Contacto (cómo llegar). */}
       <Showcase
         indice="02"
         label="El local"
@@ -71,8 +78,8 @@ const Index = () => {
         description="Sofá corrido, mesas de mármol y la barra a la vista: un sitio para pedir otra ronda sin mirar el reloj. Y si hoy no te apetece un cóctel, en la carta también hay champagne, vino y whisky."
         foto={{ imagen: IMAGENES.champanMesa, alt: "Botellas de champagne y una copa servida sobre una mesa de mármol de Touza" }}
         detalle={{ imagen: IMAGENES.botellas, alt: "Botellas de aperitivo y ron en la barra de Touza" }}
-        ctaText="Ver la galería"
-        ctaLink="/galeria"
+        ctaText="Cómo llegar"
+        ctaLink="/contacto"
         invertido
       />
 
