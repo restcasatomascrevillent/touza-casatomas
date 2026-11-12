@@ -123,6 +123,30 @@ export const IMAGENES = {
   copaRoja: construir("touza-copa-roja"),
   /** Copa coupé naranja con espuma blanca, sobre el mármol, fondo azul. Vertical. */
   copaEspuma: construir("touza-copa-espuma"),
+  /** Tres copas coupé (roja, amarilla, naranja) en fila sobre la barra, estantería al fondo. Vertical. */
+  tresCopas: construir("touza-tres-copas"),
+  /** Tres copas coupé distintas vistas desde arriba, en diagonal sobre el mármol. Vertical. */
+  copasCenital: construir("touza-copas-cenital"),
+  /** La bartender rellenando un mojito con soda en la barra. Vertical. */
+  mojitoPreparando: construir("touza-mojito-preparando"),
+  /** Cóctel en vaso tiki de cerámica con forma de tótem y rodaja de lima. Vertical. */
+  tiki: construir("touza-tiki"),
+  /** Cóctel claro en vaso bajo labrado, con rodaja de kiwi y pajita negra. Vertical. */
+  kiwiVasoBajo: construir("touza-kiwi-vaso-bajo"),
+  /** Moscow Mule en taza de cobre con pajita negra, sobre el mármol. Vertical. */
+  moscowMule2: construir("touza-moscow-mule-2"),
+  /** El bartender agitando la coctelera detrás de la barra. Vertical. */
+  agitando: construir("touza-agitando"),
+  /** Copa coupé roja con espuma y arándanos sobre el mármol, en primer plano. Vertical. */
+  copaRoja2: construir("touza-copa-roja-2"),
+  /** Piña Colada en vaso piña sobre la barra, con la estantería iluminada detrás. Vertical. */
+  pinaBotellas: construir("touza-pina-botellas"),
+  /** El bartender sirviendo una Piña Colada desde la coctelera. Vertical. */
+  pinaPreparando: construir("touza-pina-preparando"),
+  /** La «T» de Touza retroiluminada sobre la pared trenzada. Vertical. */
+  logo: construir("touza-logo"),
+  /** Copa coupé con espuma blanca y una flor seca encima, sobre el mármol. Vertical. */
+  copaFlor: construir("touza-copa-flor"),
 } satisfies Record<string, ImagenResponsive>;
 
 /**

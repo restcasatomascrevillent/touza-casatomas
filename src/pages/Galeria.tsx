@@ -42,6 +42,19 @@ const galleryData = [
   { id: 14, category: "cocktails", image: IMAGENES.copaRoja, alt: "Cóctel rojo con espuma y arándanos en copa coupé" },
   { id: 15, category: "ambiente", image: IMAGENES.botellas, alt: "Botellas de aperitivo, ron y licores junto a un spritz en la barra" },
   { id: 16, category: "ambiente", image: IMAGENES.estanteria, alt: "La estantería de botellas de Touza, iluminada en dorado" },
+  { id: 17, category: "cocktails", image: IMAGENES.mojito, alt: "Mojito con hielo picado y pajita de Touza, recién servido en la barra" },
+  { id: 18, category: "ambiente", image: IMAGENES.agitando, alt: "El bartender agitando la coctelera detrás de la barra" },
+  { id: 19, category: "cocktails", image: IMAGENES.copaFlor, alt: "Cóctel con espuma blanca y flor seca en copa coupé" },
+  { id: 20, category: "cocktails", image: IMAGENES.tiki, alt: "Cóctel en vaso tiki de cerámica con rodaja de lima" },
+  { id: 21, category: "cocktails", image: IMAGENES.tresCopas, alt: "Tres cócteles en copa coupé en fila sobre la barra" },
+  { id: 22, category: "ambiente", image: IMAGENES.mojitoPreparando, alt: "La bartender rellenando un mojito con soda" },
+  { id: 23, category: "cocktails", image: IMAGENES.kiwiVasoBajo, alt: "Cóctel en vaso bajo labrado con rodaja de kiwi" },
+  { id: 24, category: "cocktails", image: IMAGENES.copaRoja2, alt: "Cóctel rojo con espuma y arándanos sobre el mármol" },
+  { id: 25, category: "ambiente", image: IMAGENES.logo, alt: "La T de Touza iluminada en la pared" },
+  { id: 26, category: "cocktails", image: IMAGENES.copasCenital, alt: "Tres cócteles en copa coupé vistos desde arriba" },
+  { id: 27, category: "cocktails", image: IMAGENES.pinaBotellas, alt: "Piña Colada en la barra con la estantería iluminada detrás" },
+  { id: 28, category: "ambiente", image: IMAGENES.pinaPreparando, alt: "El bartender sirviendo una Piña Colada desde la coctelera" },
+  { id: 29, category: "cocktails", image: IMAGENES.moscowMule2, alt: "Moscow Mule en taza de cobre con pajita" },
 ];
 
 const Galeria = () => {
