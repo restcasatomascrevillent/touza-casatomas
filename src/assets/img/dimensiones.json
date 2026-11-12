@@ -19,6 +19,54 @@
     "width": 1708,
     "height": 2560
   },
+  "touza-aperol": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-coctel-t": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-copa-espuma": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-copa-roja": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-estanteria": {
+    "width": 2560,
+    "height": 1920
+  },
+  "touza-green": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-mango": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-mojito-2": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-moscow-mule": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-pina": {
+    "width": 1440,
+    "height": 2560
+  },
+  "touza-sirviendo": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-trio": {
+    "width": 1536,
+    "height": 2048
+  },
   "touza-2-movil": {
     "width": 1280,
     "height": 1708

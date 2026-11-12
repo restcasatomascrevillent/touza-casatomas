@@ -95,6 +95,34 @@ export const IMAGENES = {
   champanMesa: construir("touza-8-1"),
   /** Botellas de aperitivo (Select), ron (Kraken) y licores junto a un spritz, vertical. */
   botellas: construir("touza-10"),
+
+  // ── Sesión de fotos de la barra (Drive «Cócteles», 12/11/2026). Todas
+  // verticales salvo `estanteria`. Los nombres de cóctel que no se pueden
+  // asegurar por la foto se describen por lo que se ve (copa roja, espuma…).
+  /** Copa coupé roja con arándanos delante de la «T» retroiluminada del local. Vertical. */
+  coctelLogo: construir("touza-coctel-t"),
+  /** El bartender sirviendo un cóctel rojo en copa coupé, plano corto de manos y copa. Vertical. */
+  sirviendo: construir("touza-sirviendo"),
+  /** Tres copas coupé (naranja con espuma, roja con arándanos, amarilla) en la barra, con la estantería detrás. Vertical. */
+  trio: construir("touza-trio"),
+  /** Estantería de botellas iluminada en dorado, de pared a pared. Apaisada (4:3). */
+  estanteria: construir("touza-estanteria"),
+  /** Moscow Mule en taza de cobre martelada, con rodaja de lima deshidratada. Vertical. */
+  moscowMule: construir("touza-moscow-mule"),
+  /** Aperol Spritz en copa de vino con pajitas negras, sobre el mármol. Vertical. */
+  aperol: construir("touza-aperol"),
+  /** Mojito en vaso alto con hierbabuena, lima y pajita negra, fondo azul del local. Vertical. */
+  mojitoBarra: construir("touza-mojito-2"),
+  /** Cóctel en copa coupé con borde de sal y chile, amarillo anaranjado (Spicy Mango Margarita). Vertical. */
+  mango: construir("touza-mango"),
+  /** Cóctel verde de hielo picado con rodaja de kiwi, en vaso labrado. Vertical. */
+  verde: construir("touza-green"),
+  /** Piña Colada en vaso con forma de piña sobre una caja dorada, papel pintado detrás. Vertical. */
+  pinaColada: construir("touza-pina"),
+  /** Copa coupé roja con espuma y arándanos en la barra, fondo azul. Vertical. */
+  copaRoja: construir("touza-copa-roja"),
+  /** Copa coupé naranja con espuma blanca, sobre el mármol, fondo azul. Vertical. */
+  copaEspuma: construir("touza-copa-espuma"),
 } satisfies Record<string, ImagenResponsive>;
 
 /**

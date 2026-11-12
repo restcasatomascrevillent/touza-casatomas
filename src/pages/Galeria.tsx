@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { BARRA_BAJO_CABECERA } from "@/lib/cabecera";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import Seo from "@/components/Seo";
-import { IMAGENES, imagenRemota } from "@/assets/imagenes";
+import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
@@ -21,21 +21,27 @@ const galleryCategories = [
 
 // Las fotos locales (IMAGENES) son propias y cada `alt` describe lo que se
 // ve en ellas, no lo que se querría enseñar.
-// ⚠️ Las 5 de Unsplash siguen siendo stock: un bar real ilustrado con fotos
-// de catálogo resta credibilidad frente a la ficha de Google, donde sí habrá
-// fotos reales. Pendiente de fotos del dueño.
-// El orden importa: las posiciones 0 y 5 son las casillas grandes (2×2).
+// Desde el 12/11/2026 todas son fotos reales de la barra (las 5 de Unsplash
+// se han quitado).
+// El orden importa: las posiciones múltiplo de 5 (0, 5, 10…) son las
+// casillas grandes (2×2): ahí van las fotos con más escena.
 const galleryData = [
   { id: 1, category: "ambiente", image: IMAGENES.interior, alt: "Interior de Touza: sofá corrido color mostaza, mesas de mármol y sillas tapizadas" },
-  { id: 2, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel Signature" },
-  { id: 3, category: "ambiente", image: IMAGENES.barra, alt: "Bartender colando un cóctel sobre hielo en la barra" },
-  { id: 4, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel tropical" },
-  { id: 5, category: "cocktails", image: IMAGENES.mojito, alt: "Mojito con hielo picado y pajita de Touza, recién servido en la barra" },
-  { id: 8, category: "ambiente", image: IMAGENES.champanMesa, alt: "Tres botellas de champagne y una copa servida sobre una mesa de mármol" },
-  { id: 6, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1536935338788-846bb9981813?w=600&h=800&fit=crop", 600, 800), alt: "Cóctel clásico" },
-  { id: 7, category: "ambiente", image: IMAGENES.botellas, alt: "Botellas de aperitivo, ron y licores junto a un spritz en la barra" },
-  { id: 9, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=600&h=800&fit=crop", 600, 800), alt: "Mojito" },
-  { id: 11, category: "cocktails", image: imagenRemota("https://images.unsplash.com/photo-1556855810-ac404aa91e85?w=600&h=800&fit=crop", 600, 800), alt: "Margarita" },
+  { id: 2, category: "cocktails", image: IMAGENES.moscowMule, alt: "Moscow Mule en taza de cobre con rodaja de lima deshidratada" },
+  { id: 3, category: "ambiente", image: IMAGENES.sirviendo, alt: "El bartender sirviendo un cóctel rojo en copa coupé" },
+  { id: 4, category: "cocktails", image: IMAGENES.aperol, alt: "Aperol Spritz en copa de vino sobre la barra de mármol" },
+  { id: 5, category: "cocktails", image: IMAGENES.mango, alt: "Cóctel en copa coupé con borde de sal y chile" },
+  { id: 6, category: "cocktails", image: IMAGENES.trio, alt: "Tres cócteles en copa coupé sobre la barra, con la estantería de botellas detrás" },
+  { id: 7, category: "cocktails", image: IMAGENES.verde, alt: "Cóctel verde con hielo picado y rodaja de kiwi" },
+  { id: 8, category: "ambiente", image: IMAGENES.barra, alt: "Bartender colando un cóctel sobre hielo en la barra" },
+  { id: 9, category: "cocktails", image: IMAGENES.pinaColada, alt: "Piña Colada en vaso con forma de piña" },
+  { id: 10, category: "cocktails", image: IMAGENES.copaEspuma, alt: "Cóctel naranja con espuma en copa coupé" },
+  { id: 11, category: "cocktails", image: IMAGENES.coctelLogo, alt: "Cóctel rojo con arándanos delante de la T iluminada de Touza" },
+  { id: 12, category: "cocktails", image: IMAGENES.mojitoBarra, alt: "Mojito con hierbabuena y lima en vaso alto" },
+  { id: 13, category: "ambiente", image: IMAGENES.champanMesa, alt: "Tres botellas de champagne y una copa servida sobre una mesa de mármol" },
+  { id: 14, category: "cocktails", image: IMAGENES.copaRoja, alt: "Cóctel rojo con espuma y arándanos en copa coupé" },
+  { id: 15, category: "ambiente", image: IMAGENES.botellas, alt: "Botellas de aperitivo, ron y licores junto a un spritz en la barra" },
+  { id: 16, category: "ambiente", image: IMAGENES.estanteria, alt: "La estantería de botellas de Touza, iluminada en dorado" },
 ];
 
 const Galeria = () => {
@@ -94,7 +100,7 @@ const Galeria = () => {
       <section className="escena-scroll relative overflow-hidden h-[44vh] min-h-[19rem] md:h-[62vh]">
         <div className="escena-foto absolute inset-0">
           <OptimizedImage
-            imagen={IMAGENES.botellas}
+            imagen={IMAGENES.estanteria}
             alt=""
             className="w-full h-full object-cover [&_img]:object-[50%_38%]"
             sizes="100vw"

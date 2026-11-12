@@ -54,8 +54,8 @@ const Index = () => {
         label="Descubre"
         title="Cócteles de autor"
         description="Cada copa que servimos cuenta una historia. Ingredientes seleccionados, técnicas de vanguardia y una presentación que desafía lo convencional."
-        foto={{ imagen: IMAGENES.barra, alt: "Bartender de Touza colando un cóctel sobre hielo en vaso bajo" }}
-        detalle={{ imagen: IMAGENES.mojito, alt: "Mojito recién servido en la barra, con pajita de Touza" }}
+        foto={{ imagen: IMAGENES.coctelLogo, alt: "Cóctel rojo en copa coupé con arándanos, delante de la T iluminada de Touza" }}
+        detalle={{ imagen: IMAGENES.sirviendo, alt: "El bartender de Touza sirviendo un cóctel rojo en copa coupé" }}
         ctaText="Ver la carta"
         ctaLink="/carta"
       />
