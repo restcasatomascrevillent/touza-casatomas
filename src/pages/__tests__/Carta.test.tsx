@@ -450,13 +450,13 @@ describe("Carta — estructura general", () => {
     expect(screen.getByRole("tab", { name: "Champagne" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Cavas" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Cervezas" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Copas de Vino" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Por copas" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Whiskies" })).toBeInTheDocument();
   });
 
   it("pinta TODAS las secciones con su <h2> aunque solo se vea la activa (carta indexable)", () => {
     renderCarta();
-    for (const nombre of ["Cócteles", "Champagne", "Cavas", "Cervezas", "Copas de Vino", "Whiskies"]) {
+    for (const nombre of ["Cócteles", "Champagne", "Cavas", "Cervezas", "Por copas", "Whiskies"]) {
       expect(screen.getByRole("heading", { level: 2, name: nombre, hidden: true })).toBeInTheDocument();
     }
     expect(screen.getByRole("heading", { level: 2, name: "Cócteles" })).toBeVisible();

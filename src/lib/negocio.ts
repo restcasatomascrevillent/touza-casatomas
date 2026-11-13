@@ -99,7 +99,7 @@ export function barSchema(): Record<string, unknown> {
     acceptsReservations: false,
     hasMenu: canonical("/carta"),
     // Bar de copas: sin "Tapas" (la carta de Touza no tiene platos).
-    servesCuisine: ["Cócteles", "Coctelería", "Copas", "Champagne", "Vinos"],
+    servesCuisine: ["Cócteles", "Coctelería", "Copas", "Champagne", "Cava"],
     // "€€", nunca "$$": react-helmet pasa el contenido por String.replace() y
     // "$$" es la secuencia de escape de "$" → en dist salía "priceRange":"$".
     priceRange: "€€",

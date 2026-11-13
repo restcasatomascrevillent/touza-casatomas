@@ -23,6 +23,7 @@ import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
 import { menuSchema } from "@/lib/negocio";
 import { CARTA_SSG, platosParaJsonLd } from "@/lib/carta-ssg";
+import FilaBotella from "@/components/carta/FilaBotella";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -40,6 +41,18 @@ interface GenericDrink {
 // Champagne y Cavas (cava, crémant, moscato…) salen de las categorías
 // «VINOS ESPUMOSOS — …» de Vinos. Tintos, blancos y rosados no tienen
 // pestaña aunque alguno siga marcado touza=true en el panel.
+// En «Por copas» solo champagne y cava: las copas de tinto, blanco, rosado o
+// dulce no salen aunque sigan marcadas para Touza en el panel.
+const esCopaEspumosa = (copa: { tipo?: string | null }) => /^(champagne|cava)$/i.test(copa.tipo ?? "");
+
+// Una línea bajo el título de cada pestaña de bebidas: cómo se sirve.
+const INTRO_PESTANA: Record<string, string> = {
+  champagne: "Por botella.",
+  cavas: "Cava y otros espumosos, por botella.",
+  copas: "Champagne y cava, por copa.",
+  whiskies: "Por copa: solo, con hielo o con agua.",
+};
+
 const mainCategoriesAntesDeVinos = [
   { id: "cocteles", name: "Cócteles" },
   { id: "champagne", name: "Champagne" },
@@ -47,7 +60,7 @@ const mainCategoriesAntesDeVinos = [
 ];
 const mainCategoriesDespuesDeVinos = [
   { id: "cervezas", name: "Cervezas" },
-  { id: "copas", name: "Copas de Vino" },
+  { id: "copas", name: "Por copas" },
   { id: "whiskies", name: "Whiskies" },
 ];
 
@@ -157,7 +170,7 @@ const Carta = () => {
   const { data: copasRaw, isLoading: loadingCopas } = useBebidas('Copas');
   const { data: whiskiesRaw, isLoading: loadingWhiskies } = useBebidas('Whiskies');
   const cervezasData = useMemo(() => transformBebidasToUI(cervezasRaw), [cervezasRaw]);
-  const copasData = useMemo(() => transformBebidasToUI(copasRaw), [copasRaw]);
+  const copasData = useMemo(() => transformBebidasToUI(copasRaw?.filter(esCopaEspumosa)), [copasRaw]);
   const whiskiesData = useMemo(() => transformBebidasToUI(whiskiesRaw), [whiskiesRaw]);
 
   const { data: platosRaw, isLoading: loadingPlatos } = usePlatosTouza();
@@ -185,7 +198,7 @@ const Carta = () => {
       { nombre: "Champagnes", items: espumosos.filter((vino) => esChampagne(vino.categoria)) },
       { nombre: "Cavas y otros espumosos", items: espumosos.filter((vino) => !esChampagne(vino.categoria)) },
       { nombre: "Cervezas", items: CARTA_SSG.bebidas["Cervezas"] ?? [] },
-      { nombre: "Copas de vino", items: CARTA_SSG.bebidas["Copas"] ?? [] },
+      { nombre: "Champagne y cava por copas", items: (CARTA_SSG.bebidas["Copas"] ?? []).filter(esCopaEspumosa) },
       { nombre: "Whiskies", items: CARTA_SSG.bebidas["Whiskies"] ?? [] },
       // Sin fotos si el panel las apagó al construir (ver `platosParaJsonLd`).
       { nombre: "Tapas", items: platosParaJsonLd(CARTA_SSG.platos) },
@@ -256,8 +269,8 @@ const Carta = () => {
   return (
     <Layout>
       <Seo
-        title="Carta de cócteles, vinos y champagne · Touza Crevillente"
-        description="Carta de Touza, bar de copas en Crevillente: cócteles de autor y clásicos, cócteles sin alcohol, champagne, vinos, cervezas y whiskies, con precios."
+        title="Carta de cócteles, champagne y whisky · Touza Crevillente"
+        description="Carta de Touza, bar de copas en Crevillente: cócteles de autor y clásicos, cócteles sin alcohol, champagne, cava, cervezas y whiskies, con precios."
         canonical={canonical("/carta")}
         keywords={['carta touza', 'cócteles crevillente', 'coctelería crevillente', 'champagne', 'precios']}
         schema={schemaCarta}
@@ -305,7 +318,7 @@ const Carta = () => {
               style={{ animationDelay: "0.4s" }}
               className="entrada-hero text-white/70 text-base md:text-lg font-light max-w-xl mx-auto"
             >
-              Una colección curada de sabores. Desde clásicos atemporales hasta innovaciones audaces.
+              Cócteles de la casa y clásicos, champagne, cava, whisky y cerveza.
             </p>
           </div>
         </div>
@@ -322,13 +335,22 @@ const Carta = () => {
                     key={cat.id}
                     value={cat.id}
                     className={cn(
-                      "rounded-full px-5 min-h-11 text-[15px] md:text-sm font-light transition-all duration-300",
-                      "data-[state=active]:bg-white data-[state=active]:text-black",
+                      "relative rounded-none px-4 md:px-5 min-h-11 text-[15px] md:text-sm font-light tracking-wide transition-colors duration-300",
+                      "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#D8B47E]",
                       "data-[state=inactive]:text-white/60 data-[state=inactive]:hover:text-white",
                       "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0"
                     )}
                   >
                     {cat.name}
+                    {/* Subrayado dorado que se desliza a la pestaña elegida. */}
+                    {cat.id === activeMainCategory && (
+                      <motion.span
+                        layoutId="subrayado-pestana"
+                        aria-hidden="true"
+                        className="absolute inset-x-4 md:inset-x-5 bottom-1.5 h-px bg-[#D8B47E]"
+                        transition={{ duration: 0.45, ease: appleEase }}
+                      />
+                    )}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -475,44 +497,29 @@ const Carta = () => {
             const filasPanel = activa ? filterBySearch(activeDrinkData) : bebidasDePestana(pestana.id);
             const cargando = cargandoPestana(pestana.id);
             return (
-              <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo} className="max-w-4xl mx-auto">
-                <h2 id={idTitulo} className="sr-only">{pestana.name}</h2>
+              <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
+                <header className="mb-2 md:mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                  <h2 id={idTitulo} className="font-serif text-4xl md:text-6xl leading-none text-[#F3EEE4]">{pestana.name}</h2>
+                  {INTRO_PESTANA[pestana.id] && (
+                    <p className="text-sm font-light text-white/50 md:text-right">{INTRO_PESTANA[pestana.id]}</p>
+                  )}
+                </header>
                 {activa && (cargando ? <DrinksSkeleton /> : filasPanel.length === 0 ? (
                   <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />
                 ) : null)}
-                {/* Sin retraso por posición: las filas entran de una en una al
-                    hacer scroll, y con `index * 0.04` el vino 60 de una lista
-                    esperaba 2,4 s después de llegar a la pantalla. */}
-                    {filasPanel.map((drink) => (
-                      <Reveal
-                        key={drink.id}
-                        y={15}
-                        className="flex justify-between items-center gap-4 py-3.5 md:py-5 border-b border-white/5 group"
-                      >
-                        {/* Foto de la botella al lado, estrecha (3:5) como en la
-                            carta de vinos de Casa Tomás. Sin foto, fila de texto. */}
-                        {drink.image && (
-                          <div className="shrink-0 w-16 md:w-20 aspect-[3/5] overflow-hidden rounded-lg bg-white/5">
-                            <img
-                              src={drink.image}
-                              alt={drink.name}
-                              width={900}
-                              height={1500}
-                              loading="lazy"
-                              decoding="async"
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                            />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-serif text-lg text-white group-hover:text-primary transition-colors duration-300">{drink.name}</h3>
-                          {(drink as GenericDrink).type && (
-                            <span className="text-xs text-white/50 uppercase tracking-wider font-light">{(drink as GenericDrink).type}</span>
-                          )}
-                        </div>
-                        <span className="text-primary font-medium text-lg whitespace-nowrap tabular-nums">{drink.price}</span>
-                      </Reveal>
-                    ))}
+                <ul className="grid md:grid-cols-2 md:gap-x-14">
+                  {filasPanel.map((drink, indice) => (
+                    <FilaBotella
+                      key={drink.id}
+                      indice={indice}
+                      nombre={drink.name}
+                      precio={drink.price}
+                      descripcion={drink.description}
+                      tipo={(drink as GenericDrink).type}
+                      imagen={drink.image}
+                    />
+                  ))}
+                </ul>
               </section>
             );
           })}

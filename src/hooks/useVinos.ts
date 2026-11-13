@@ -28,6 +28,7 @@ export interface VinoUI {
   denomination?: string;
   /** Foto de la botella (Storage, 3:5). Sin foto, la fila va sin imagen. */
   image?: string;
+  description?: string;
 }
 
 export const useVinos = (categoria: string, soloTouza: boolean = true) => {
@@ -182,5 +183,6 @@ export const transformVinosToUI = (vinos: Vino[] | undefined): VinoUI[] => {
     country: vino.ubicacion_pais || undefined,
     denomination: vino.denominacion_origen || undefined,
     image: vino.imagen_url || undefined,
+    description: vino.descripcion || undefined,
   }));
 };

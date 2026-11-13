@@ -28,7 +28,7 @@ const Index = () => {
     <Layout>
       <Seo
         title="Touza Cocktail Bar · Copas y cócteles en Crevillente"
-        description="Coctelería y bar de copas en Crevillent, junto a Casa Tomás: cócteles de autor, champagne, vinos y whisky. Sin reservas: ven directamente."
+        description="Coctelería y bar de copas en Crevillent, junto a Casa Tomás: cócteles de autor, champagne, cava y whisky. Sin reservas: ven directamente."
         canonical={canonical("/")}
         keywords={["cocktail bar", "coctelería crevillente", "bar de copas crevillente", "cócteles", "cócteles de autor", "copas"]}
         schema={barSchema()}
@@ -75,7 +75,7 @@ const Index = () => {
         indice="02"
         label="El local"
         title="Un sitio para quedarse"
-        description="Sofá corrido, mesas de mármol y la barra a la vista: un sitio para pedir otra ronda sin mirar el reloj. Y si hoy no te apetece un cóctel, en la carta también hay champagne, vino y whisky."
+        description="Sofá corrido, mesas de mármol y la barra a la vista: un sitio para pedir otra ronda sin mirar el reloj. Y si hoy no te apetece un cóctel, en la carta también hay champagne, cava y whisky."
         foto={{ imagen: IMAGENES.champanMesa, alt: "Botellas de champagne y una copa servida sobre una mesa de mármol de Touza" }}
         detalle={{ imagen: IMAGENES.botellas, alt: "Botellas de aperitivo y ron en la barra de Touza" }}
         ctaText="Cómo llegar"
@@ -102,14 +102,14 @@ const Index = () => {
             </p>
             <p>
               La carta gira en torno a los cócteles: de autor, con recetas propias de la casa, y clásicos bien
-              hechos. También hay cócteles sin alcohol, una selección amplia de champagne y vinos, cervezas y
+              hechos. También hay cócteles sin alcohol, una selección amplia de champagne y cava, cervezas y
               whiskies. Detrás de la barra hay cinco años de experiencia preparando copas, con ingredientes
               seleccionados y una presentación cuidada.
             </p>
             <p>
               En Touza no se reserva: ven directamente, con tu pareja, con amigos o después de cenar en Casa
               Tomás. Si es tu primera vez, déjate aconsejar y empieza por un cóctel de autor; si prefieres algo
-              más clásico, en la carta encontrarás champagne, vino y whisky para acompañar la noche.
+              más clásico, en la carta encontrarás champagne, cava y whisky para acompañar la noche.
             </p>
           </div>
         </div>
