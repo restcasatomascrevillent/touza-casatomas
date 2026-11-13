@@ -11,8 +11,7 @@ import { cn } from "@/lib/utils";
 import { BARRA_BAJO_CABECERA } from "@/lib/cabecera";
 import { irA } from "@/lib/scroll";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
-import { useVinos, useVinosRestantes, transformVinosToUI, type Vino, type VinoUI } from "@/hooks/useVinos";
-import { agruparVinosPorTipo, capitalizarEtiqueta } from "@/lib/vinos-carta";
+import { useEspumosos, esChampagne, PREFIJO_ESPUMOSOS, transformVinosToUI, type Vino, type VinoUI } from "@/hooks/useVinos";
 import { useBebidas, transformBebidasToUI, type BebidaUI } from "@/hooks/useBebidas";
 import { usePlatosTouza, transformPlatosToUI, useMostrarFotosPlatosTouza } from "@/hooks/usePlatos";
 import { AVISO_ALERGENOS_CARTA, AVISO_SIN_ALERGENOS } from "@/lib/alergenos";
@@ -37,18 +36,10 @@ interface GenericDrink {
   image?: string;
 }
 
-// CHAMPAGNES y CAVAS Y OTROS ESPUMOSOS son las dos únicas categorías de
-// Vinos sin denominación de origen (no llevan "—"), así que siguen pidiendo
-// su propia pestaña fija con useVinos(categoria). Todo lo demás (tintos,
-// blancos...) se pide de una vez con useVinosRestantes excluyendo estas dos,
-// y se agrupa en pestañas dinámicas — ver gruposVino más abajo.
-const CATEGORIAS_VINO_FIJAS = ["CHAMPAGNES", "CAVAS Y OTROS ESPUMOSOS"];
-
-// Pestañas que no dependen de datos: cócteles, los dos vinos sin
-// denominación y las bebidas. Las pestañas de vino con denominación
-// (Blancos, Tintos...) se insertan entre "cavas" y "cervezas" en tabsCarta,
-// derivadas de gruposVino para que una categoría nueva en el admin no vuelva
-// a quedarse sin pestaña.
+// Touza solo tiene espumosos (13/11/2026: «los vinos en Touza van fuera»):
+// Champagne y Cavas (cava, crémant, moscato…) salen de las categorías
+// «VINOS ESPUMOSOS — …» de Vinos. Tintos, blancos y rosados no tienen
+// pestaña aunque alguno siga marcado touza=true en el panel.
 const mainCategoriesAntesDeVinos = [
   { id: "cocteles", name: "Cócteles" },
   { id: "champagne", name: "Champagne" },
@@ -150,45 +141,18 @@ const Carta = () => {
 
   const { data: coctelesData, isLoading: loadingCocteles } = useCocteles();
   const cocktailsData = useMemo(() => transformCoctelesToUI(coctelesData), [coctelesData]);
-  const { data: champagnesRaw, isLoading: loadingChampagnes } = useVinos('CHAMPAGNES');
-  const { data: cavasRaw, isLoading: loadingCavas } = useVinos('CAVAS Y OTROS ESPUMOSOS');
-  const champagneData = useMemo(() => transformVinosToUI(champagnesRaw), [champagnesRaw]);
-  const cavasData = useMemo(() => transformVinosToUI(cavasRaw), [cavasRaw]);
-  // Resto de vinos con denominación de origen (tintos, blancos...): una sola
-  // consulta para todo, agrupada por tipo real de los datos en vez de
-  // categorías escritas a mano. Ver src/lib/vinos-carta.ts.
-  //
-  // `useVinosRestantes` no tiene instantánea de build propia (no siembra con
-  // `initialData`, a diferencia de useVinos/useCocteles/useBebidas/usePlatos
-  // — ver el comentario en su definición), así que en el primer render
-  // —tanto en Node durante `vite-react-ssg build` como en el navegador antes
-  // de que resuelva su fetch— `vinosRestoRaw` viene `undefined`. Sin más,
-  // `gruposVino` saldría `[]` y las pestañas Blancos/Tintos no existirían en
-  // el HTML prerenderizado (el bug que arregla este cambio). `vinosRestoSSG`
-  // cubre ese hueco con la instantánea de `CARTA_SSG.vinos` —ahora con TODAS
-  // las categorías reales, no solo las dos fijas, ver
-  // scripts/carta-ssg-plugin.mjs— para que el primer render, en Node y en el
-  // navegador, ya tenga los mismos datos; en cuanto `useVinosRestantes`
-  // resuelve su fetch real, `gruposVino` se recalcula con esos datos frescos.
-  const vinosRestoSSG = useMemo(() => {
-    if (!CARTA_SSG) return undefined;
-    return Object.entries(CARTA_SSG.vinos)
-      .filter(([categoria]) => !CATEGORIAS_VINO_FIJAS.includes(categoria))
-      .flatMap(([, vinosDeCategoria]) => vinosDeCategoria);
-  }, []);
-  const { data: vinosRestoRaw } = useVinosRestantes(CATEGORIAS_VINO_FIJAS);
-  const gruposVino = useMemo(
-    () => agruparVinosPorTipo(vinosRestoRaw ?? vinosRestoSSG ?? []),
-    [vinosRestoRaw, vinosRestoSSG]
+  const { data: espumososRaw, isLoading: loadingEspumosos } = useEspumosos();
+  const champagneData = useMemo(
+    () => transformVinosToUI(espumososRaw?.filter((vino) => esChampagne(vino.categoria))),
+    [espumososRaw]
   );
-  const tabsCarta = useMemo(
-    () => [
-      ...mainCategoriesAntesDeVinos,
-      ...gruposVino.map((grupo) => ({ id: grupo.id, name: grupo.etiqueta })),
-      ...mainCategoriesDespuesDeVinos,
-    ],
-    [gruposVino]
+  const cavasData = useMemo(
+    () => transformVinosToUI(espumososRaw?.filter((vino) => !esChampagne(vino.categoria))),
+    [espumososRaw]
   );
+  const loadingChampagnes = loadingEspumosos;
+  const loadingCavas = loadingEspumosos;
+  const tabsCarta = useMemo(() => [...mainCategoriesAntesDeVinos, ...mainCategoriesDespuesDeVinos], []);
   const { data: cervezasRaw, isLoading: loadingCervezas } = useBebidas('Cervezas');
   const { data: copasRaw, isLoading: loadingCopas } = useBebidas('Copas');
   const { data: whiskiesRaw, isLoading: loadingWhiskies } = useBebidas('Whiskies');
@@ -213,39 +177,13 @@ const Carta = () => {
   // prerenderizado y el de la hidratación sean idénticos.
   const schemaCarta = useMemo(() => {
     if (!CARTA_SSG) return undefined;
-    // Blancos, Tintos y cualquier otra denominación: una sección de Menu por
-    // cada categoría real de CARTA_SSG.vinos que no sea Champagnes/Cavas
-    // (esas dos ya tienen su sección fija justo debajo, con su nombre
-    // legible de siempre). Reutiliza capitalizarEtiqueta (src/lib/vinos-carta.ts)
-    // para el nombre de sección en vez de mostrar la categoría en bruto de
-    // la base de datos ("VINOS TINTOS — RIBERA DEL DUERO").
-    //
-    // Agrupado por TIPO ("Vinos Tintos", "Vinos Blancos"...), no por
-    // categoría: antes salían 40+ secciones, algunas llamadas "… — Origen
-    // Pendiente" o "… — Sin D.o.". La denominación pasa a la descripción de
-    // cada vino, y solo cuando es una denominación real.
-    const vinosPorTipo = new Map<string, Vino[]>();
-    for (const [categoria, vinosDeCategoria] of Object.entries(CARTA_SSG.vinos)) {
-      if (CATEGORIAS_VINO_FIJAS.includes(categoria)) continue;
-      const [tipoCrudo, ...resto] = categoria.split(/\s*[-–—]\s*/);
-      const tipo = capitalizarEtiqueta(tipoCrudo.trim());
-      const denominacion = resto.join(" ").trim();
-      const denominacionValida = denominacion && !/pendiente|^sin d\.?\s*o/i.test(denominacion)
-        ? capitalizarEtiqueta(denominacion)
-        : null;
-      const vinos = vinosDeCategoria.map((vino) =>
-        denominacionValida
-          ? { ...vino, descripcion: [denominacionValida, vino.descripcion].filter(Boolean).join(". ") }
-          : vino
-      );
-      vinosPorTipo.set(tipo, [...(vinosPorTipo.get(tipo) ?? []), ...vinos]);
-    }
-    const seccionesVinoResto = Array.from(vinosPorTipo, ([nombre, items]) => ({ nombre, items }));
+    const espumosos = Object.entries(CARTA_SSG.vinos)
+      .filter(([categoria]) => categoria.startsWith(PREFIJO_ESPUMOSOS))
+      .flatMap(([, vinos]) => vinos as Vino[]);
     return menuSchema([
       { nombre: "Cócteles", items: CARTA_SSG.cocteles },
-      { nombre: "Champagnes", items: CARTA_SSG.vinos["CHAMPAGNES"] ?? [] },
-      { nombre: "Cavas y otros espumosos", items: CARTA_SSG.vinos["CAVAS Y OTROS ESPUMOSOS"] ?? [] },
-      ...seccionesVinoResto,
+      { nombre: "Champagnes", items: espumosos.filter((vino) => esChampagne(vino.categoria)) },
+      { nombre: "Cavas y otros espumosos", items: espumosos.filter((vino) => !esChampagne(vino.categoria)) },
       { nombre: "Cervezas", items: CARTA_SSG.bebidas["Cervezas"] ?? [] },
       { nombre: "Copas de vino", items: CARTA_SSG.bebidas["Copas"] ?? [] },
       { nombre: "Whiskies", items: CARTA_SSG.bebidas["Whiskies"] ?? [] },
@@ -271,32 +209,16 @@ const Carta = () => {
     return items.filter(item => normalizarBusqueda(item.name).includes(busqueda));
   };
 
-  // Grupo de vino (Blancos, Tintos...) que corresponde a la pestaña activa,
-  // si la activa es una de vino con denominación. `undefined` en cualquier
-  // otra pestaña (cócteles, champagne, cavas, cervezas, copas, whiskies).
-  const grupoVinoActivo = useMemo(
-    () => gruposVino.find((grupo) => grupo.id === activeMainCategory),
-    [gruposVino, activeMainCategory]
-  );
-
   // Pills bajo el buscador: categorías de cóctel en "Cócteles", denominación
   // de origen en una pestaña de vino con más de una denominación, nada en el
   // resto (igual que hoy en Champagne, Cavas, Cervezas...).
   const subFilterOptions = useMemo(() => {
     if (activeMainCategory === "cocteles") return cocktailCategories;
-    if (grupoVinoActivo && grupoVinoActivo.denominaciones.length > 1) {
-      return [
-        { id: "all", name: "Todos" },
-        ...grupoVinoActivo.denominaciones.map((denom) => ({ id: denom.id, name: denom.etiqueta })),
-      ];
-    }
     return [];
-  }, [activeMainCategory, grupoVinoActivo]);
+  }, [activeMainCategory]);
 
   // Datos de la pestaña "genérica" activa (todo lo que no es cócteles):
-  // champagne/cavas/cervezas/copas/whiskies son fijos; una pestaña de vino
-  // con denominación se resuelve contra grupoVinoActivo y, si hay una
-  // denominación concreta seleccionada, se filtra a esa.
+  // champagne/cavas/cervezas/copas/whiskies.
   const activeDrinkData = useMemo<(VinoUI | BebidaUI)[]>(() => {
     switch (activeMainCategory) {
       case "champagne": return champagneData;
@@ -304,15 +226,9 @@ const Carta = () => {
       case "cervezas": return cervezasData;
       case "copas": return copasData;
       case "whiskies": return whiskiesData;
-      default:
-        if (!grupoVinoActivo) return [];
-        if (selectedCategory === "all") return grupoVinoActivo.vinos;
-        return (
-          grupoVinoActivo.denominaciones.find((denom) => denom.id === selectedCategory)?.vinos ??
-          grupoVinoActivo.vinos
-        );
+      default: return [];
     }
-  }, [activeMainCategory, champagneData, cavasData, cervezasData, copasData, whiskiesData, grupoVinoActivo, selectedCategory]);
+  }, [activeMainCategory, champagneData, cavasData, cervezasData, copasData, whiskiesData]);
 
   // Lista completa (sin buscador ni filtros) de una pestaña que no es la
   // activa: se pinta oculta para que su sección esté en el HTML.
@@ -323,11 +239,9 @@ const Carta = () => {
       case "cervezas": return cervezasData;
       case "copas": return copasData;
       case "whiskies": return whiskiesData;
-      default: return gruposVino.find((grupo) => grupo.id === id)?.vinos ?? [];
+      default: return [];
     }
   };
-  // Blancos/Tintos no necesitan estado de carga: sus pestañas solo existen
-  // una vez que sus datos han llegado (ver tabsCarta).
   const cargandoPestana = (id: string): boolean => {
     switch (id) {
       case "champagne": return loadingChampagnes;
@@ -575,7 +489,22 @@ const Carta = () => {
                         y={15}
                         className="flex justify-between items-center gap-4 py-3.5 md:py-5 border-b border-white/5 group"
                       >
-                        <div>
+                        {/* Foto de la botella al lado, estrecha (3:5) como en la
+                            carta de vinos de Casa Tomás. Sin foto, fila de texto. */}
+                        {drink.image && (
+                          <div className="shrink-0 w-16 md:w-20 aspect-[3/5] overflow-hidden rounded-lg bg-white/5">
+                            <img
+                              src={drink.image}
+                              alt={drink.name}
+                              width={900}
+                              height={1500}
+                              loading="lazy"
+                              decoding="async"
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
                           <h3 className="font-serif text-lg text-white group-hover:text-primary transition-colors duration-300">{drink.name}</h3>
                           {(drink as GenericDrink).type && (
                             <span className="text-xs text-white/50 uppercase tracking-wider font-light">{(drink as GenericDrink).type}</span>

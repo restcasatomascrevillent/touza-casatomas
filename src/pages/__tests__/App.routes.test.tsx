@@ -32,6 +32,9 @@ vi.mock("@/hooks/useCocteles", () => ({
 vi.mock("@/hooks/useVinos", () => ({
   useVinos: () => ({ data: [], isLoading: false }),
   useVinosRestantes: () => ({ data: [], isLoading: false }),
+  useEspumosos: () => ({ data: [], isLoading: false }),
+  esChampagne: () => false,
+  PREFIJO_ESPUMOSOS: "VINOS ESPUMOSOS",
   transformVinosToUI: () => [],
 }));
 vi.mock("@/hooks/useBebidas", () => ({
