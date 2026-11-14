@@ -8,6 +8,7 @@ export interface Bebida {
   nombre: string | null;
   descripcion: string | null;
   precio_eur: number | null;
+  imagen_url?: string | null;
   categoria: string | null;
   tipo: string | null;
   tag: string | null;
@@ -24,6 +25,9 @@ export interface BebidaUI {
   type?: string;
   tag?: string;
   size?: string;
+  /** Foto de la botella (Storage, 3:5). Sin foto, la fila va sin imagen. */
+  image?: string;
+  description?: string;
 }
 
 export const useBebidas = (categoria: string, soloTouza: boolean = true) => {
@@ -68,5 +72,7 @@ export const transformBebidasToUI = (bebidas: Bebida[] | undefined): BebidaUI[] 
     type: bebida.tipo || undefined,
     tag: bebida.tag || undefined,
     size: bebida.tamano || undefined,
+    image: bebida.imagen_url || undefined,
+    description: bebida.descripcion || undefined,
   }));
 };

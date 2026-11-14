@@ -1,4 +1,6 @@
 import Reveal from "@/components/Reveal";
+import { OptimizedImage } from "@/components/ui/optimized-image";
+import { IMAGENES } from "@/assets/imagenes";
 
 /**
  * "Lo que nos define" (antes FeaturesGrid en escritorio y FeaturesMobile en
@@ -34,6 +36,16 @@ const Claves = () => {
           </Reveal>
           <Reveal as="h2" delay={0.08} className="font-serif text-3xl md:text-5xl text-white leading-[1.05]">
             Lo que nos define
+          </Reveal>
+          {/* La «T» del local: solo en escritorio, donde la columna izquierda
+              quedaba vacía bajo el título. */}
+          <Reveal delay={0.15} className="hidden lg:block mt-10 aspect-[3/4] max-w-[18rem] overflow-hidden rounded-2xl bg-white/5">
+            <OptimizedImage
+              imagen={IMAGENES.logo}
+              alt="La T de Touza iluminada en la pared del local"
+              sizes="18rem"
+              className="w-full h-full object-cover"
+            />
           </Reveal>
         </div>
 

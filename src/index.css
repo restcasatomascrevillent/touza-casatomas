@@ -767,3 +767,44 @@
     }
   }
 }
+/* ── Carta: «la vitrina» de botellas (components/carta/FilaBotella.tsx) ──
+   Luz cálida desde abajo en el nicho, como la estantería retroiluminada de la
+   barra; se enciende un poco más al pasar por encima. La entrada se dispara
+   cada vez que la pestaña pasa de `hidden` a visible (una animación CSS se
+   reinicia al salir de display:none), escalonada con --i. */
+@layer components {
+  .luz-nicho {
+    background:
+      radial-gradient(120% 45% at 50% 108%, rgb(216 180 126 / 0.32), transparent 70%),
+      linear-gradient(to bottom, rgb(10 10 10 / 0.25), transparent 30%);
+    mix-blend-mode: soft-light;
+    opacity: 0.85;
+    transition: opacity 0.7s ease;
+  }
+  .group:hover .luz-nicho {
+    opacity: 1;
+    mix-blend-mode: screen;
+  }
+  .fila-botella {
+    animation: entrada-botella 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 45ms);
+  }
+  .fila-botella .nicho-botella {
+    animation: subida-nicho 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 45ms + 60ms);
+  }
+  @keyframes entrada-botella {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes subida-nicho {
+    from { clip-path: inset(100% 0 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fila-botella,
+    .fila-botella .nicho-botella {
+      animation: none;
+    }
+  }
+}

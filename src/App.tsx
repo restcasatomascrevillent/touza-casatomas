@@ -92,7 +92,6 @@ export const routes: RouteRecord[] = [
     children: [
       { index: true, lazy: lazyRoute(() => import("./pages/Index")) },
       { path: "carta", lazy: lazyRoute(() => import("./pages/Carta")) },
-      { path: "galeria", lazy: lazyRoute(() => import("./pages/Galeria")) },
       // `handle: SIN_BARRA_MOVIL`: sin la barra fija "Cómo llegar"
       // del móvil (ver src/lib/barra-movil.ts). Contacto ya lleva ese mismo botón
       // arriba del todo.

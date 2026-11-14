@@ -15,7 +15,6 @@ import path from "node:path";
 const AJUSTES = {
   "/": { priority: "1.0", changefreq: "weekly" },
   "/carta": { priority: "0.9", changefreq: "weekly" },
-  "/galeria": { priority: "0.7", changefreq: "monthly" },
   "/contacto": { priority: "0.6", changefreq: "monthly" },
   // Textos legales: indexables (dan confianza y datos del titular), pero al final.
   "/aviso-legal": { priority: "0.2", changefreq: "yearly" },

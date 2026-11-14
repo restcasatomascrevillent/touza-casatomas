@@ -98,7 +98,8 @@ async function traerCarta(base, key) {
       base,
       key,
       "Vinos",
-      `select=${COLUMNAS_VINOS}&activado=eq.true&touza=eq.true&order=categoria.asc,${ORDEN_VINOS_POSTGREST}`,
+      // Solo espumosos (13/11/2026): el resto de vinos ya no sale en Touza.
+      `select=${COLUMNAS_VINOS}&activado=eq.true&touza=eq.true&categoria=like.${encodeURIComponent("VINOS ESPUMOSOS*")}&order=categoria.asc,${ORDEN_VINOS_POSTGREST}`,
     ),
     consultar(
       base,

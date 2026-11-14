@@ -20,7 +20,7 @@ describe("muestraBarraMovil", () => {
 
 describe("barra del móvil por ruta (handle en App.tsx)", () => {
   it("sale en las páginas de contenido", () => {
-    for (const ruta of ["carta", "galeria", "aviso-legal", "privacidad", "cookies"]) {
+    for (const ruta of ["carta", "aviso-legal", "privacidad", "cookies"]) {
       expect(muestraBarraMovil(matchesDe(ruta))).toBe(true);
     }
     const portada = hijas.find((r) => r.index);
