@@ -3,15 +3,14 @@ import { OptimizedImage } from "@/components/ui/optimized-image";
 import { IMAGENES } from "@/assets/imagenes";
 
 /**
- * Cómo se hace una copa, en tres fotos reales de la barra: agitar, servir y
- * la copa terminada. Es una secuencia de verdad, por eso va numerada.
+ * Cómo se hace una copa, en dos fotos reales de la barra: servir y la copa
+ * terminada. Es una secuencia de verdad, por eso va numerada. (La foto de
+ * «Se agita» la quitó el dueño el 14/11/2026.)
  *
- * Escritorio: tres columnas escalonadas (la del medio baja) para que se lea
- * como un movimiento. Móvil: la primera foto grande y las otras dos debajo,
- * en dos columnas, sin desplazamiento lateral (ya lo tiene la tira de cócteles).
+ * Dos columnas en todos los tamaños; en escritorio la segunda baja un poco
+ * para que se lea como un movimiento.
  */
-const pasos: { titulo: string; texto: string; imagen: typeof IMAGENES.agitando; alt: string; encuadre?: string }[] = [
-  { titulo: "Se agita", texto: "Hielo, medida y coctelera: cada copa se prepara al momento.", imagen: IMAGENES.agitando, alt: "El bartender de Touza agitando la coctelera detrás de la barra" },
+const pasos: { titulo: string; texto: string; imagen: typeof IMAGENES.sirviendo; alt: string; encuadre?: string }[] = [
   { titulo: "Se sirve", texto: "Colado, directo a la copa.", imagen: IMAGENES.sirviendo, alt: "El bartender sirviendo un cóctel rojo en copa coupé" },
   { titulo: "Y a disfrutarla", texto: "Con su guarnición, lista para tomar sin prisas.", imagen: IMAGENES.copaRoja2, alt: "Cóctel rojo con espuma y arándanos sobre la barra de mármol" },
 ];
@@ -28,19 +27,19 @@ const EnLaBarra = () => (
         </Reveal>
       </div>
 
-      <ol className="grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-3 md:gap-x-8">
+      <ol className="grid grid-cols-2 gap-x-3 gap-y-8 md:gap-x-10 md:max-w-4xl">
         {pasos.map((paso, i) => (
           <Reveal
             as="li"
             key={paso.titulo}
             delay={i * 0.1}
-            className={i === 0 ? "col-span-2 md:col-span-1" : i === 1 ? "md:mt-24" : "md:mt-48"}
+            className={i === 1 ? "md:mt-24" : undefined}
           >
-            <div className={`overflow-hidden rounded-2xl bg-white/5 ${i === 0 ? "aspect-[4/5]" : "aspect-[3/4]"} md:aspect-[3/4]`}>
+            <div className={`overflow-hidden rounded-2xl bg-white/5 aspect-[3/4]`}>
               <OptimizedImage
                 imagen={paso.imagen}
                 alt={paso.alt}
-                sizes="(min-width: 768px) 33vw, (min-width: 0px) 50vw"
+                sizes="(min-width: 768px) 430px, 50vw"
                 className={`w-full h-full object-cover ${paso.encuadre ?? ""}`}
               />
             </div>

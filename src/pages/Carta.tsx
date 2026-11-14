@@ -19,11 +19,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Seo from "@/components/Seo";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { CocktailHoverOutlineSVG } from "@/components/ui/svg/CocktailHoverOutlineSVG";
-import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
 import { menuSchema } from "@/lib/negocio";
 import { CARTA_SSG, platosParaJsonLd } from "@/lib/carta-ssg";
 import FilaBotella from "@/components/carta/FilaBotella";
+import HeroLlenado from "@/components/carta/HeroLlenado";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -289,12 +289,9 @@ const Carta = () => {
           transition={{ duration: 1.5, ease: appleEase }}
           className="escena-foto absolute inset-0"
         >
-          <OptimizedImage
-            imagen={IMAGENES.sirviendo}
-            alt="El bartender de Touza sirviendo un cóctel en copa coupé"
-            className="w-full h-full object-cover"
-            sizes="100vw"
-            priority={true}
+          <HeroLlenado
+            alt="El bartender de Touza llenando una copa coupé con un cóctel rojo"
+            className="absolute inset-0"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black" />
         </motion.div>
