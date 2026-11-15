@@ -13,6 +13,14 @@ const SIZES = "(min-width: 1024px) 60vh, 100vw";
 // React 18 aún no conoce `fetchPriority` en camelCase: se escribe en minúsculas.
 const PRIORIDAD_ALTA = { fetchpriority: "high" } as Record<string, string>;
 
+/**
+ * Encuadre del vídeo y del póster. En el móvil la pantalla es más alta que
+ * 9:16 y `object-cover` recorta los lados: centrado, la copa (a la derecha del
+ * plano C029) quedaba cortada. Al 80 % entra entera y la T se corre a la
+ * izquierda. Desde lg el marco ya es 9:16 y no recorta nada.
+ */
+const ENCUADRE = "object-[80%_50%] lg:object-center";
+
 const ALT_POSTER = "Un cóctel en la barra de Touza, delante de la T iluminada";
 const ALT_INTERIOR = "Interior de Touza: sofá corrido color mostaza, mesas de mármol y luz cálida";
 
@@ -21,7 +29,8 @@ const ImagenHero = ({ prioridad, alt, className }: { prioridad: boolean; alt: st
   const atributos = {
     alt,
     loading: "eager" as const,
-    decoding: "async" as const,
+    // El LCP, decodificado de una vez: que el primer pintado ya lo traiga.
+    decoding: prioridad ? ("sync" as const) : ("async" as const),
     ...(prioridad ? PRIORIDAD_ALTA : {}),
     className: cn("absolute inset-0 h-full w-full object-cover", className),
   };
@@ -44,7 +53,7 @@ const ImagenHero = ({ prioridad, alt, className }: { prioridad: boolean; alt: st
  * del vídeo costaría decodificarlo dos veces.
  */
 export const HeroFondo = () => (
-  <ImagenHero prioridad={false} alt="" className="scale-125 blur-3xl brightness-[0.3] saturate-[1.1]" />
+  <ImagenHero prioridad={false} alt="" className="scale-125 blur-3xl brightness-[0.5] saturate-[1.1]" />
 );
 
 interface HeroVideoProps {
@@ -122,7 +131,7 @@ const HeroVideo = ({ botonClassName }: HeroVideoProps) => {
 
   return (
     <>
-      <ImagenHero prioridad alt={VIDEO_HERO.poster ? ALT_POSTER : ALT_INTERIOR} />
+      <ImagenHero prioridad alt={VIDEO_HERO.poster ? ALT_POSTER : ALT_INTERIOR} className={ENCUADRE} />
 
       {montado && (
         <video
@@ -140,6 +149,7 @@ const HeroVideo = ({ botonClassName }: HeroVideoProps) => {
           onLoadedMetadata={(e) => setLargo(e.currentTarget.duration > 5)}
           className={cn(
             "absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out",
+            ENCUADRE,
             listo ? "opacity-100" : "opacity-0"
           )}
         >

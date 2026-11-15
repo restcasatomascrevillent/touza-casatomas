@@ -30,7 +30,9 @@ import LineaHechos from "./LineaHechos";
  */
 const Hero = () => (
   <div className="hero-escenario relative">
-    <section className="sticky top-0 isolate h-[100svh] min-h-[30rem] overflow-hidden bg-background apaisado:relative apaisado:h-auto apaisado:min-h-[100svh]">
+    {/* Fondo cálido (la pared trenzada y la luz de la T del póster) en vez de
+        negro: es lo que se ve en el primer instante, mientras llega el póster. */}
+    <section className="sticky top-0 isolate h-[100svh] min-h-[30rem] overflow-hidden bg-[radial-gradient(75%_85%_at_68%_45%,#3d2c1c_0%,#1b130c_55%,hsl(var(--background))_100%)] apaisado:relative apaisado:h-auto apaisado:min-h-[100svh]">
       {/* Lo que hace el zoom: el fondo desenfocado y el vídeo. El marco que lo
           recorta acaba 2 px antes del borde: con el zoom, la capa ampliada
           dejaba una línea de 1 px de la foto bajo el degradado al salir. */}
@@ -54,14 +56,11 @@ const Hero = () => (
       {/* Se oscurece del todo al final del tramo fijo (transparente en reposo). */}
       <div aria-hidden="true" className="hero-velo pointer-events-none absolute inset-0" />
 
-      {/* Mientras está abierto el aviso de cookies (primera visita, móvil), el
-          texto sube lo que mide el aviso (`--aviso-cookies`, lo publica
-          CookieConsent). Con `transform`: no mueve el diseño ni suma CLS.
-          `pointer-events-none`: deja pulsar el botón de pausa del vídeo. */}
-      <div className="hero-contenido pointer-events-none relative z-10 mx-auto flex h-full max-w-[110rem] flex-col justify-end px-5 pt-24 -translate-y-[var(--aviso-cookies,0px)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:px-8 lg:translate-y-0 lg:px-12 apaisado:translate-y-0 apaisado:pt-20">
+      {/* `pointer-events-none`: deja pulsar el botón de pausa del vídeo. */}
+      <div className="hero-contenido pointer-events-none relative z-10 mx-auto flex h-full max-w-[110rem] flex-col justify-end px-5 pt-24 md:px-8 lg:px-12 apaisado:pt-20">
         <h1 className="hero-titulo text-cream">
           <span
-            className="entrada-hero block font-serif font-bold leading-[0.78] tracking-[-0.04em] [text-shadow:0_8px_60px_rgb(0_0_0/0.5)] text-[26vw] md:text-[24vw] lg:text-[clamp(9rem,21vw,26rem)] apaisado:text-[6rem]"
+            className="entrada-marca block font-serif font-bold leading-[0.78] tracking-[-0.04em] [text-shadow:0_8px_60px_rgb(0_0_0/0.5)] text-[26vw] md:text-[24vw] lg:text-[clamp(9rem,21vw,26rem)] apaisado:text-[6rem]"
             style={{ animationDelay: "0.1s" }}
           >
             TOUZA

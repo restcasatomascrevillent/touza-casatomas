@@ -141,26 +141,42 @@ describe("Contacto — mapa", () => {
     expect(screen.getByRole("link", { name: /abrir en google maps/i })).toBeInTheDocument();
   });
 
-  it("sin consentimiento, ni iframe ni opción de mapa interactivo (cookies de terceros)", () => {
+  it("sin elección, el iframe no se carga solo; al pedirlo, se pregunta en el hueco del mapa", () => {
     localStorage.removeItem("touza_cookie_consent");
     renderContacto();
     expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /mapa interactivo/i })).not.toBeInTheDocument();
-  });
-
-  it("con 'Rechazar' guardado, tampoco", () => {
-    localStorage.setItem("touza_cookie_consent", "rejected");
-    renderContacto();
+    fireEvent.click(screen.getByRole("button", { name: "Ver mapa interactivo de Google" }));
     expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /mapa interactivo/i })).not.toBeInTheDocument();
+    const pregunta = screen.getByRole("group", { name: "Mapa interactivo de Google" });
+    expect(pregunta).toHaveAccessibleDescription(/cookies/);
+    const aceptar = screen.getByRole("button", { name: "Aceptar" });
+    expect(aceptar).toHaveFocus();
+    expect(aceptar.className).toBe(screen.getByRole("button", { name: "Rechazar" }).className);
+    expect(screen.getByRole("link", { name: "Más información" })).toHaveAttribute("href", "/cookies");
+
+    fireEvent.click(aceptar);
+    expect(localStorage.getItem("touza_cookie_consent")).toBe("accepted");
+    expect(screen.getByTitle("Ubicación Touza")).toBeInTheDocument();
     localStorage.removeItem("touza_cookie_consent");
   });
 
-  it("con 'Aceptar' guardado, el mapa interactivo es una opción: no se carga solo, sí al pedirlo", () => {
+  it("«Rechazar» guarda la elección y vuelve al mapa estático, sin iframe", () => {
+    localStorage.removeItem("touza_cookie_consent");
+    renderContacto();
+    fireEvent.click(screen.getByRole("button", { name: "Ver mapa interactivo de Google" }));
+    fireEvent.click(screen.getByRole("button", { name: "Rechazar" }));
+    expect(localStorage.getItem("touza_cookie_consent")).toBe("rejected");
+    expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Mapa interactivo de Google" })).not.toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /mapa del centro de crevillent/i })).toBeInTheDocument();
+    localStorage.removeItem("touza_cookie_consent");
+  });
+
+  it("con 'Aceptar' ya guardado, no se carga solo, pero al pedirlo sale directamente", () => {
     localStorage.setItem("touza_cookie_consent", "accepted");
     renderContacto();
     expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /ver mapa interactivo/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Ver mapa interactivo de Google" }));
     expect(screen.getByTitle("Ubicación Touza")).toBeInTheDocument();
     localStorage.removeItem("touza_cookie_consent");
   });

@@ -13,9 +13,9 @@ import { ESTABLECIMIENTO, RUTAS_LEGALES, TITULAR } from "@/lib/legal";
 //  · Supabase (proyecto en eu-west-1, Irlanda): el navegador lee de ahí la
 //    carta, sin iniciar sesión y sin enviar datos del visitante.
 //  · Vercel aloja la web y sirve Vercel Web Analytics (sin cookies).
-//  · Google Maps en /contacto: solo con consentimiento o a petición.
+//  · Google Maps en /contacto: solo si se pide el mapa interactivo y se acepta.
 //  · Google Fonts se cargan desde los servidores de Google (index.html).
-//  · 5 fotos de la galería se sirven desde Unsplash.
+//  · Ninguna foto de terceros: las de Unsplash se retiraron el 15/11/2026.
 // Si cambia cualquiera de estas piezas, hay que cambiar este texto.
 
 const enlaceExterno = (href: string, texto: string) => (
@@ -103,7 +103,7 @@ const Privacidad = () => (
           ],
           [
             "Mostrarte el mapa interactivo de Google en la página de contacto.",
-            "Tu consentimiento (art. 6.1.a), que se pide en el aviso de cookies o al pulsar «Cargar mapa».",
+            "Tu consentimiento (art. 6.1.a), que se pide al pulsar «Ver mapa interactivo de Google» en la página «Cómo llegar».",
           ],
           [
             "Cumplir obligaciones legales y atender requerimientos de autoridades.",
@@ -159,9 +159,6 @@ const Privacidad = () => (
           <strong>Google Ireland Ltd.</strong>: el mapa de la página de contacto, solo si lo aceptas (con cookies; ver{" "}
           {enlaceExterno("https://policies.google.com/privacy?hl=es", "su política de privacidad")}), y las tipografías
           de la web (Google Fonts, sin cookies).
-        </li>
-        <li>
-          <strong>Unsplash</strong>: algunas fotografías de la galería.
         </li>
         <li>
           <strong>Instagram y Facebook (Meta)</strong>: solo si sigues los enlaces a nuestros perfiles; a partir de ahí

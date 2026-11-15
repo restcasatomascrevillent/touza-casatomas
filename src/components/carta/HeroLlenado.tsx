@@ -184,10 +184,8 @@ const HeroLlenado = ({ alt, children }: Props) => {
             className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent via-40% to-[#0b0806] to-95% md:via-55% md:to-100%"
           />
         </div>
-        {/* En el móvil, por encima de la barra fija «Cómo llegar» y, en la
-            primera visita, del aviso de cookies (`--aviso-cookies`, lo publica
-            CookieConsent): se sube con `transform`, sin mover la maquetación. */}
-        <div className="absolute inset-x-0 bottom-0 z-10 px-6 pb-[calc(var(--barra-movil,4.5rem)+1.5rem)] -translate-y-[var(--aviso-cookies,0px)] transition-transform duration-500 md:translate-y-0 md:pb-14">
+        {/* En el móvil, por encima de la barra fija «Cómo llegar». */}
+        <div className="absolute inset-x-0 bottom-0 z-10 px-6 pb-[calc(var(--barra-movil,4.5rem)+1.5rem)] md:pb-14">
           {children}
         </div>
       </div>

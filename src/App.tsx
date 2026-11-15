@@ -10,7 +10,6 @@ import { Analytics } from "@vercel/analytics/react";
 import ErrorBoundary from "./components/ui/error-boundary";
 import PageTransition from "./components/PageTransition";
 import SmoothScroll from "./components/SmoothScroll";
-import CookieConsent from "./components/CookieConsent";
 import BarraAccionesMovil from "./components/BarraAccionesMovil";
 import { irArriba } from "./lib/scroll";
 import { SIN_BARRA_MOVIL } from "./lib/barra-movil";
@@ -60,7 +59,6 @@ const RootLayout = () => {
               {/* Fuera de <PageTransition>: su transform de framer-motion crearía
                   un containing block y la barra `fixed` dejaría de anclarse al viewport. */}
               <BarraAccionesMovil />
-              <CookieConsent />
               {/* Vercel Web Analytics (sin cookies). Renderiza `null` y solo inyecta
                   el script en un useEffect → no afecta al HTML del SSG. El script
                   sigue los cambios de history (react-router): cada navegación en
@@ -104,7 +102,7 @@ export const routes: RouteRecord[] = [
       // lista) y el sitemap la recoge del `dist/despues-de-cenar.html`.
       { path: "despues-de-cenar", lazy: lazyRoute(() => import("./pages/DespuesDeCenar")) },
       // Textos legales (LSSI-CE, RGPD/LOPDGDD y cookies). Datos del titular en
-      // src/lib/legal.ts; el pie y el aviso de cookies enlazan aquí.
+      // src/lib/legal.ts; el pie y el mapa de /contacto enlazan aquí.
       { path: "aviso-legal", lazy: lazyRoute(() => import("./pages/AvisoLegal")) },
       { path: "privacidad", lazy: lazyRoute(() => import("./pages/Privacidad")) },
       { path: "cookies", lazy: lazyRoute(() => import("./pages/Cookies")) },

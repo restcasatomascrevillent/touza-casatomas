@@ -10,13 +10,14 @@ import { RUTAS_LEGALES, TITULAR } from "@/lib/legal";
 //  · localStorage `touza_cookie_consent` (src/lib/consentimiento.ts).
 //  · Caché del service worker de la PWA (vite.config.ts: `touza-assets`,
 //    `touza-pages` y el precache de Workbox).
-//  · Google Maps (iframe de /contacto): solo con consentimiento o "Cargar mapa".
+//  · Google Maps (iframe de /contacto): solo si el visitante pide el mapa
+//    interactivo y lo acepta en ese momento (no hay aviso global).
 //  · Vercel Web Analytics: sin cookies ni almacenamiento local.
 //  · Supabase: la web solo lee la carta, sin iniciar sesión, así que no
 //    guarda nada en el navegador.
 //  · Lenis (scroll suave) y framer-motion: no guardan nada.
 // Si se añade cualquier otra cookie o script de terceros, actualizar esta
-// tabla Y el aviso (CookieConsent.tsx) ANTES de publicarlo.
+// tabla ANTES de publicarlo (y, si necesita permiso, pedirlo donde se use).
 
 const enlaceExterno = (href: string, texto: string) => (
   <a href={href} target="_blank" rel="noopener noreferrer">
@@ -38,8 +39,9 @@ const Cookies = () => (
     >
       <h2 id="tu-eleccion">1. Tu elección</h2>
       <p>
-        Las únicas cookies que necesitan tu permiso son las del mapa de Google de la página de contacto. Puedes cambiar
-        de opinión en cualquier momento: el botón borra tu elección y vuelve a mostrar el aviso.
+        Las únicas cookies que necesitan tu permiso son las del mapa interactivo de Google de la página «Cómo llegar».
+        Por defecto esa página enseña un mapa estático, alojado en esta web y sin cookies; el de Google solo se carga si
+        lo pides allí y lo aceptas. Puedes cambiar de opinión aquí en cualquier momento.
       </p>
       <ConfigurarCookies />
 
@@ -63,7 +65,7 @@ const Cookies = () => (
             <code key="c">{CLAVE_CONSENTIMIENTO}</code>,
             "Almacenamiento local",
             "Recuerda si aceptaste o rechazaste las cookies del mapa, para no preguntarte en cada visita.",
-            "Hasta que borres los datos del navegador o pulses «Configurar cookies».",
+            "Hasta que borres los datos del navegador o cambies tu elección en esta página.",
           ],
           [
             "touza-assets, touza-pages y caché de Workbox",
@@ -81,15 +83,15 @@ const Cookies = () => (
         filas={[
           [
             "Google Maps (Google Ireland Ltd.)",
-            "Solo si aceptas en el aviso o pulsas «Cargar mapa» en la página de contacto.",
+            "Solo si pides el mapa interactivo en la página «Cómo llegar» y lo aceptas.",
             "Mostrar el mapa interactivo. Google instala sus propias cookies (por ejemplo NID, AEC o SOCS) en el dominio google.com; su número, finalidad y duración —de meses en algunos casos— los decide Google, y pueden incluir fines de seguridad, preferencias o publicidad.",
             enlaceExterno("https://policies.google.com/technologies/cookies?hl=es", "Cookies de Google"),
           ],
         ]}
       />
       <p>
-        Si rechazas, el mapa no se carga y te ofrecemos un enlace para abrir la dirección directamente en Google Maps.
-        Nada más de la web cambia.
+        Si no lo permites, ves el mapa estático y un enlace para abrir la dirección directamente en Google Maps. Nada más
+        de la web cambia.
       </p>
 
       <h2 id="sin-cookies">5. Lo que no usa cookies</h2>
@@ -100,8 +102,9 @@ const Cookies = () => (
           <Link to={RUTAS_LEGALES.privacidad}>política de privacidad</Link>.
         </li>
         <li>
-          <strong>Tipografías (Google Fonts)</strong> y <strong>algunas fotos de la galería (Unsplash)</strong>: se
-          descargan de servidores de terceros, que reciben tu dirección IP, pero no instalan cookies.
+          <strong>Tipografías (Google Fonts)</strong>: se descargan de servidores de Google, que reciben tu dirección
+          IP, pero no instalan cookies. El mapa estático de «Cómo llegar» está alojado en esta web (datos de
+          OpenStreetMap).
         </li>
       </ul>
 

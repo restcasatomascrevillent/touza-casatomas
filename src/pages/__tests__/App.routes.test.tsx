@@ -87,8 +87,7 @@ vi.mock("lenis", () => ({
   })),
 }));
 
-// CookieConsent y PageTransition — no relevantes para este test
-vi.mock("@/components/CookieConsent", () => ({ default: () => null }));
+// PageTransition — no relevante para este test
 vi.mock("@/components/PageTransition", () => ({
   default: ({ children }: { children: React.ReactNode }) =>
     React.createElement(React.Fragment, null, children),

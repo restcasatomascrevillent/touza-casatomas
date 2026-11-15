@@ -36,11 +36,10 @@ import { routes } from "../../App";
 import AvisoLegal from "../AvisoLegal";
 import Privacidad from "../Privacidad";
 import Cookies from "../Cookies";
-import CookieConsent from "@/components/CookieConsent";
 import { TITULAR } from "@/lib/legal";
+import fuenteApp from "../../App.tsx?raw";
 
-// Router de datos (como el de vite-react-ssg): el aviso de cookies lee los
-// `handle` de la ruta con useMatches para saber si hay barra en el móvil.
+// Router de datos, como el de vite-react-ssg.
 const enRouter = (el: React.ReactElement) =>
   render(React.createElement(RouterProvider, { router: createMemoryRouter([{ path: "*", element: el }]) }));
 
@@ -106,77 +105,29 @@ describe("Política de cookies", () => {
     expect(screen.getByText("Google Maps (Google Ireland Ltd.)")).toBeInTheDocument();
   });
 
-  it("«Configurar cookies» borra la elección y vuelve a abrir el aviso", () => {
+  it("se puede cambiar la elección: «Permitir» y «No permitir», con el mismo peso", () => {
     localStorage.setItem("touza_cookie_consent", "accepted");
-    enRouter(
-      React.createElement(
-        React.Fragment,
-        null,
-        React.createElement(Cookies),
-        React.createElement(CookieConsent),
-      ),
-    );
-    expect(screen.queryByRole("region", { name: "Aviso de cookies" })).not.toBeInTheDocument();
+    enRouter(React.createElement(Cookies));
     expect(screen.getByText(/Has aceptado/)).toBeInTheDocument();
+    const permitir = screen.getByRole("button", { name: "Permitir" });
+    const noPermitir = screen.getByRole("button", { name: "No permitir" });
+    expect(permitir).toHaveAttribute("aria-pressed", "true");
+    expect(permitir.className).toBe(noPermitir.className);
 
     act(() => {
-      fireEvent.click(screen.getByRole("button", { name: "Configurar cookies" }));
+      fireEvent.click(noPermitir);
     });
-
-    expect(localStorage.getItem("touza_cookie_consent")).toBeNull();
-    expect(screen.getByRole("region", { name: "Aviso de cookies" })).toBeInTheDocument();
-    expect(screen.getByText(/Todavía no has elegido/)).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Rechazar" }));
     expect(localStorage.getItem("touza_cookie_consent")).toBe("rejected");
     expect(screen.getByText(/Has rechazado/)).toBeInTheDocument();
+    expect(noPermitir).toHaveAttribute("aria-pressed", "true");
   });
 });
 
-describe("Aviso de cookies", () => {
-  it("Aceptar y Rechazar tienen el mismo peso visual y nada va premarcado", () => {
-    enRouter(React.createElement(CookieConsent));
-    const aviso = screen.getByRole("region", { name: "Aviso de cookies" });
-    expect(aviso).toHaveAccessibleDescription(/Cookies del mapa de Google/);
-    const aceptar = screen.getByRole("button", { name: "Aceptar" });
-    const rechazar = screen.getByRole("button", { name: "Rechazar" });
-    expect(aceptar.className).toBe(rechazar.className);
-    expect(aviso.querySelector("input")).toBeNull();
-  });
-
-  it("publica su alto para el hero mientras está abierto y lo retira al responder", () => {
-    enRouter(React.createElement(CookieConsent));
-    expect(document.documentElement.style.getPropertyValue("--aviso-cookies")).toMatch(/px$/);
-    fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
-    expect(localStorage.getItem("touza_cookie_consent")).toBe("accepted");
-    expect(document.documentElement.style.getPropertyValue("--aviso-cookies")).toBe("");
-  });
-
-  it("reabierto desde «Configurar cookies» toma el foco y lo devuelve al responder", () => {
-    localStorage.setItem("touza_cookie_consent", "rejected");
-    enRouter(
-      React.createElement(
-        React.Fragment,
-        null,
-        React.createElement(Cookies),
-        React.createElement(CookieConsent),
-      ),
-    );
-    const configurar = screen.getByRole("button", { name: "Configurar cookies" });
-    configurar.focus();
-    act(() => {
-      fireEvent.click(configurar);
-    });
-    expect(screen.getByRole("button", { name: "Aceptar" })).toHaveFocus();
-
-    fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
-    expect(configurar).toHaveFocus();
-  });
-});
-
-describe("Enlaces a los textos legales", () => {
-  it("el aviso de cookies enlaza «Más información» a /cookies", () => {
-    enRouter(React.createElement(CookieConsent));
-    expect(screen.getByRole("link", { name: "Más información" })).toHaveAttribute("href", "/cookies");
+describe("Sin aviso de cookies global", () => {
+  // El permiso del mapa de Google se pide en /contacto, en el propio hueco del
+  // mapa (ver Contacto.test.tsx): la app ya no monta ningún aviso.
+  it("no existe el componente del aviso ni lo monta App", () => {
+    expect(Object.keys(import.meta.glob("/src/components/CookieConsent.tsx"))).toHaveLength(0);
+    expect(fuenteApp).not.toMatch(/CookieConsent/);
   });
 });

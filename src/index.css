@@ -872,3 +872,12 @@
     }
   }
 }
+
+/* Entrada de la marca del hero de la portada: solo sube, sin fundido, en
+   todos los tamaños. Con el fundido de `.entrada-hero` (≥ md) TOUZA estaba
+   invisible en el primer pintado y el hero se veía casi negro un segundo. */
+@layer components {
+  .entrada-marca {
+    animation: entrada-hero-movil 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}

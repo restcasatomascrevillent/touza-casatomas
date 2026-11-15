@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { Phone, MapPin, Clock, Mail, Instagram, Facebook, ExternalLink, Navigation } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
 import { canonical } from "@/lib/site";
-import { useConsentimiento } from "@/lib/consentimiento";
+import { guardarConsentimiento, useConsentimiento } from "@/lib/consentimiento";
 import Reveal from "@/components/Reveal";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { IMAGENES } from "@/assets/imagenes";
@@ -32,14 +33,26 @@ const contactInfo = [
  * la foto se pinta a tamaño real (`object-none`), así que nunca se mueve.
  * La atribución «© OpenStreetMap» tiene que verse siempre (licencia ODbL).
  *
- * El mapa interactivo de Google pone cookies de terceros: solo se ofrece, como
- * opción, a quien ya ha aceptado las cookies.
+ * El mapa interactivo de Google pone cookies de terceros. Ya no hay aviso de
+ * cookies en la web: el permiso se pide aquí, en el propio hueco del mapa, solo
+ * cuando el visitante pulsa «Ver mapa interactivo de Google» (si ya lo había
+ * aceptado, se carga directamente). La elección se puede cambiar en /cookies.
  */
+const BOTON_MAPA =
+  "inline-flex min-h-11 items-center gap-2 rounded-full bg-black/80 px-4 text-sm text-white/90 ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+
 const MapaTouza = () => {
   const consentimiento = useConsentimiento();
-  const [interactivo, setInteractivo] = useState(false);
+  const [pedido, setPedido] = useState(false);
+  const permitir = useRef<HTMLButtonElement>(null);
+  const preguntando = pedido && consentimiento !== "accepted";
 
-  if (interactivo && consentimiento === "accepted") {
+  // Al abrirse la pregunta, el foco pasa a ella (el botón pulsado desaparece).
+  useEffect(() => {
+    if (preguntando) permitir.current?.focus();
+  }, [preguntando]);
+
+  if (pedido && consentimiento === "accepted") {
     return (
       <div className="overflow-hidden rounded-2xl ring-1 ring-white/10">
         <iframe
@@ -97,24 +110,13 @@ const MapaTouza = () => {
       </div>
       <figcaption>
         <div className="absolute inset-x-3 bottom-3 flex flex-wrap gap-2">
-          <a
-            href={URL_MAPS}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-black/80 px-4 text-sm text-white/90 ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
+          <a href={URL_MAPS} target="_blank" rel="noopener noreferrer" className={BOTON_MAPA}>
             Abrir en Google Maps
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
           </a>
-          {consentimiento === "accepted" && (
-            <button
-              type="button"
-              onClick={() => setInteractivo(true)}
-              className="inline-flex min-h-11 items-center rounded-full bg-black/80 px-4 text-sm text-white/90 ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              Ver mapa interactivo
-            </button>
-          )}
+          <button type="button" onClick={() => setPedido(true)} className={BOTON_MAPA}>
+            Ver mapa interactivo de Google
+          </button>
         </div>
         <a
           href="https://www.openstreetmap.org/copyright"
@@ -125,6 +127,50 @@ const MapaTouza = () => {
           © OpenStreetMap
         </a>
       </figcaption>
+
+      {/* El permiso, en el propio hueco del mapa y solo cuando se pide. */}
+      {preguntando && (
+        <div
+          role="group"
+          aria-labelledby="mapa-google-titulo"
+          aria-describedby="mapa-google-texto"
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-5 bg-black/85 px-6 text-center backdrop-blur-sm"
+        >
+          <p id="mapa-google-titulo" className="font-serif text-2xl text-[#F3EEE4]">
+            Mapa interactivo de Google
+          </p>
+          <p id="mapa-google-texto" className="max-w-sm text-sm leading-relaxed text-white/80">
+            Lo sirve Google y pone sus propias cookies. Si prefieres no aceptarlas, con el mapa de esta página y «Abrir
+            en Google Maps» llegas igual.{" "}
+            <Link
+              to="/cookies"
+              className="whitespace-nowrap text-[#D8B47E] underline underline-offset-4 decoration-[#D8B47E]/40 hover:decoration-[#D8B47E] rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              Más información
+            </Link>
+          </p>
+          <div className="grid w-full max-w-xs grid-cols-2 gap-3">
+            <button
+              ref={permitir}
+              type="button"
+              onClick={() => guardarConsentimiento("accepted")}
+              className="min-h-11 rounded-full border border-white/30 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              Aceptar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                guardarConsentimiento("rejected");
+                setPedido(false);
+              }}
+              className="min-h-11 rounded-full border border-white/30 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              Rechazar
+            </button>
+          </div>
+        </div>
+      )}
     </figure>
   );
 };
