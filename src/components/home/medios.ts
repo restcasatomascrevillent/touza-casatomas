@@ -34,6 +34,13 @@ const urlsReels = import.meta.glob("../../assets/videos/reels/*.{webm,mp4,webp}"
   query: "?url",
   import: "default",
 }) as Urls;
+// Clips del local (sala, vitrinas, barra): «El local» de la portada y
+// /despues-de-cenar. Ver `assets/videos/README.md`.
+const urlsLocal = import.meta.glob("../../assets/videos/local/*.{webm,mp4,webp}", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Urls;
 
 export interface FuentesVideo {
   webm?: string;
@@ -67,7 +74,9 @@ export interface Clip extends FuentesVideo {
   id: string;
   /** Lo que se lee bajo el clip ("Clover Club"). */
   nombre: string;
-  origen: "barra" | "instagram";
+  origen: "barra" | "instagram" | "local";
+  /** Texto alternativo del póster. Sin él: «{nombre}, en la barra de Touza». */
+  alt?: string;
 }
 
 const MINUSCULAS = new Set(["de", "del", "la", "el", "y", "con", "en", "a"]);
@@ -114,6 +123,60 @@ export const CLIPS_PORTADA: Clip[] = [
   ...agruparClips(urlsReels, "instagram"),
   ...agruparClips(urlsClips, "barra"),
 ];
+
+const fuentesLocal = (nombre: string): FuentesVideo => ({
+  webm: buscar(urlsLocal, `${nombre}.webm`),
+  mp4: buscar(urlsLocal, `${nombre}.mp4`),
+  poster: buscar(urlsLocal, `${nombre}.webp`),
+});
+
+/**
+ * Cuándo «El local» usa el clip horizontal: pantalla ancha y apaisada (el
+ * marco es entonces más ancho que alto). En el móvil y en la tableta en
+ * vertical, el clip vertical. La misma media query va en el <source> del
+ * póster y en la elección del vídeo.
+ */
+export const MEDIA_LOCAL_ANCHO = "(min-width: 768px) and (orientation: landscape)";
+
+/**
+ * «El local» de la portada. `sala-panoramica` se descartó porque la tele
+ * encendida se lleva la mirada; `sala-mesa-tv`, por lo mismo.
+ */
+export const VIDEOS_EL_LOCAL = {
+  /** Vitrinas de vino y champagne y, al final, los sofás. 406×720, móvil. */
+  vitrinas: fuentesLocal("vitrinas-sofas"),
+  /** Pared de vitrinas con el sofá a la derecha. 1280×720, escritorio. */
+  vitrinasAncho: fuentesLocal("vitrina-vinos-panoramica"),
+  /** Pared de madera en abanico, casi quieta: el mejor bucle. 406×720. */
+  pared: fuentesLocal("pared-madera-bucle"),
+} as const;
+
+/** Medidas de los pósters del local. */
+export const POSTER_LOCAL_VERTICAL = { width: 406, height: 720 } as const;
+export const POSTER_LOCAL_ANCHO = { width: 1280, height: 720 } as const;
+
+/** Franja de /despues-de-cenar: la barra y las vitrinas, de cerca. */
+export const CLIPS_DESPUES_DE_CENAR: Clip[] = (
+  [
+    {
+      id: "barra-botellas",
+      nombre: "La trasbarra",
+      alt: "La trasbarra de Touza, con las ginebras y los licores bajo la tira de luz",
+    },
+    {
+      id: "vitrina-krug",
+      nombre: "Champagne en la vitrina",
+      alt: "Botellas de Krug en la vitrina de Touza, con botellas ámbar al fondo",
+    },
+    {
+      id: "figuras-vitrina-bucle",
+      nombre: "Las figuras de la vitrina",
+      alt: "Tres figuras con sombrero de copa, azul, amarilla y roja, en la vitrina sobre el mármol",
+    },
+  ] as const
+)
+  .map((clip): Clip => ({ ...clip, ...fuentesLocal(clip.id), origen: "local" }))
+  .filter(hayVideo);
 
 interface ConexionConAhorro {
   saveData?: boolean;

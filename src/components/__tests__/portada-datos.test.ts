@@ -4,7 +4,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { fraseHorario, filasHorario, hastaLaHora, lineaDeHechos, nombreDias } from "@/components/home/hechos";
-import { agruparClips, nombreDeClip } from "@/components/home/medios";
+import { CLIPS_DESPUES_DE_CENAR, VIDEOS_EL_LOCAL, agruparClips, nombreDeClip } from "@/components/home/medios";
 
 describe("hechos de la portada", () => {
   it("frase de horario desde NEGOCIO: días y hora de cierre", () => {
@@ -57,5 +57,18 @@ describe("vídeos de la portada", () => {
     expect(clips.map((c) => c.id)).toEqual(["02-clover-club", "10-aperol"]);
     expect(clips[0]).toMatchObject({ nombre: "Clover Club", webm: "/a/02.webm", mp4: "/a/02.mp4", poster: "/a/02.webp", origen: "barra" });
     expect(clips[1].poster).toBeUndefined();
+  });
+
+  it("clips del local: los tres de «El local» y los tres de /despues-de-cenar, con WebM, MP4 y póster", () => {
+    for (const fuentes of Object.values(VIDEOS_EL_LOCAL)) {
+      expect(fuentes.webm).toBeTruthy();
+      expect(fuentes.mp4).toBeTruthy();
+      expect(fuentes.poster).toBeTruthy();
+    }
+    expect(CLIPS_DESPUES_DE_CENAR.map((c) => c.id)).toEqual(["barra-botellas", "vitrina-krug", "figuras-vitrina-bucle"]);
+    for (const clip of CLIPS_DESPUES_DE_CENAR) {
+      expect(clip).toMatchObject({ origen: "local", webm: expect.any(String), mp4: expect.any(String), poster: expect.any(String) });
+      expect(clip.alt).toBeTruthy();
+    }
   });
 });

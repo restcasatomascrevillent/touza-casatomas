@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Encabezado from "./Encabezado";
 import { CLIPS_PORTADA, pausar, reproducirSolo, videoPermitido, type Clip } from "./medios";
 
@@ -18,17 +19,51 @@ const VISIBLE_PARA_REPRODUCIR = 0.6;
  * - Con «reducir movimiento», ahorro de datos o 3G: solo los pósters.
  * - Los clips repiten en bucle, así que hay un botón para pararlos todos
  *   (WCAG 2.2.2).
+ *
+ * `estilo="pagina"` es la versión de las páginas interiores
+ * (/despues-de-cenar): la caja `max-w-6xl` y el título de esas páginas, y
+ * desde md una rejilla de tres en 3:4, como las fotos de «Para la sobremesa».
  */
-const FranjaClips = ({ clips = CLIPS_PORTADA }: { clips?: Clip[] }) => {
+interface FranjaClipsProps {
+  clips?: Clip[];
+  titulo?: string;
+  /** `id` del título, para el `aria-labelledby` de la sección. */
+  id?: string;
+  estilo?: "portada" | "pagina";
+}
+
+const ESTILOS = {
+  portada: {
+    seccion: "py-20 md:py-28",
+    cabecera: "mb-8 max-w-7xl px-5 md:mb-12 md:px-8 lg:px-10",
+    lista:
+      "flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-2 scrollbar-hide md:mx-auto md:max-w-7xl md:scroll-px-8 md:gap-5 md:px-8 lg:scroll-px-10 lg:px-10",
+    elemento: "w-[62vw] max-w-[17rem] shrink-0 snap-start md:w-[14.5rem] md:max-w-none",
+    marco: "aspect-[9/16]",
+    pie: "mt-3 font-serif text-xl font-medium text-cream md:text-2xl",
+  },
+  pagina: {
+    seccion: "pb-12 md:pb-20",
+    cabecera: "mb-6 max-w-6xl px-6 md:mb-10",
+    lista:
+      "mx-auto flex max-w-6xl snap-x scroll-px-6 gap-4 overflow-x-auto px-6 scrollbar-hide md:grid md:grid-cols-3 md:gap-6 md:overflow-visible",
+    elemento: "w-[64vw] max-w-[18rem] shrink-0 snap-start md:w-auto md:max-w-none",
+    marco: "aspect-[3/4]",
+    pie: "mt-3 font-serif text-lg leading-tight text-white md:text-xl",
+  },
+} as const;
+
+const FranjaClips = ({ clips = CLIPS_PORTADA, titulo = "En la barra", id = "clips-titulo", estilo = "portada" }: FranjaClipsProps) => {
   if (clips.length === 0) return null;
   return (
-    <section aria-labelledby="clips-titulo" className="py-20 md:py-28">
-      <TiraClips clips={clips} />
+    <section aria-labelledby={id} className={ESTILOS[estilo].seccion}>
+      <TiraClips clips={clips} titulo={titulo} id={id} estilo={estilo} />
     </section>
   );
 };
 
-const TiraClips = ({ clips }: { clips: Clip[] }) => {
+const TiraClips = ({ clips, titulo, id, estilo }: { clips: Clip[]; titulo: string; id: string; estilo: "portada" | "pagina" }) => {
+  const clases = ESTILOS[estilo];
   const [conVideo, setConVideo] = useState(false);
   const [cerca, setCerca] = useState<boolean[]>(() => clips.map(() => false));
   const [parado, setParado] = useState(false);
@@ -115,8 +150,14 @@ const TiraClips = ({ clips }: { clips: Clip[] }) => {
 
   return (
     <>
-      <div className="mx-auto mb-8 flex max-w-7xl items-end justify-between gap-6 px-5 md:mb-12 md:px-8 lg:px-10">
-        <Encabezado id="clips-titulo" lineas={["En la barra"]} tituloClassName="text-[2.5rem] leading-none md:text-6xl" />
+      <div className={cn("mx-auto flex items-end justify-between gap-6", clases.cabecera)}>
+        {estilo === "portada" ? (
+          <Encabezado id={id} lineas={[titulo]} tituloClassName="text-[2.5rem] leading-none md:text-6xl" />
+        ) : (
+          <h2 id={id} className="font-serif text-3xl text-[#F3EEE4] md:text-5xl">
+            {titulo}
+          </h2>
+        )}
         {conVideo && (
           <button
             type="button"
@@ -129,10 +170,10 @@ const TiraClips = ({ clips }: { clips: Clip[] }) => {
         )}
       </div>
 
-      {/* Tira con desplazamiento lateral en todos los tamaños: en escritorio
-          caben cinco clips de 15 rem; a partir del sexto (los reels), se
-          desliza. */}
-      <ul className="flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-2 scrollbar-hide md:mx-auto md:max-w-7xl md:scroll-px-8 md:gap-5 md:px-8 lg:scroll-px-10 lg:px-10">
+      {/* Portada: tira con desplazamiento lateral en todos los tamaños; en
+          escritorio caben cinco clips de 15 rem y a partir del sexto (los
+          reels) se desliza. Páginas: tira en el móvil, rejilla desde md. */}
+      <ul className={clases.lista}>
         {clips.map((clip, i) => (
           <li
             key={clip.id}
@@ -147,14 +188,14 @@ const TiraClips = ({ clips }: { clips: Clip[] }) => {
             onPointerLeave={() => {
               encima.current = null;
             }}
-            className="w-[62vw] max-w-[17rem] shrink-0 snap-start md:w-[14.5rem] md:max-w-none"
+            className={clases.elemento}
           >
             <figure>
-              <div className="fondo-foto relative aspect-[9/16] overflow-hidden rounded-2xl">
+              <div className={cn("fondo-foto relative overflow-hidden rounded-2xl", clases.marco)}>
                 {clip.poster && (
                   <img
                     src={clip.poster}
-                    alt={`${clip.nombre}, en la barra de Touza`}
+                    alt={clip.alt ?? `${clip.nombre}, en la barra de Touza`}
                     width={720}
                     height={1280}
                     loading="lazy"
@@ -183,7 +224,7 @@ const TiraClips = ({ clips }: { clips: Clip[] }) => {
                   </video>
                 )}
               </div>
-              <figcaption className="mt-3 font-serif text-xl font-medium text-cream md:text-2xl">{clip.nombre}</figcaption>
+              <figcaption className={clases.pie}>{clip.nombre}</figcaption>
             </figure>
           </li>
         ))}

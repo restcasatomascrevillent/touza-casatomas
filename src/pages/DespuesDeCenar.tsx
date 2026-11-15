@@ -10,6 +10,8 @@ import { FOTO_SOBREMESA, fotoResponsive, volverAFotoOriginal } from "@/lib/foto"
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { IMAGENES } from "@/assets/imagenes";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
+import FranjaClips from "@/components/home/FranjaClips";
+import { CLIPS_DESPUES_DE_CENAR } from "@/components/home/medios";
 
 /**
  * /despues-de-cenar: la página que responde a «copas después de cenar en Casa
@@ -22,6 +24,11 @@ import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCo
  * móvil, una franja a sangre bajo la cabecera transparente; desde lg, a la
  * derecha del título. Es la misma <img> en los dos casos (una sola descarga).
  * El texto va en la misma rejilla que la cabecera: `max-w-6xl` con `px-6`.
+ *
+ * Tras «Para la sobremesa», «Dentro de Touza»: tres clips del local (la
+ * trasbarra, la vitrina del champagne y las figuras), con la franja de la
+ * portada en su versión de página. Solo pósters en el HTML; cada vídeo se crea
+ * al acercarse y solo va uno en marcha.
  */
 const CONTENEDOR = "mx-auto max-w-6xl px-6";
 
@@ -163,6 +170,8 @@ const DespuesDeCenar = () => {
           </div>
         </section>
       )}
+
+      <FranjaClips clips={CLIPS_DESPUES_DE_CENAR} titulo="Dentro de Touza" id="dentro-titulo" estilo="pagina" />
 
       {/* Lleva su propio «Cómo llegar»: aquí se aparta la barra fija del móvil. */}
       <section data-oculta-barra-movil="" className="pb-20 md:pb-28">

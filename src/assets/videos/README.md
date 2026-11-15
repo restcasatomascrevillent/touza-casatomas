@@ -25,6 +25,21 @@ Cada clip tiene `NN-nombre.webm` (AV1), `.mp4` (H.264, `+faststart`) y `.webp` (
 | `03-rosa-hibisco` | `IMG_0433.MOV`, 0,3-3,5 s (cóctel sin identificar, vaso rosa con hibisco) | 3,2 s | ≈400 / 215 KB |
 | `04-clover-club` | `IMG_0397.MOV`, 0,3-2,8 s | 2,5 s | ≈360 / 210 KB |
 
+## Clips del local: `local/`
+
+Del zip «Local y ambiente» (15/11/2026), procesados fuera del repo (HLG a SDR, 720 de alto, 30 fps, estabilizados; ver `touza-recursos/videos-interior/PROPUESTA.md`). Cada uno con `.mp4` (H.264, `+faststart`), `.webm` (**VP9**, no AV1) y póster `.webp`. Sin audio.
+
+| Clip | Medidas | MP4 / WebM | Dónde |
+|---|---|---|---|
+| `vitrinas-sofas` | 406×720 | ≈896 / 682 KB | «El local», marco a sangre en el móvil y en la tableta en vertical |
+| `vitrina-vinos-panoramica` | 1280×720 | ≈1.380 / 961 KB | «El local», marco a sangre en pantalla ancha y apaisada (`MEDIA_LOCAL_ANCHO`) |
+| `pared-madera-bucle` | 406×720 | ≈910 / 530 KB | «El local», junto al texto (decorativo) |
+| `barra-botellas` | 406×720 | ≈1.030 / 900 KB | /despues-de-cenar, «Dentro de Touza» |
+| `vitrina-krug` | 406×720 | ≈1.120 / 970 KB | /despues-de-cenar, «Dentro de Touza» |
+| `figuras-vitrina-bucle` | 540×720 | ≈610 / 495 KB | /despues-de-cenar, «Dentro de Touza» |
+
+Descartados: `sala-panoramica` y `sala-mesa-tv` (la tele encendida se lleva la mirada). En `vitrina-vinos-panoramica` la tele también sale, a la derecha y más pequeña.
+
 ## Presupuesto
 
 - Hero ≤ 900 KB por formato; cada clip ≤ 1,5 MB.
