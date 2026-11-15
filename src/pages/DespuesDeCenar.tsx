@@ -21,7 +21,8 @@ const DESCRIPCION =
 const PREFERIDOS = ["Clover Club", "Pornstar Martini", "Espresso Martini", "Moscow Mule", "Aperol Spritz"];
 
 function elegirTres(cocteles: CoctelUI[]): CoctelUI[] {
-  const conFoto = cocteles.filter((c) => c.image);
+  // La foto genérica de la «T» no cuenta: aquí se enseñan cócteles con la suya.
+  const conFoto = cocteles.filter((c) => c.image && !c.fotoGenerica);
   const preferidos = PREFERIDOS.map((nombre) => conFoto.find((c) => c.name === nombre)).filter(
     (c): c is CoctelUI => !!c
   );

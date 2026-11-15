@@ -83,8 +83,9 @@ describe("Contacto — renderizado", () => {
 
   it("muestra el horario del bar, sacado de NEGOCIO", () => {
     renderContacto();
-    expect(screen.getByText(/Jueves a sábado: 20:00 – 02:00/)).toBeInTheDocument();
-    expect(screen.getByText(/Domingo: 18:00 – 00:00/)).toBeInTheDocument();
+    expect(screen.getByText(/Jueves: 16:00 – 01:00/)).toBeInTheDocument();
+    expect(screen.getByText(/Viernes: 15:30 – 02:00/)).toBeInTheDocument();
+    expect(screen.getByText(/Domingo: 15:00 – 20:00/)).toBeInTheDocument();
   });
 
   it("el enlace de teléfono tiene href=tel correcto", () => {

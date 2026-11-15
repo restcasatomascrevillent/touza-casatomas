@@ -70,7 +70,7 @@ describe("generarSitemapYRobots", () => {
   it("llms.txt de public/ existe y solo usa datos de negocio.ts (horario y teléfono)", () => {
     const llms = readFileSync(path.resolve(process.cwd(), "public/llms.txt"), "utf8");
     expect(llms).toMatch(/^# Touza Cocktail Bar\n/);
-    expect(llms).toContain("de jueves a sábado, de 20:00 a 02:00; el domingo, de 18:00 a 00:00");
+    expect(llms).toContain("el jueves, de 16:00 a 01:00; el viernes, de 15:30 a 02:00; el sábado, de 15:00 a 02:00; el domingo, de 15:00 a 20:00");
     expect(llms).toContain("+34 966 782 000");
     expect(llms).toContain(`${URL_PRODUCCION}/despues-de-cenar`);
   });

@@ -5,6 +5,7 @@
  * montar la página (ver `lib/__tests__/carta.test.ts`).
  */
 import { esFotoDeBanco } from "@/lib/negocio";
+import { IMAGENES } from "@/assets/imagenes";
 
 /**
  * Ancla de un producto en /carta: «Moscow Mule» → `moscow-mule`,
@@ -30,6 +31,19 @@ export function slugCarta(nombre: string): string {
  */
 export const fotoPropia = (url: string | null | undefined): string =>
   url && !esFotoDeBanco(url) ? url : "";
+
+/**
+ * Foto para el cóctel que aún no tiene la suya: la «T» retroiluminada del
+ * local, sin copa, para no enseñar un cóctel que no es (pedido del 15/11/2026).
+ * Variante de 640 px en WebP (≈55 KB): las tarjetas no pasan de ese ancho.
+ */
+export const FOTO_COCTEL_SIN_FOTO: string = (() => {
+  const variantes = IMAGENES.logo.webp.split(", ").map((v) => {
+    const [url, ancho] = v.split(" ");
+    return { url, ancho: Number.parseInt(ancho, 10) };
+  });
+  return variantes.find((v) => v.ancho >= 640)?.url ?? IMAGENES.logo.src;
+})();
 
 /** 7 → «7»; 8,5 → «8,50». */
 const precioCorto = (n: number): string => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace(".", ","));

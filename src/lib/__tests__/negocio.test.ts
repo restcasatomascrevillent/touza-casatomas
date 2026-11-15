@@ -67,13 +67,15 @@ describe("JSON-LD de Touza", () => {
 describe("Horario y dirección legibles, sacados de NEGOCIO", () => {
   it("tramos de horario", () => {
     expect(HORARIO).toEqual([
-      { dias: "Jueves a sábado", horas: "20:00 – 02:00" },
-      { dias: "Domingo", horas: "18:00 – 00:00" },
+      { dias: "Jueves", horas: "16:00 – 01:00" },
+      { dias: "Viernes", horas: "15:30 – 02:00" },
+      { dias: "Sábado", horas: "15:00 – 02:00" },
+      { dias: "Domingo", horas: "15:00 – 20:00" },
     ]);
   });
 
   it("horario en una frase", () => {
-    expect(HORARIO_EN_FRASE).toBe("De jueves a sábado, de 20:00 a 02:00; el domingo, de 18:00 a 00:00.");
+    expect(HORARIO_EN_FRASE).toBe("El jueves, de 16:00 a 01:00; el viernes, de 15:30 a 02:00; el sábado, de 15:00 a 02:00; el domingo, de 15:00 a 20:00.");
   });
 
   it("la calle sin el número", () => {

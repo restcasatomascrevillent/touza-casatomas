@@ -33,7 +33,7 @@ describe("Portada", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(/TOUZA/);
     expect(screen.getByRole("heading", { level: 2, name: /Crevillent/ })).toBeInTheDocument();
     expect(
-      screen.getByText("Abrimos de jueves a sábado hasta las 2:00 y el domingo hasta medianoche. Sin reservas: ven directamente.")
+      screen.getByText("Abrimos el jueves hasta la 1:00, el viernes y sábado hasta las 2:00 y el domingo hasta las 20:00. Sin reservas: ven directamente.")
     ).toBeInTheDocument();
 
     const llegar = screen.getAllByRole("link", { name: "Cómo llegar a Touza (abre Google Maps)" });

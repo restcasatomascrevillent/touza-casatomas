@@ -10,9 +10,11 @@
  * ────────────────────────────────────────────────────────────────────────────
  * PENDIENTE DE CONFIRMAR POR EL DUEÑO — no se inventa nada aquí:
  *
- *  · Teléfono y horarios: son los que ya publica la propia web
- *    (`VisitUs.tsx`, `Contacto.tsx`, `Footer.tsx`), pero nadie los ha
- *    verificado — `PLAN-TESTEO-MASIVO.md:98` los marca como "⚠️ Verificar".
+ *  · Teléfono: el que ya publicaba la web, sin verificar
+ *    (`PLAN-TESTEO-MASIVO.md:98` lo marca como "⚠️ Verificar").
+ *  · Horario: desde el 15/11/2026 es el de la ficha de Google (jueves
+ *    16–01, viernes 15:30–02, sábado 15–02, domingo 15–20), pendiente de
+ *    que el dueño lo confirme.
  *    Google usa el JSON-LD para el "Abierto ahora" de la ficha local, así que
  *    si están mal, están mal en el sitio donde más se nota.
  *  · Redes sociales (`sameAs`): las URLs que ya enlaza el pie. Sin comprobar.
@@ -47,10 +49,12 @@ export const NEGOCIO = {
   /** Ficha de Google Maps "TOUZA CLUB" (por CID, estable aunque cambie el nombre). */
   mapa: "https://maps.google.com/?cid=1982489405729160298",
   redes: ["https://www.instagram.com/touzabar/", "https://www.facebook.com/touzabar/"],
-  /** Mismo horario que muestra la web en VisitUs.tsx y Contacto.tsx. */
+  /** El de la ficha de Google, por indicación del 15/11/2026. Antes: J–S 20:00–02:00 y D 18:00–00:00. */
   horarios: [
-    { dias: ["Thursday", "Friday", "Saturday"], abre: "20:00", cierra: "02:00" },
-    { dias: ["Sunday"], abre: "18:00", cierra: "00:00" },
+    { dias: ["Thursday"], abre: "16:00", cierra: "01:00" },
+    { dias: ["Friday"], abre: "15:30", cierra: "02:00" },
+    { dias: ["Saturday"], abre: "15:00", cierra: "02:00" },
+    { dias: ["Sunday"], abre: "15:00", cierra: "20:00" },
   ],
 } as const;
 
@@ -115,7 +119,7 @@ export const HORARIO = NEGOCIO.horarios.map((h) => {
   return { dias: dias.charAt(0).toUpperCase() + dias.slice(1), horas: `${h.abre} – ${h.cierra}` };
 });
 
-/** «De jueves a sábado, de 20:00 a 02:00; el domingo, de 18:00 a 00:00.» */
+/** «El jueves, de 16:00 a 01:00; el viernes, de 15:30 a 02:00; …» */
 export const HORARIO_EN_FRASE =
   NEGOCIO.horarios
     .map((h, i) => {

@@ -8,16 +8,18 @@ import { agruparClips, nombreDeClip } from "@/components/home/medios";
 
 describe("hechos de la portada", () => {
   it("frase de horario desde NEGOCIO: días y hora de cierre", () => {
-    expect(fraseHorario()).toBe("Abrimos de jueves a sábado hasta las 2:00 y el domingo hasta medianoche.");
+    expect(fraseHorario()).toBe("Abrimos el jueves hasta la 1:00, el viernes y sábado hasta las 2:00 y el domingo hasta las 20:00.");
     expect(lineaDeHechos()).toBe(
-      "Abrimos de jueves a sábado hasta las 2:00 y el domingo hasta medianoche. Sin reservas: ven directamente."
+      "Abrimos el jueves hasta la 1:00, el viernes y sábado hasta las 2:00 y el domingo hasta las 20:00. Sin reservas: ven directamente."
     );
   });
 
   it("filas de la tabla de horario", () => {
     expect(filasHorario()).toEqual([
-      { dias: "Jueves a sábado", horas: "20:00 – 02:00" },
-      { dias: "Domingo", horas: "18:00 – 00:00" },
+      { dias: "Jueves", horas: "16:00 – 01:00" },
+      { dias: "Viernes", horas: "15:30 – 02:00" },
+      { dias: "Sábado", horas: "15:00 – 02:00" },
+      { dias: "Domingo", horas: "15:00 – 20:00" },
     ]);
   });
 

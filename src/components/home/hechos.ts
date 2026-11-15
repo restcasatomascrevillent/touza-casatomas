@@ -50,11 +50,19 @@ export function hastaLaHora(hora: string): string {
 }
 
 /**
- * "Abrimos de jueves a sábado hasta las 2:00 y el domingo hasta medianoche."
+ * "Abrimos el jueves hasta la 1:00, el viernes y sábado hasta las 2:00 y el domingo hasta las 20:00."
  * Solo días y cierre: es lo que decide si aún da tiempo a ir.
  */
 export function fraseHorario(horarios = NEGOCIO.horarios): string {
-  const tramos = horarios.map((h) => {
+  // Solo cuenta el cierre: tramos seguidos que cierran a la misma hora van
+  // juntos («viernes y sábado hasta las 2:00») aunque abran a horas distintas.
+  const juntos: { dias: string[]; cierra: string }[] = [];
+  for (const h of horarios) {
+    const ultimo = juntos[juntos.length - 1];
+    if (ultimo && ultimo.cierra === h.cierra) ultimo.dias.push(...h.dias);
+    else juntos.push({ dias: [...h.dias], cierra: h.cierra });
+  }
+  const tramos = juntos.map((h) => {
     const dias = nombreDias(h.dias);
     const prefijo = h.dias.length > 1 && dias.includes(" a ") ? "de" : "el";
     return `${prefijo} ${dias} ${hastaLaHora(h.cierra)}`;

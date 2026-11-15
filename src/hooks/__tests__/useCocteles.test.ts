@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement } from "react";
 import { useCocteles, transformCoctelesToUI, type Coctel } from "../useCocteles";
 import { COLUMNAS_COCTELES } from "@/lib/carta-consultas.mjs";
+import { FOTO_COCTEL_SIN_FOTO } from "@/lib/carta";
 
 // ---------------------------------------------------------------------------
 // Mock del cliente Supabase
@@ -212,14 +213,19 @@ describe("transformCoctelesToUI", () => {
   });
 
   // Auditoría del 15/11/2026: ninguna foto de banco en la carta. Sin foto
-  // propia, `image` vacía y la carta pinta el cóctel como fila de texto.
-  it("descarta las fotos de Unsplash: image vacía", () => {
+  // propia, el cóctel lleva la foto de la «T» del local, marcada como genérica.
+  it("descarta las fotos de Unsplash: foto de la «T» en su lugar", () => {
     const result = transformCoctelesToUI([
       { ...mockCoctelA, imagen_url: "https://images.unsplash.com/photo-1513558161293?w=500" },
       mockCoctelB,
     ]);
-    expect(result[0].image).toBe("");
-    expect(result[1].image).toBe("");
-    expect(transformCoctelesToUI([mockCoctelA])[0].image).toBe("https://example.com/negroni.jpg");
+    expect(result[0].image).toBe(FOTO_COCTEL_SIN_FOTO);
+    expect(result[0].fotoGenerica).toBe(true);
+    expect(result[1].image).toBe(FOTO_COCTEL_SIN_FOTO);
+    expect(result[1].fotoGenerica).toBe(true);
+    expect(FOTO_COCTEL_SIN_FOTO).toMatch(/touza-logo-640/);
+    const propia = transformCoctelesToUI([mockCoctelA])[0];
+    expect(propia.image).toBe("https://example.com/negroni.jpg");
+    expect(propia.fotoGenerica).toBe(false);
   });
 });
