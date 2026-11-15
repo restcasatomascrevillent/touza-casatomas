@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 import { COLUMNAS_BEBIDAS } from '@/lib/carta-consultas.mjs';
 import { fotoPropia } from '@/lib/carta';
+import { formatearPrecio } from '@/lib/precio';
 
 export interface Bebida {
   id: string;
@@ -68,7 +69,7 @@ export const transformBebidasToUI = (bebidas: Bebida[] | undefined): BebidaUI[] 
   return bebidas.map((bebida) => ({
     id: bebida.id,
     name: bebida.nombre || '',
-    price: bebida.precio_eur ? `${bebida.precio_eur.toFixed(2).replace('.', ',')}€` : '',
+    price: formatearPrecio(bebida.precio_eur),
     featured: bebida.featured || false,
     type: bebida.tipo || undefined,
     tag: bebida.tag || undefined,

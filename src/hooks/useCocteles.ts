@@ -4,6 +4,7 @@ import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 import { COLUMNAS_COCTELES } from '@/lib/carta-consultas.mjs';
 import { datosAlergenos, etiquetasAlergenos } from '@/lib/alergenos';
 import { FOTO_COCTEL_SIN_FOTO, fotoPropia } from '@/lib/carta';
+import { formatearPrecio } from '@/lib/precio';
 
 export interface Coctel {
   id: string;
@@ -82,7 +83,7 @@ export const transformCoctelesToUI = (cocteles: Coctel[] | undefined): CoctelUI[
       name: c.nombre || '',
       category: c.categoria || 'autor',
       base: c.base || 'all',
-      price: c.precio_eur ? `${c.precio_eur.toFixed(2).replace('.', ',')}€` : '',
+      price: formatearPrecio(c.precio_eur),
       description: c.descripcion || '',
       ingredients: c.ingredientes?.split(', ') || [],
       // Nunca una foto de banco (Unsplash): sin foto propia, el cóctel lleva

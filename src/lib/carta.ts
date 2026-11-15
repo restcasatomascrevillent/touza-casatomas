@@ -6,6 +6,7 @@
  */
 import { esFotoDeBanco } from "@/lib/negocio";
 import { IMAGENES } from "@/assets/imagenes";
+import { ESPACIO_PRECIO, importe } from "@/lib/precio";
 
 /**
  * Ancla de un producto en /carta: «Moscow Mule» → `moscow-mule`,
@@ -45,8 +46,6 @@ export const FOTO_COCTEL_SIN_FOTO: string = (() => {
   return variantes.find((v) => v.ancho >= 640)?.url ?? IMAGENES.logo.src;
 })();
 
-/** 7 → «7»; 8,5 → «8,50». */
-const precioCorto = (n: number): string => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace(".", ","));
 
 /** «a», «a y b», «a, b y c». */
 const enumerar = (partes: string[]): string =>
@@ -78,7 +77,10 @@ export function resumenCocteles(
   if (precios.length > 0) {
     const min = Math.min(...precios);
     const max = Math.max(...precios);
-    rango = min === max ? `, a ${precioCorto(min)} €` : `, de ${precioCorto(min)} a ${precioCorto(max)} €`;
+    rango =
+      min === max
+        ? `, a ${importe(min)}${ESPACIO_PRECIO}€`
+        : `, de ${importe(min)} a ${importe(max)}${ESPACIO_PRECIO}€`;
   }
   return `${cuantos}${tipos}${rango}`;
 }

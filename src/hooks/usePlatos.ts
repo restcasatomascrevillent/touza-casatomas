@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 import { datosAlergenos, etiquetasAlergenos } from '@/lib/alergenos';
+import { formatearPrecio } from '@/lib/precio';
 
 export interface PlatoTouza {
   id: string;
@@ -132,7 +133,7 @@ export const transformPlatosToUI = (
       id: p.id,
       name: p.nombre || '',
       description: p.descripcion || '',
-      price: p.precio_eur ? `${p.precio_eur.toFixed(2).replace('.', ',')}€` : '',
+      price: formatearPrecio(p.precio_eur),
       image: mostrarFotos ? p.imagen_url || '/placeholder.svg' : null,
       categoria: p.categoria || '',
       alergenos: etiquetasAlergenos(datos),

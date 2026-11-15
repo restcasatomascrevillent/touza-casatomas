@@ -30,13 +30,13 @@ describe("resumenCocteles", () => {
         { categoria: "clasicos", precio_eur: 8.5 },
         { categoria: "sin-alcohol", precio_eur: 7 },
       ])
-    ).toBe("3 cócteles de autor, clásicos y sin alcohol, de 7 a 10 €");
+    ).toBe("3 cócteles de autor, clásicos y sin alcohol, de 7 a 10\u00A0€");
   });
 
   it("decimales con coma y un solo precio", () => {
-    expect(resumenCocteles([{ categoria: "clasicos", precio_eur: 8.5 }])).toBe("1 cóctel clásico, a 8,50 €");
+    expect(resumenCocteles([{ categoria: "clasicos", precio_eur: 8.5 }])).toBe("1 cóctel clásico, a 8,50\u00A0€");
     expect(resumenCocteles([{ categoria: "autor", precio_eur: 9 }, { categoria: "clasicos", precio_eur: 8.5 }])).toBe(
-      "2 cócteles de autor y clásicos, de 8,50 a 9 €"
+      "2 cócteles de autor y clásicos, de 8,50 a 9\u00A0€"
     );
   });
 

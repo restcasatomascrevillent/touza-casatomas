@@ -184,7 +184,7 @@ describe("transformCoctelesToUI", () => {
     const ui = result[0];
     expect(ui.id).toBe("c-1");
     expect(ui.name).toBe("Negroni Touza");
-    expect(ui.price).toBe("9,50€");
+    expect(ui.price).toBe("9,50\u00A0€");
     expect(ui.ingredients).toEqual(["Ginebra", "Campari", "Vermut rojo"]);
   });
 

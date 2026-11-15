@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 import { COLUMNAS_VINOS, ordenarVinos } from '@/lib/carta-consultas.mjs';
 import { fotoPropia } from '@/lib/carta';
+import { formatearPrecio } from '@/lib/precio';
 
 export interface Vino {
   id: string;
@@ -178,7 +179,7 @@ export const transformVinosToUI = (vinos: Vino[] | undefined): VinoUI[] => {
   return vinos.map((vino) => ({
     id: vino.id,
     name: vino.nombre || '',
-    price: vino.precio_eur ? `${vino.precio_eur.toFixed(2).replace('.', ',')}€` : '',
+    price: formatearPrecio(vino.precio_eur),
     featured: vino.featured || false,
     region: vino.ubicacion_region || undefined,
     country: vino.ubicacion_pais || undefined,
