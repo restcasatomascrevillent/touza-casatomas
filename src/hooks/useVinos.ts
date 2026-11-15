@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 import { COLUMNAS_VINOS, ordenarVinos } from '@/lib/carta-consultas.mjs';
+import { fotoPropia } from '@/lib/carta';
 
 export interface Vino {
   id: string;
@@ -182,7 +183,7 @@ export const transformVinosToUI = (vinos: Vino[] | undefined): VinoUI[] => {
     region: vino.ubicacion_region || undefined,
     country: vino.ubicacion_pais || undefined,
     denomination: vino.denominacion_origen || undefined,
-    image: vino.imagen_url || undefined,
+    image: fotoPropia(vino.imagen_url) || undefined,
     description: vino.descripcion || undefined,
   }));
 };

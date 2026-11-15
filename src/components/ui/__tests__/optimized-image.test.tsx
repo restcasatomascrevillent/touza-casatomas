@@ -6,6 +6,7 @@
  */
 import { afterEach, describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 
 /** Simula una <img> que ya terminó (bien o mal) antes de montar React. */
@@ -49,5 +50,14 @@ describe("OptimizedImage (fotos de Supabase)", () => {
     const img = screen.getByRole("img", { name: "Mojito" });
     expect(img).toHaveClass("opacity-100");
     expect(container.querySelector(".animate-pulse")).toBeNull();
+  });
+
+  // Mismo criterio que <Reveal>: nada a opacity 0 en el HTML del SSG. El
+  // fundido de entrada es solo del cliente.
+  it("en el HTML del servidor (SSG) la foto sale visible, sin opacity-0 ni esqueleto", () => {
+    const html = renderToString(<OptimizedImage src="https://example.com/mojito.jpg" alt="Mojito" />);
+    expect(html).toContain("opacity-100");
+    expect(html).not.toContain("opacity-0");
+    expect(html).not.toContain("animate-pulse");
   });
 });

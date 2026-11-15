@@ -6,6 +6,7 @@ import { CURVA_CABECERA } from "@/lib/cabecera";
 import { NEGOCIO, URL_COMO_LLEGAR } from "@/lib/negocio";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { filasHorario } from "@/components/home/hechos";
 
 // En el prerender (SSG) no hay ventana y useLayoutEffect solo avisaría.
 const useEfectoDeMaqueta = typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -21,6 +22,7 @@ const Header = () => {
   const [isHidden, setIsHidden] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const enPortada = (location.pathname.replace(/\/+$/, "") || "/") === "/";
   const lastScrollY = useRef(0);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -90,15 +92,19 @@ const Header = () => {
     >
       <div className="max-w-6xl mx-auto px-6">
         <nav className="flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="relative z-10 inline-flex items-center min-h-11" aria-label="Touza, ir al inicio">
-            <span className="font-serif text-xl lg:text-2xl font-bold tracking-wider text-primary">
-              TOUZA
-            </span>
-          </Link>
+          {/* Logo. En lo alto de la portada no está: el hero ya es TOUZA a
+              pantalla completa y la cabecera se queda en lo mínimo. Aparece
+              al bajar. */}
+          {(!enPortada || isScrolled) && (
+            <Link to="/" className="relative z-10 inline-flex items-center min-h-11 animate-in fade-in duration-500" aria-label="Touza, ir al inicio">
+              <span className="font-serif text-xl lg:text-2xl font-bold tracking-wider text-primary">
+                TOUZA
+              </span>
+            </Link>
+          )}
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="ml-auto hidden lg:flex items-center gap-1">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
@@ -107,10 +113,10 @@ const Header = () => {
                   to={link.path}
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "relative px-5 py-2 text-[13px] font-light tracking-[0.1em] uppercase transition-colors duration-300",
+                    "relative px-5 py-2 text-[13px] font-normal tracking-[0.1em] uppercase transition-colors duration-300",
                     isActive
                       ? "text-white"
-                      : "text-white/65 hover:text-white"
+                      : "text-white/75 hover:text-white"
                   )}
                 >
                   {link.name}
@@ -123,10 +129,26 @@ const Header = () => {
                 </Link>
               );
             })}
+            {/* En escritorio no hay barra fija: al bajar del hero, «Cómo
+                llegar» queda a mano en la cabecera, en el mismo vidrio con
+                borde dorado que la barra del móvil. Arriba del todo no está
+                (ni en el HTML del SSG): el hero ya lo tiene en blanco. */}
+            {isScrolled && (
+              <a
+                href={URL_COMO_LLEGAR}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Cómo llegar a Touza (abre Google Maps)"
+                className="ml-4 inline-flex h-10 items-center gap-2 rounded-full border border-primary/50 bg-black/40 px-5 text-[13px] font-medium text-white backdrop-blur-md transition-colors duration-300 animate-in fade-in hover:border-primary hover:bg-black/60"
+              >
+                <Navigation className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                Cómo llegar
+              </a>
+            )}
           </div>
 
           {/* Mobile Menu */}
-          <div className="lg:hidden">
+          <div className="ml-auto lg:hidden">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <button
@@ -137,8 +159,8 @@ const Header = () => {
                 </button>
               </SheetTrigger>
               {/* Menú del móvil a pantalla casi completa: enlaces grandes en
-                  serif con su número (el mismo ritmo editorial de la portada),
-                  la sección actual en dorado, y abajo cómo llegar y el
+                  serif (sin números: no son una secuencia), la sección
+                  actual en dorado, y abajo cómo llegar y el
                   horario, que es lo que se busca desde un teléfono. Radix ya
                   atrapa el foco, cierra con Escape y bloquea el scroll.
                   Al abrir, enlaces y pie entran escalonados (`.menu-entrada`
@@ -169,19 +191,10 @@ const Header = () => {
                               aria-current={isActive ? "page" : undefined}
                               onClick={() => setIsOpen(false)}
                               className={cn(
-                                "group flex items-baseline gap-4 py-3 min-h-[3.5rem] transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                                "group flex items-baseline py-3 min-h-[3.5rem] transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                                 isActive ? "text-primary" : "text-white/85 hover:text-white active:text-white"
                               )}
                             >
-                              <span
-                                aria-hidden="true"
-                                className={cn(
-                                  "font-serif text-sm tabular-nums w-6",
-                                  isActive ? "text-primary" : "text-white/35"
-                                )}
-                              >
-                                {String(i + 1).padStart(2, "0")}
-                              </span>
                               <span className="font-serif text-[2rem] leading-none tracking-wide">{link.name}</span>
                             </Link>
                           </li>
@@ -210,11 +223,17 @@ const Header = () => {
                         Cómo llegar
                       </a>
                     </Button>
-                    <p className="text-[13px] leading-relaxed text-white/60 font-light text-center">
-                      Jue - Sáb: 20:00 - 02:00 · Dom: 18:00 - 00:00
-                      <br />
-                      {NEGOCIO.calle} · {NEGOCIO.localidad}
-                    </p>
+                    {/* Horario desde NEGOCIO, el mismo del JSON-LD. */}
+                    <div className="text-[13px] leading-relaxed text-white/75 text-center">
+                      {filasHorario().map((fila) => (
+                        <p key={fila.dias}>
+                          {fila.dias}, de {fila.horas.replace(" – ", " a ")}
+                        </p>
+                      ))}
+                      <p className="mt-1">
+                        {NEGOCIO.calle}, {NEGOCIO.localidad}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </SheetContent>

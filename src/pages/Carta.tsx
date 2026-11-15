@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Search, Wine, Beer, Martini, GlassWater, Sparkles, X, Info } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Search, X, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import Reveal from "@/components/Reveal";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,20 +10,22 @@ import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
 import { BARRA_BAJO_CABECERA } from "@/lib/cabecera";
 import { irA } from "@/lib/scroll";
+import { conexionRapida, precargarImagenes } from "@/lib/precarga";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
 import { useEspumosos, esChampagne, PREFIJO_ESPUMOSOS, transformVinosToUI, type Vino, type VinoUI } from "@/hooks/useVinos";
 import { useBebidas, transformBebidasToUI, type BebidaUI } from "@/hooks/useBebidas";
 import { usePlatosTouza, transformPlatosToUI, useMostrarFotosPlatosTouza } from "@/hooks/usePlatos";
 import { AVISO_ALERGENOS_CARTA, AVISO_SIN_ALERGENOS } from "@/lib/alergenos";
-import { Skeleton } from "@/components/ui/skeleton";
 import Seo from "@/components/Seo";
 import { OptimizedImage } from "@/components/ui/optimized-image";
-import { CocktailHoverOutlineSVG } from "@/components/ui/svg/CocktailHoverOutlineSVG";
 import { canonical } from "@/lib/site";
-import { menuSchema } from "@/lib/negocio";
+import { NEGOCIO, menuSchema, sinDuplicados } from "@/lib/negocio";
+import { agruparChampagne, resumenCocteles, slugCarta } from "@/lib/carta";
 import { CARTA_SSG, platosParaJsonLd } from "@/lib/carta-ssg";
 import FilaBotella from "@/components/carta/FilaBotella";
+import TarjetaCoctel from "@/components/carta/TarjetaCoctel";
 import HeroLlenado from "@/components/carta/HeroLlenado";
+import { LiquidLoaderSVG } from "@/components/ui/svg/LiquidLoaderSVG";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
@@ -53,12 +55,10 @@ const INTRO_PESTANA: Record<string, string> = {
   whiskies: "Por copa: solo, con hielo o con agua.",
 };
 
-const mainCategoriesAntesDeVinos = [
+const tabsCarta = [
   { id: "cocteles", name: "Cócteles" },
   { id: "champagne", name: "Champagne" },
   { id: "cavas", name: "Cavas" },
-];
-const mainCategoriesDespuesDeVinos = [
   { id: "cervezas", name: "Cervezas" },
   { id: "copas", name: "Por copas" },
   { id: "whiskies", name: "Whiskies" },
@@ -71,7 +71,8 @@ const cocktailCategories = [
   { id: "sin-alcohol", name: "Sin Alcohol" },
 ];
 
-import { LiquidLoaderSVG } from "@/components/ui/svg/LiquidLoaderSVG";
+/** Alto de cabecera + barra de pestañas: lo que tapa arriba al saltar a un ancla. */
+const MARGEN_ANCLA = 140;
 
 /** Minúsculas y sin diacríticos, para comparar búsquedas. */
 const normalizarBusqueda = (texto: string) =>
@@ -84,7 +85,7 @@ const SinResultados = ({ termino, onLimpiar }: { termino: string; onLimpiar: () 
     </p>
     {termino ? (
       <>
-        <p className="text-white/60 font-light mb-6">Prueba con otra palabra o mira en otra pestaña de la carta.</p>
+        <p className="text-white/75 mb-6">Prueba con otra palabra o mira en otra pestaña de la carta.</p>
         <button
           type="button"
           onClick={onLimpiar}
@@ -94,7 +95,7 @@ const SinResultados = ({ termino, onLimpiar }: { termino: string; onLimpiar: () 
         </button>
       </>
     ) : (
-      <p className="text-white/60 font-light">Pregúntanos en barra por las opciones del día.</p>
+      <p className="text-white/75">Pregúntanos en barra por las opciones del día.</p>
     )}
   </div>
 );
@@ -105,28 +106,39 @@ const DrinksSkeleton = () => (
   </div>
 );
 
+const EtiquetasAlergenos = ({ alergenos }: { alergenos: string[] }) =>
+  alergenos.length > 0 ? (
+    <div className="relative z-0 mt-2 flex flex-wrap gap-1">
+      {alergenos.map((alergeno) => (
+        <span key={alergeno} className="rounded-full border border-white/15 px-2 py-0.5 text-[11px] text-white/70">
+          {alergeno}
+        </span>
+      ))}
+    </div>
+  ) : null;
+
 const Carta = () => {
   const [activeMainCategory, setActiveMainCategory] = useState("cocteles");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCocktail, setSelectedCocktail] = useState<CoctelUI | null>(null);
+  // Cócteles cuya foto no ha cargado: pasan de la rejilla a la lista de texto.
+  const [fotosRotas, setFotosRotas] = useState<ReadonlySet<string>>(() => new Set());
+  const marcarFotoRota = (id: string) =>
+    setFotosRotas((previas) => (previas.has(id) ? previas : new Set(previas).add(id)));
 
-  // El filtro secundario (pills bajo el buscador) cambia de significado según
-  // la pestaña activa: categoría de cóctel, o denominación de vino. Si no se
-  // reinicia al cambiar de pestaña, un filtro elegido en "Tintos" (p.ej.
-  // "Rioja") se arrastraría a "Blancos" y no encajaría con ninguna
-  // denominación de esa pestaña, dejando la lista vacía.
+  // El filtro secundario (pills bajo el buscador) solo existe en Cócteles: se
+  // reinicia al cambiar de pestaña para no arrastrar un filtro que no aplica.
   useEffect(() => { setSelectedCategory("all"); }, [activeMainCategory]);
 
   // Al cambiar de pestaña en el móvil: (1) la pestaña elegida se centra en la
-  // fila (con 9 pestañas, las de los extremos quedaban medio fuera), y (2) si
-  // se venía de mitad de una lista larga (p. ej. el vino 40 de Tintos), la
-  // lista nueva empieza arriba, justo bajo la barra pegajosa, en vez de abrir
-  // a media altura de otra lista.
+  // fila, y (2) si se venía de mitad de una lista larga, la lista nueva
+  // empieza arriba, justo bajo la barra pegajosa.
   const filaPestanasRef = useRef<HTMLDivElement>(null);
   const barraPestanasRef = useRef<HTMLDivElement>(null);
   const inicioListaRef = useRef<HTMLDivElement>(null);
   const cambiarPestana = (id: string) => {
+    precargarPestana(id);
     setActiveMainCategory(id);
     const barra = barraPestanasRef.current;
     const inicio = inicioListaRef.current;
@@ -152,26 +164,30 @@ const Carta = () => {
     });
   }, [activeMainCategory]);
 
+  // Datos. `sinDuplicados` es la misma limpieza que ya hacía el JSON-LD:
+  // «Heineken» dos veces o «Cruz Campo» y «Cruzcampo Gran Reserva» salían
+  // repetidos en pantalla aunque no en los datos estructurados.
   const { data: coctelesData, isLoading: loadingCocteles } = useCocteles();
-  const cocktailsData = useMemo(() => transformCoctelesToUI(coctelesData), [coctelesData]);
+  const coctelesUnicos = useMemo(() => sinDuplicados(coctelesData ?? []), [coctelesData]);
+  const cocktailsData = useMemo(() => transformCoctelesToUI(coctelesUnicos), [coctelesUnicos]);
+  const resumen = useMemo(() => resumenCocteles(coctelesUnicos), [coctelesUnicos]);
+
   const { data: espumososRaw, isLoading: loadingEspumosos } = useEspumosos();
+  const espumososUnicos = useMemo(() => sinDuplicados(espumososRaw ?? []), [espumososRaw]);
   const champagneData = useMemo(
-    () => transformVinosToUI(espumososRaw?.filter((vino) => esChampagne(vino.categoria))),
-    [espumososRaw]
+    () => transformVinosToUI(espumososUnicos.filter((vino) => esChampagne(vino.categoria))),
+    [espumososUnicos]
   );
   const cavasData = useMemo(
-    () => transformVinosToUI(espumososRaw?.filter((vino) => !esChampagne(vino.categoria))),
-    [espumososRaw]
+    () => transformVinosToUI(espumososUnicos.filter((vino) => !esChampagne(vino.categoria))),
+    [espumososUnicos]
   );
-  const loadingChampagnes = loadingEspumosos;
-  const loadingCavas = loadingEspumosos;
-  const tabsCarta = useMemo(() => [...mainCategoriesAntesDeVinos, ...mainCategoriesDespuesDeVinos], []);
   const { data: cervezasRaw, isLoading: loadingCervezas } = useBebidas('Cervezas');
   const { data: copasRaw, isLoading: loadingCopas } = useBebidas('Copas');
   const { data: whiskiesRaw, isLoading: loadingWhiskies } = useBebidas('Whiskies');
-  const cervezasData = useMemo(() => transformBebidasToUI(cervezasRaw), [cervezasRaw]);
-  const copasData = useMemo(() => transformBebidasToUI(copasRaw?.filter(esCopaEspumosa)), [copasRaw]);
-  const whiskiesData = useMemo(() => transformBebidasToUI(whiskiesRaw), [whiskiesRaw]);
+  const cervezasData = useMemo(() => transformBebidasToUI(sinDuplicados(cervezasRaw ?? [])), [cervezasRaw]);
+  const copasData = useMemo(() => transformBebidasToUI(sinDuplicados((copasRaw ?? []).filter(esCopaEspumosa))), [copasRaw]);
+  const whiskiesData = useMemo(() => transformBebidasToUI(sinDuplicados(whiskiesRaw ?? [])), [whiskiesRaw]);
 
   const { data: platosRaw, isLoading: loadingPlatos } = usePlatosTouza();
   // Interruptor «Fotos de platos en Touza» del panel. Falla abierto: solo un
@@ -182,12 +198,9 @@ const Carta = () => {
     [platosRaw, mostrarFotosPlatos]
   );
 
-  // JSON-LD `Menu` con TODA la carta, no solo la pestaña activa.
-  // En pantalla champagnes, cavas, cervezas, copas y whiskies viven detrás de
-  // una pestaña, así que no están en el HTML inicial; aquí sí llegan, con
-  // nombre y precio, legibles por buscadores y por asistentes de IA.
-  // Se construye desde la instantánea del build (constante) para que el HTML
-  // prerenderizado y el de la hidratación sean idénticos.
+  // JSON-LD `Menu` con TODA la carta, no solo la pestaña activa. Se construye
+  // desde la instantánea del build (constante) para que el HTML prerenderizado
+  // y el de la hidratación sean idénticos.
   const schemaCarta = useMemo(() => {
     if (!CARTA_SSG) return undefined;
     const espumosos = Object.entries(CARTA_SSG.vinos)
@@ -205,8 +218,29 @@ const Carta = () => {
     ]);
   }, []);
 
-  // Búsqueda sin distinguir mayúsculas ni tildes: "cafe" encuentra "Café",
-  // "rioja" encuentra "RIOJA". Antes una tilde de menos dejaba la lista vacía.
+  // Enlaces a un cóctel desde otras páginas (`/carta#moscow-mule`): abre la
+  // pestaña de cócteles sin filtros y lleva la tarjeta justo bajo la barra de
+  // pestañas. Espera a que acabe la transición de página (0,3 s), que antes
+  // sube la página al principio.
+  const { hash } = useLocation();
+  const hayCocteles = cocktailsData.length > 0;
+  useEffect(() => {
+    const slug = decodeURIComponent(hash.replace(/^#/, ""));
+    if (!slug || !hayCocteles) return;
+    if (!cocktailsData.some((c) => slugCarta(c.name) === slug)) return;
+    setActiveMainCategory("cocteles");
+    setSelectedCategory("all");
+    setSearchTerm("");
+    const temporizador = window.setTimeout(() => {
+      const destino = document.getElementById(slug);
+      if (destino) irA(Math.max(0, destino.getBoundingClientRect().top + window.scrollY - MARGEN_ANCLA));
+    }, 350);
+    return () => window.clearTimeout(temporizador);
+    // Solo cuando cambia el ancla o llegan los cócteles.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hash, hayCocteles]);
+
+  // Búsqueda sin distinguir mayúsculas ni tildes: "cafe" encuentra "Café".
   const busqueda = normalizarBusqueda(searchTerm.trim());
 
   const filteredCocktails = cocktailsData.filter((cocktail) => {
@@ -222,29 +256,8 @@ const Carta = () => {
     return items.filter(item => normalizarBusqueda(item.name).includes(busqueda));
   };
 
-  // Pills bajo el buscador: categorías de cóctel en "Cócteles", denominación
-  // de origen en una pestaña de vino con más de una denominación, nada en el
-  // resto (igual que hoy en Champagne, Cavas, Cervezas...).
-  const subFilterOptions = useMemo(() => {
-    if (activeMainCategory === "cocteles") return cocktailCategories;
-    return [];
-  }, [activeMainCategory]);
+  const subFilterOptions = activeMainCategory === "cocteles" ? cocktailCategories : [];
 
-  // Datos de la pestaña "genérica" activa (todo lo que no es cócteles):
-  // champagne/cavas/cervezas/copas/whiskies.
-  const activeDrinkData = useMemo<(VinoUI | BebidaUI)[]>(() => {
-    switch (activeMainCategory) {
-      case "champagne": return champagneData;
-      case "cavas": return cavasData;
-      case "cervezas": return cervezasData;
-      case "copas": return copasData;
-      case "whiskies": return whiskiesData;
-      default: return [];
-    }
-  }, [activeMainCategory, champagneData, cavasData, cervezasData, copasData, whiskiesData]);
-
-  // Lista completa (sin buscador ni filtros) de una pestaña que no es la
-  // activa: se pinta oculta para que su sección esté en el HTML.
   const bebidasDePestana = (id: string): (VinoUI | BebidaUI)[] => {
     switch (id) {
       case "champagne": return champagneData;
@@ -255,16 +268,57 @@ const Carta = () => {
       default: return [];
     }
   };
+  // Fotos de una pestaña en el orden en que se ven (el champagne, agrupado).
+  const fotosDePestana = (id: string): string[] => {
+    const filas = id === "champagne" ? agruparChampagne(champagneData).flatMap((g) => g.items) : bebidasDePestana(id);
+    return filas.map((fila) => fila.image).filter((url): url is string => !!url);
+  };
+  // Al acercarse a una pestaña (ratón encima, foco o primer toque) se piden
+  // ya sus fotos, delante de todo lo demás: así al abrirla están o casi.
+  const precargarPestana = (id: string) => precargarImagenes(fotosDePestana(id), { delante: true });
+
+  // Al entrar en la carta, cuando la página ya ha cargado y está ociosa, las
+  // tres primeras fotos de cada pestaña de botellas (las que se ven al
+  // abrirla). Solo con buena conexión: cada foto pesa ~500 KB.
+  const hayFotosBotellas = champagneData.length + whiskiesData.length + cavasData.length + copasData.length > 0;
+  useEffect(() => {
+    if (!hayFotosBotellas || !conexionRapida()) return;
+    let cancelado = false;
+    let espera: number | undefined;
+    const precargar = () => {
+      if (cancelado) return;
+      precargarImagenes(["champagne", "whiskies", "cavas", "copas"].flatMap((id) => fotosDePestana(id).slice(0, 3)));
+    };
+    const cuandoOcioso = () => {
+      const ocioso = (window as Window & { requestIdleCallback?: (fn: () => void, o?: { timeout: number }) => number })
+        .requestIdleCallback;
+      if (ocioso) ocioso(precargar, { timeout: 3000 });
+      else espera = window.setTimeout(precargar, 1500);
+    };
+    if (document.readyState === "complete") cuandoOcioso();
+    else window.addEventListener("load", cuandoOcioso, { once: true });
+    return () => {
+      cancelado = true;
+      window.removeEventListener("load", cuandoOcioso);
+      window.clearTimeout(espera);
+    };
+    // Una vez, cuando hay datos.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hayFotosBotellas]);
+
   const cargandoPestana = (id: string): boolean => {
     switch (id) {
-      case "champagne": return loadingChampagnes;
-      case "cavas": return loadingCavas;
+      case "champagne":
+      case "cavas": return loadingEspumosos;
       case "cervezas": return loadingCervezas;
       case "copas": return loadingCopas;
       case "whiskies": return loadingWhiskies;
       default: return false;
     }
   };
+
+  const tieneFoto = (coctel: CoctelUI) => !!coctel.image && !fotosRotas.has(coctel.id);
+  const fotoDetalle = selectedCocktail && tieneFoto(selectedCocktail);
 
   return (
     <Layout>
@@ -276,50 +330,27 @@ const Carta = () => {
         schema={schemaCarta}
       />
 
-      {/* Hero */}
-      {/* En móvil el héroe baja de 60vh a 46vh: esta es la página de la carta,
-          y con 60vh la primera bebida caía a 725 px del inicio (casi una
-          pantalla entera por debajo del pliegue). En escritorio no cambia. */}
-      <section className="escena-scroll relative overflow-hidden h-[46vh] md:h-[80vh]">
-        <motion.div
-          // Sin fundido de opacidad: la foto es el LCP y con opacity:0 inicial
-          // el HTML del SSG la traía invisible hasta hidratar.
-          initial={{ scale: 1.05 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.5, ease: appleEase }}
-          className="escena-foto absolute inset-0"
-        >
-          <HeroLlenado
-            alt="El bartender de Touza llenando una copa coupé con un cóctel rojo"
-            className="absolute inset-0"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black" />
-        </motion.div>
-
-        <div className="escena-texto absolute inset-0 z-10 flex items-end pb-12 md:pb-20 px-6">
-          <div className="max-w-6xl mx-auto w-full text-center text-shadow">
-            <span
-              style={{ animationDelay: "0.15s" }}
-              className="entrada-hero text-primary text-xs tracking-[0.3em] uppercase mb-4 block font-medium"
-            >
-              Selección Exclusiva
-            </span>
-            <h1
-              style={{ animationDelay: "0.25s" }}
-              className="entrada-hero font-serif font-bold text-white leading-[0.9] text-4xl mb-4 md:text-7xl md:mb-6 lg:text-8xl"
-            >
-              Nuestra Carta
-              <span className="sr-only"> de cócteles y copas</span>
-            </h1>
-            <p
-              style={{ animationDelay: "0.4s" }}
-              className="entrada-hero text-white/70 text-base md:text-lg font-light max-w-xl mx-auto"
-            >
-              Cócteles de la casa y clásicos, champagne, cava, whisky y cerveza.
-            </p>
-          </div>
+      {/* Hero: la copa se llena con el scroll (ver HeroLlenado). El texto va
+          en la franja oscura de abajo, nunca encima del líquido. */}
+      <HeroLlenado alt="El bartender de Touza llenando una copa coupé con un cóctel rojo">
+        <div className="max-w-6xl mx-auto w-full text-center">
+          <h1
+            style={{ animationDelay: "0.15s" }}
+            className="entrada-hero font-serif font-bold text-white leading-[0.9] text-5xl md:text-7xl lg:text-8xl"
+          >
+            Nuestra carta
+            <span className="sr-only"> de cócteles y copas</span>
+          </h1>
+          <p
+            style={{ animationDelay: "0.3s" }}
+            className="entrada-hero mx-auto mt-4 max-w-xl text-base text-white/80 [font-variant-numeric:lining-nums] md:mt-6 md:text-lg"
+          >
+            {resumen
+              ? `${resumen}. También champagne, cava, whisky y cerveza.`
+              : "Cócteles de autor y clásicos, champagne, cava, whisky y cerveza."}
+          </p>
         </div>
-      </section>
+      </HeroLlenado>
 
       {/* Tabs */}
       <div ref={barraPestanasRef} className={cn(BARRA_BAJO_CABECERA, "bg-black/85 backdrop-blur-2xl border-y border-white/5 py-2.5")}>
@@ -331,10 +362,13 @@ const Carta = () => {
                   <TabsTrigger
                     key={cat.id}
                     value={cat.id}
+                    onPointerEnter={() => precargarPestana(cat.id)}
+                    onFocus={() => precargarPestana(cat.id)}
+                    onTouchStart={() => precargarPestana(cat.id)}
                     className={cn(
-                      "relative rounded-none px-4 md:px-5 min-h-11 text-[15px] md:text-sm font-light tracking-wide transition-colors duration-300",
+                      "relative rounded-none px-4 md:px-5 min-h-11 text-[15px] md:text-sm tracking-wide transition-colors duration-300",
                       "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#D8B47E]",
-                      "data-[state=inactive]:text-white/60 data-[state=inactive]:hover:text-white",
+                      "data-[state=inactive]:text-white/70 data-[state=inactive]:hover:text-white",
                       "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0"
                     )}
                   >
@@ -359,9 +393,8 @@ const Carta = () => {
       {/* Search + Filters */}
       <div ref={inicioListaRef} className="max-w-6xl mx-auto py-5 px-5 md:px-6 md:py-8">
         {/* items-stretch en móvil: con items-center la fila de filtros, más
-            ancha que la pantalla, desbordaba por los DOS lados y "Todos" quedaba
-            cortado a la izquierda sin poder llegar a él con el scroll. */}
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center mb-4 md:mb-8">
+            ancha que la pantalla, desbordaba por los DOS lados. */}
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center mb-6 md:mb-10">
           <div className="relative w-full md:w-80 group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" aria-hidden="true" />
             <Input
@@ -393,10 +426,10 @@ const Carta = () => {
                   onClick={() => setSelectedCategory(cat.id)}
                   aria-pressed={selectedCategory === cat.id}
                   className={cn(
-                    "px-5 min-h-11 rounded-full text-[15px] md:text-sm font-light whitespace-nowrap transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                    "px-5 min-h-11 rounded-full text-[15px] md:text-sm whitespace-nowrap transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     selectedCategory === cat.id
                       ? "bg-white text-black"
-                      : "text-white/70 ring-1 ring-inset ring-white/10 hover:text-white hover:ring-white/25"
+                      : "text-white/75 ring-1 ring-inset ring-white/15 hover:text-white hover:ring-white/30"
                   )}
                 >
                   {cat.name}
@@ -405,15 +438,6 @@ const Carta = () => {
             </div>
           )}
         </div>
-
-        {/* Aviso de alérgenos de toda la carta. Sustituye al bloque que antes
-            se repetía bajo CADA tarjeta de cóctel y de tapa. Vive aquí, fuera
-            del condicional de pestaña, para que se vea en todas (cócteles,
-            vinos, cervezas...). Ver AVISO_ALERGENOS_CARTA en lib/alergenos.ts. */}
-        <p className="mb-6 flex items-start gap-2 text-[13px] md:text-xs font-light leading-relaxed text-white/65 md:mb-8">
-          <Info className="mt-[2px] h-3.5 w-3.5 flex-shrink-0 text-white/50" aria-hidden="true" />
-          <span>{AVISO_ALERGENOS_CARTA}</span>
-        </p>
 
         {/* Todas las secciones de la carta van en el HTML (también el
             prerenderizado), cada una con su <h2>, aunque en pantalla se vea
@@ -427,96 +451,110 @@ const Carta = () => {
 
             if (pestana.id === "cocteles") {
               const coctelesPanel = activa ? filteredCocktails : cocktailsData;
+              // Los que tienen foto propia, en tarjetas; los que no, al final
+              // en filas de texto como las botellas (antes, una caja «TOUZA»).
+              const conFoto = coctelesPanel.filter(tieneFoto);
+              const sinFoto = coctelesPanel.filter((c) => !tieneFoto(c));
               return (
                 <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
                   <h2 id={idTitulo} className="sr-only">{pestana.name}</h2>
                   {loadingCocteles ? (activa ? <DrinksSkeleton /> : null) : coctelesPanel.length === 0 ? (
                     activa ? <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} /> : null
                   ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 md:gap-x-5 md:gap-y-8">
-                    {coctelesPanel.map((cocktail, index) => (
-                      // <Reveal> y no `whileInView`: el HTML del SSG ya no trae las
-                      // tarjetas con opacity:0. El retraso escalona por columna
-                      // (index % 4), no por posición: con `index * 0.06` la tarjeta
-                      // 12 esperaba 0,7 s después de entrar en pantalla.
-                      <Reveal
-                        key={cocktail.id}
-                        y={25}
-                        delay={(index % 4) * 0.06}
-                        className="group relative"
-                      >
-                        {/* Botón que cubre toda la tarjeta: antes el clic vivía en un
-                            <div> y con teclado no había forma de abrir el detalle. */}
-                        <button
-                          type="button"
-                          onClick={() => setSelectedCocktail(cocktail)}
-                          aria-label={`Ver detalle de ${cocktail.name}, ${cocktail.price}`}
-                          className="absolute inset-0 z-40 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
-                        />
-                        <div className="marco-zoom aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 relative mb-4">
-                          <OptimizedImage
-                            src={cocktail.image}
-                            alt={cocktail.name}
-                            className="foto-zoom w-full h-full object-cover group-hover:scale-105 group-hover:opacity-40 transition-all duration-700"
-                          />
-                          <CocktailHoverOutlineSVG />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent group-hover:from-black/90 transition-all duration-700" />
-                          <span className="absolute bottom-3 right-3 bg-white text-black text-[13px] md:text-xs font-medium tabular-nums px-3 py-1 rounded-full z-30">
-                            {cocktail.price}
-                          </span>
+                    <>
+                      {conFoto.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-8 md:gap-x-5 md:gap-y-12">
+                          {conFoto.map((cocktail) => (
+                            <TarjetaCoctel
+                              key={cocktail.id}
+                              id={slugCarta(cocktail.name)}
+                              coctel={cocktail}
+                              alAbrir={() => setSelectedCocktail(cocktail)}
+                              alFallar={() => marcarFotoRota(cocktail.id)}
+                            />
+                          ))}
                         </div>
-                        <h3 className="font-serif text-base md:text-lg text-white group-hover:text-primary transition-colors leading-tight mb-1">{cocktail.name}</h3>
-                        <p className="text-white/55 text-sm line-clamp-2 font-light">{cocktail.description}</p>
-                        {/* Solo las etiquetas reales. El "no consta" ya no se pinta
-                            aquí (eran 13 bloques idénticos en la rejilla): vive una
-                            vez en la cabecera de la carta y, por cóctel, en su
-                            diálogo de detalle. */}
-                        {cocktail.alergenos.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {cocktail.alergenos.map((alergeno) => (
-                              <span
-                                key={alergeno}
-                                className="px-2 py-0.5 rounded-full border border-white/10 text-[11px] text-white/60 font-light uppercase tracking-wide"
+                      )}
+                      {sinFoto.length > 0 && (
+                        <div className={conFoto.length > 0 ? "mt-14 md:mt-20" : undefined}>
+                          {conFoto.length > 0 && (
+                            <h3 className="mb-2 font-serif text-3xl leading-none text-[#F3EEE4] md:mb-4 md:text-4xl">
+                              Más cócteles
+                            </h3>
+                          )}
+                          <ul className="grid grid-cols-1 md:grid-cols-2 md:gap-x-14">
+                            {sinFoto.map((cocktail, indice) => (
+                              <FilaBotella
+                                key={cocktail.id}
+                                id={slugCarta(cocktail.name)}
+                                indice={indice}
+                                nivel={conFoto.length > 0 ? 4 : 3}
+                                nombre={cocktail.name}
+                                precio={cocktail.price}
+                                descripcion={cocktail.description}
+                                alPulsar={() => setSelectedCocktail(cocktail)}
+                                etiquetaBoton={`Ver detalle de ${cocktail.name}, ${cocktail.price}`}
                               >
-                                {alergeno}
-                              </span>
+                                <EtiquetasAlergenos alergenos={cocktail.alergenos} />
+                              </FilaBotella>
                             ))}
-                          </div>
-                        )}
-                      </Reveal>
-                    ))}
-                    </div>
+                          </ul>
+                        </div>
+                      )}
+                    </>
                   )}
                 </section>
               );
             }
 
-            const filasPanel = activa ? filterBySearch(activeDrinkData) : bebidasDePestana(pestana.id);
+            const filasPanel = activa ? filterBySearch(bebidasDePestana(pestana.id)) : bebidasDePestana(pestana.id);
             const cargando = cargandoPestana(pestana.id);
+            // Champagne por tipo (brut, rosado, añada) cuando no se busca nada.
+            const grupos =
+              pestana.id === "champagne" && !(activa && busqueda)
+                ? agruparChampagne(filasPanel)
+                : [{ titulo: null, items: filasPanel }];
+            // Mismo alto de fila: si alguna botella de la pestaña tiene foto,
+            // las que no la tienen guardan su hueco.
+            const conHueco = filasPanel.some((fila) => !!fila.image);
             return (
               <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
                 <header className="mb-2 md:mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                   <h2 id={idTitulo} className="font-serif text-4xl md:text-6xl leading-none text-[#F3EEE4]">{pestana.name}</h2>
                   {INTRO_PESTANA[pestana.id] && (
-                    <p className="text-sm font-light text-white/50 md:text-right">{INTRO_PESTANA[pestana.id]}</p>
+                    <p className="text-sm text-white/70 md:text-right">{INTRO_PESTANA[pestana.id]}</p>
                   )}
                 </header>
                 {activa && (cargando ? <DrinksSkeleton /> : filasPanel.length === 0 ? (
                   <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />
                 ) : null)}
-                <ul className="grid md:grid-cols-2 md:gap-x-14">
-                  {filasPanel.map((drink, indice) => (
-                    <FilaBotella
-                      key={drink.id}
-                      indice={indice}
-                      nombre={drink.name}
-                      precio={drink.price}
-                      descripcion={drink.description}
-                      tipo={(drink as GenericDrink).type}
-                      imagen={drink.image}
-                    />
-                  ))}
-                </ul>
+                {grupos.map((grupo, numeroGrupo) => (
+                  <div key={grupo.titulo ?? "todo"} className={grupo.titulo ? "mt-10 first-of-type:mt-6 md:mt-14" : undefined}>
+                    {grupo.titulo && (
+                      <h3 className="mb-1 font-serif text-2xl text-[#D8B47E] md:mb-2 md:text-3xl">{grupo.titulo}</h3>
+                    )}
+                    {/* `grid-cols-1` (= minmax(0, 1fr)): sin columna fija, la
+                        columna implícita crecía hasta la fila más ancha y en el
+                        móvil el «€» de los champagnes se salía de la pantalla. */}
+                    <ul className="grid grid-cols-1 md:grid-cols-2 md:gap-x-14">
+                      {grupo.items.map((drink, indice) => (
+                        <FilaBotella
+                          key={drink.id}
+                          indice={indice}
+                          nivel={grupo.titulo ? 4 : 3}
+                          conHueco={conHueco}
+                          nombre={drink.name}
+                          precio={drink.price}
+                          descripcion={drink.description}
+                          tipo={(drink as GenericDrink).type}
+                          imagen={drink.image}
+                          // Las primeras filas de la pestaña abierta, sin `lazy`.
+                          prioritaria={activa && numeroGrupo === 0 && indice < 4}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </section>
             );
           })}
@@ -530,7 +568,7 @@ const Carta = () => {
             <Reveal as="h2" y={30} className="font-serif text-3xl md:text-4xl text-white mb-3 md:mb-4">
               Tapea con tu Cóctel
             </Reveal>
-            <Reveal as="p" y={0} delay={0.1} className="text-white/60 font-light">
+            <Reveal as="p" y={0} delay={0.1} className="text-white/75">
               El maridaje perfecto para elevar la experiencia.
             </Reveal>
           </div>
@@ -559,19 +597,8 @@ const Carta = () => {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-serif text-lg text-white mb-1">{tapa.name}</h3>
-                      <p className="text-white/55 text-sm font-light">{tapa.description}</p>
-                      {tapa.alergenos.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {tapa.alergenos.map((alergeno) => (
-                            <span
-                              key={alergeno}
-                              className="px-2 py-0.5 rounded-full border border-white/10 text-[11px] text-white/60 font-light uppercase tracking-wide"
-                            >
-                              {alergeno}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      <p className="text-white/75 text-sm">{tapa.description}</p>
+                      <EtiquetasAlergenos alergenos={tapa.alergenos} />
                       {tapa.alergenosNota && (
                         <p className="mt-1 text-xs italic text-red-300">{tapa.alergenosNota}</p>
                       )}
@@ -585,22 +612,57 @@ const Carta = () => {
         </section>
       )}
 
-      {/* Detail Modal */}
+      {/* Pie de la carta: el aviso de alérgenos una sola vez (antes salía
+          arriba, en cada pestaña) y dónde está el bar. */}
+      <div className="max-w-6xl mx-auto px-5 pt-12 pb-16 md:px-6 md:pt-20 md:pb-24">
+        <div className="grid gap-8 border-t border-white/10 pt-8 md:grid-cols-12 md:gap-12 md:pt-10">
+          <p className="flex items-start gap-2 text-[13px] leading-relaxed text-white/75 md:col-span-5 md:text-sm">
+            <Info className="mt-[3px] h-3.5 w-3.5 flex-shrink-0 text-white/60" aria-hidden="true" />
+            <span>{AVISO_ALERGENOS_CARTA}</span>
+          </p>
+          <div className="md:col-span-7 md:text-right">
+            <p className="font-serif text-xl leading-snug text-[#F3EEE4] md:text-2xl">
+              Touza está en la {NEGOCIO.calle}, Crevillent, junto a Casa Tomás. Sin reservas.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3 md:justify-end">
+              <Link
+                to="/contacto"
+                className="inline-flex min-h-11 items-center rounded-full border border-[#D8B47E]/60 px-6 text-sm font-medium text-[#F3EEE4] transition-colors hover:bg-[#D8B47E] hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                Cómo llegar
+              </Link>
+              <Link
+                to="/despues-de-cenar"
+                className="text-sm text-white/80 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-[#D8B47E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
+              >
+                Copas después de cenar en Casa Tomás
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Detalle del cóctel. En móvil, a pantalla completa y con scroll en el
+          propio diálogo. Sin foto propia, una sola columna. */}
       <Dialog open={!!selectedCocktail} onOpenChange={() => setSelectedCocktail(null)}>
-        {/* En móvil, a pantalla completa y con scroll en el propio diálogo: antes
-            el texto largo (ingredientes + alérgenos) se salía por abajo sin
-            poder llegar a él. */}
-        <DialogContent className="p-0 gap-0 bg-black border-white/5 text-white w-full max-w-[100vw] h-[100dvh] overflow-y-auto rounded-none md:h-auto md:max-h-[90vh] md:max-w-4xl md:overflow-hidden md:rounded-2xl">
-          <div className="grid grid-rows-[40vh_auto] md:grid-rows-none md:grid-cols-2">
-            <div className="relative bg-white/5 md:min-h-[480px]">
-              {selectedCocktail && (
-                <OptimizedImage
+        <DialogContent
+          className={cn(
+            "p-0 gap-0 bg-black border-white/5 text-white w-full max-w-[100vw] h-[100dvh] overflow-y-auto rounded-none md:h-auto md:max-h-[90vh] md:overflow-hidden md:rounded-2xl",
+            fotoDetalle ? "md:max-w-4xl" : "md:max-w-xl"
+          )}
+        >
+          <div className={cn("grid", fotoDetalle && "grid-rows-[40vh_auto] md:grid-rows-none md:grid-cols-2")}>
+            {fotoDetalle && selectedCocktail && (
+              <div className="relative bg-white/5 md:min-h-[480px]">
+                <img
                   src={selectedCocktail.image}
                   alt={selectedCocktail.name}
-                  className="w-full h-full object-cover"
+                  width={900}
+                  height={1200}
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
-              )}
-            </div>
+              </div>
+            )}
             <div className="px-6 pt-7 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] md:p-12 flex flex-col justify-center md:max-h-[90vh] md:overflow-y-auto">
               {selectedCocktail && (
                 <>
@@ -611,25 +673,27 @@ const Carta = () => {
                   <DialogTitle className="font-serif text-3xl md:text-5xl mb-6 leading-[0.9] text-white">
                     {selectedCocktail.name}
                   </DialogTitle>
-                  <DialogDescription className="text-lg text-white/70 font-light leading-relaxed mb-8">
+                  <DialogDescription className="text-lg text-white/80 leading-relaxed mb-8">
                     {selectedCocktail.description}
                   </DialogDescription>
-                  <div>
-                    <h4 className="text-xs uppercase tracking-widest text-white/55 mb-3">Notas de cata</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedCocktail.ingredients.map((ing, i) => (
-                        <span key={i} className="px-3 py-1 rounded-full border border-white/10 text-sm text-white/60 font-light">
-                          {ing}
-                        </span>
-                      ))}
+                  {selectedCocktail.ingredients.length > 0 && (
+                    <div>
+                      <h4 className="text-sm text-white/70 mb-3">Notas de cata</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCocktail.ingredients.map((ing, i) => (
+                          <span key={i} className="px-3 py-1 rounded-full border border-white/10 text-sm text-white/75">
+                            {ing}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="mt-6">
-                    <h4 className="text-xs uppercase tracking-widest text-white/55 mb-3">Alérgenos</h4>
+                    <h4 className="text-sm text-white/70 mb-3">Alérgenos</h4>
                     {selectedCocktail.alergenos.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {selectedCocktail.alergenos.map((alergeno, i) => (
-                          <span key={i} className="px-3 py-1 rounded-full border border-white/10 text-sm text-white/60 font-light">
+                          <span key={i} className="px-3 py-1 rounded-full border border-white/10 text-sm text-white/75">
                             {alergeno}
                           </span>
                         ))}
@@ -642,8 +706,8 @@ const Carta = () => {
                     )}
                   </div>
                   <div className="flex items-center justify-between pt-8 mt-8 border-t border-white/5">
-                    <span className="text-xs text-white/55">Base: <span className="text-white/80 capitalize">{selectedCocktail.base}</span></span>
-                    <span className="text-3xl font-serif text-primary">{selectedCocktail.price}</span>
+                    <span className="text-sm text-white/70">Base: <span className="text-white/80 capitalize">{selectedCocktail.base}</span></span>
+                    <span className="text-3xl font-serif text-primary [font-variant-numeric:lining-nums]">{selectedCocktail.price}</span>
                   </div>
                 </>
               )}

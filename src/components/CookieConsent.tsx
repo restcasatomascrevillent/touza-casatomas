@@ -20,11 +20,11 @@ const useEfectoDeDiseno = typeof window === "undefined" ? useEffect : useLayoutE
 /**
  * Aviso de cookies: tarjeta flotante y compacta.
  *
- * - Móvil (< md): a 12 px de los bordes (más la zona segura), apoyada 8 px
- *   encima de la barra "Cómo llegar" donde la hay y sobre el borde de
- *   la pantalla donde no. Una línea y dos botones: ~96 px de alto a 360 px
- *   de ancho (antes, una franja de 153 px que tapaba la frase y los botones
- *   del hero en la primera visita).
+ * - Móvil (< md): una barra fina de una sola fila (texto corto a la
+ *   izquierda, «Aceptar» y «Rechazar» a la derecha), ~56 px de alto, a 8 px
+ *   de los bordes y justo encima de la barra «Cómo llegar» donde la hay. Antes
+ *   era una tarjeta de dos pisos (~96 px) con dos botones grandes que se
+ *   sumaban a los del hero en la primera pantalla.
  * - ≥ md: tarjeta de 24 rem abajo a la derecha, con el texto completo.
  * - Móvil en horizontal (`apaisado:`): una fila (texto y botones) a la derecha.
  *
@@ -91,8 +91,10 @@ const CookieConsent = () => {
     if (previo?.isConnected) previo.focus({ preventScroll: true });
   };
 
+  // Los dos botones, idénticos. En el móvil, más bajos y sin relleno de color:
+  // la barra no debe pesar más que los botones del hero.
   const boton =
-    "min-h-11 rounded-full border border-white/20 bg-white/[0.08] px-4 text-sm font-medium text-white transition-colors duration-200 hover:bg-white/15 hover:border-white/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card";
+    "min-h-10 rounded-full border border-white/25 bg-transparent px-3 text-[13px] font-medium text-white/90 transition-colors duration-200 hover:bg-white/10 hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card md:min-h-11 md:bg-white/[0.08] md:px-4 md:text-sm md:text-white";
 
   return (
     <AnimatePresence>
@@ -107,12 +109,13 @@ const CookieConsent = () => {
           aria-label="Aviso de cookies"
           aria-describedby="aviso-cookies-texto"
           className={cn(
-            "fixed z-[45] rounded-2xl border border-white/10 bg-card/95 p-3 shadow-[0_12px_40px_rgb(0_0_0/0.55)] backdrop-blur-xl",
-            "left-[calc(0.75rem+env(safe-area-inset-left,0px))] right-[calc(0.75rem+env(safe-area-inset-right,0px))]",
-            "md:left-auto md:right-[calc(1.5rem+env(safe-area-inset-right,0px))] md:w-[24rem] md:p-5",
+            "fixed z-[45] flex items-center gap-2 rounded-xl border border-white/10 bg-black/90 py-2 pl-3 pr-2 backdrop-blur-xl",
+            "md:block md:rounded-2xl md:bg-card/95 md:p-5 md:shadow-[0_12px_40px_rgb(0_0_0/0.55)]",
+            "left-[calc(0.5rem+env(safe-area-inset-left,0px))] right-[calc(0.5rem+env(safe-area-inset-right,0px))]",
+            "md:left-auto md:right-[calc(1.5rem+env(safe-area-inset-right,0px))] md:w-[24rem]",
             conBarra
-              ? "bottom-[calc(var(--barra-movil)+0.5rem)] md:bottom-[calc(var(--barra-movil)+0.75rem)]"
-              : "bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] md:bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))]",
+              ? "bottom-[calc(var(--barra-movil)+0.25rem)] md:bottom-[calc(var(--barra-movil)+0.75rem)]"
+              : "bottom-[calc(0.5rem+env(safe-area-inset-bottom,0px))] md:bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))]",
             // En escritorio no hay barra (lg:hidden).
             "lg:bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))]",
             // Móvil en horizontal (poco alto): una sola fila a la derecha.
@@ -124,7 +127,7 @@ const CookieConsent = () => {
               "Más información" con href="#" que solo subía al principio. */}
           <p
             id="aviso-cookies-texto"
-            className="mb-2.5 text-[13px] leading-[1.125rem] text-white/80 md:mb-4 md:text-sm md:leading-relaxed md:text-white/75 md:font-light apaisado:mb-0 apaisado:text-[13px] apaisado:leading-[1.125rem] apaisado:text-white/80 apaisado:font-normal"
+            className="min-w-0 flex-1 text-[12px] leading-[1.05rem] text-white/80 md:mb-4 md:text-sm md:leading-relaxed apaisado:mb-0 apaisado:text-[13px] apaisado:leading-[1.125rem]"
           >
             <span className="md:hidden apaisado:inline">Cookies del mapa de Google.</span>
             <span className="hidden md:inline apaisado:hidden">
@@ -138,7 +141,7 @@ const CookieConsent = () => {
               Más información
             </Link>
           </p>
-          <div className="grid grid-cols-2 gap-2 md:gap-3 apaisado:w-[13rem] apaisado:shrink-0 apaisado:gap-2">
+          <div className="grid shrink-0 grid-cols-2 gap-1.5 md:gap-3 apaisado:w-[13rem] apaisado:gap-2">
             <button ref={primerBoton} type="button" onClick={() => responder("accepted")} className={boton}>
               Aceptar
             </button>

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 import { COLUMNAS_COCTELES } from '@/lib/carta-consultas.mjs';
 import { datosAlergenos, etiquetasAlergenos } from '@/lib/alergenos';
+import { fotoPropia } from '@/lib/carta';
 
 export interface Coctel {
   id: string;
@@ -26,6 +27,7 @@ export interface CoctelUI {
   price: string;
   description: string;
   ingredients: string[];
+  /** Foto propia del cóctel; '' si no hay o si es de un banco de imágenes. */
   image: string;
   /** Etiquetas legibles ("Gluten", "Sulfitos"...). [] si no consta el dato. */
   alergenos: string[];
@@ -80,7 +82,9 @@ export const transformCoctelesToUI = (cocteles: Coctel[] | undefined): CoctelUI[
       price: c.precio_eur ? `${c.precio_eur.toFixed(2).replace('.', ',')}€` : '',
       description: c.descripcion || '',
       ingredients: c.ingredientes?.split(', ') || [],
-      image: c.imagen_url || '',
+      // Nunca una foto de banco (Unsplash): sin foto propia, el cóctel va
+      // como fila de texto en la carta.
+      image: fotoPropia(c.imagen_url),
       alergenos: etiquetasAlergenos(datos),
       alergenosNota: datos.notas,
     };

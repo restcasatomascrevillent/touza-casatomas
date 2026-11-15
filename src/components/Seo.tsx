@@ -6,6 +6,8 @@ interface SeoProps {
     description: string;
     canonical?: string;
     ogImage?: string;
+    /** Texto alternativo de la imagen social (og:image:alt y twitter:image:alt). */
+    ogImageAlt?: string;
     ogType?: 'website' | 'article' | 'profile';
     twitterCard?: 'summary' | 'summary_large_image';
     keywords?: string[];
@@ -20,12 +22,15 @@ interface SeoProps {
 // en JPEG 1200×630, que es lo que resuelven bien todos los rastreadores
 // sociales. Antes apuntaba al WordPress del restaurante.
 const OG_IMAGE_POR_DEFECTO = '/og-image.jpg';
+const OG_IMAGE_ALT_POR_DEFECTO =
+    'Salón de Touza Cocktail Bar en Crevillent: sofá corrido mostaza, mesas de mármol y butacas verde agua';
 
 const Seo = ({
     title,
     description,
     canonical,
     ogImage = OG_IMAGE_POR_DEFECTO,
+    ogImageAlt,
     ogType = 'website',
     twitterCard = 'summary_large_image',
     keywords = [],
@@ -35,6 +40,9 @@ const Seo = ({
     // Los titles con intención local ya llevan la marca ("… · Touza Crevillente");
     // al resto se le añade el sufijo de siempre.
     const fullTitle = /touza/i.test(title) ? title : `${title} | Touza Cocktail Bar`;
+    const esImagenPorDefecto = ogImage === OG_IMAGE_POR_DEFECTO;
+    // Con la imagen por defecto, su descripción; con otra, la que pase la página.
+    const altImagen = ogImageAlt ?? (esImagenPorDefecto ? OG_IMAGE_ALT_POR_DEFECTO : undefined);
 
     return (
         <Head>
@@ -51,6 +59,9 @@ const Seo = ({
             <meta property="og:title" content={fullTitle} />
             <meta property="og:description" content={description} />
             <meta property="og:image" content={absoluta(ogImage)} />
+            {esImagenPorDefecto && <meta property="og:image:width" content="1200" />}
+            {esImagenPorDefecto && <meta property="og:image:height" content="630" />}
+            {altImagen && <meta property="og:image:alt" content={altImagen} />}
             <meta property="og:site_name" content="Touza Cocktail Bar" />
             <meta property="og:locale" content="es_ES" />
 
@@ -60,6 +71,7 @@ const Seo = ({
             <meta name="twitter:title" content={fullTitle} />
             <meta name="twitter:description" content={description} />
             <meta name="twitter:image" content={absoluta(ogImage)} />
+            {altImagen && <meta name="twitter:image:alt" content={altImagen} />}
 
             {/* Schema.org Structured Data */}
             {schema && (

@@ -1,6 +1,17 @@
 import { useEffect, useRef, type CSSProperties, type ElementType, type HTMLAttributes } from "react";
 
-type Etiqueta = "div" | "section" | "span" | "p" | "h2" | "h3" | "li" | "ul" | "form";
+type Etiqueta = "div" | "section" | "span" | "p" | "h2" | "h3" | "li" | "ul" | "form" | "figure";
+
+/**
+ * Cómo aparece. `aparecer` es el fundido de siempre (lo usan Carta y
+ * Contacto). La portada usa solo dos gestos (auditoría del 15/11/2026):
+ * - `destapar`: para fotos. Una máscara que sube las destapa y el hijo con
+ *   `.foto-asienta` pasa de un zoom de 1,1 a 1.
+ * - `lineas`: para títulos. Cada `.linea` sube tras su máscara (ver
+ *   `Encabezado` en components/home).
+ * Los dos dejan la opacidad intacta: solo esconden con la máscara.
+ */
+export type EfectoReveal = "aparecer" | "destapar" | "lineas";
 
 interface RevealProps extends HTMLAttributes<HTMLElement> {
   as?: Etiqueta;
@@ -10,6 +21,7 @@ interface RevealProps extends HTMLAttributes<HTMLElement> {
   y?: number;
   /** Escala de partida (1 = sin escala). */
   scale?: number;
+  efecto?: EfectoReveal;
 }
 
 /**
@@ -27,7 +39,7 @@ interface RevealProps extends HTMLAttributes<HTMLElement> {
  * vista o por encima no se toca. Con `prefers-reduced-motion` no se anima nada.
  * Los estilos están en `index.css` (`[data-reveal]`).
  */
-const Reveal = ({ as = "div", delay = 0, y = 24, scale = 1, style, children, ...props }: RevealProps) => {
+const Reveal = ({ as = "div", delay = 0, y = 24, scale = 1, efecto = "aparecer", style, children, ...props }: RevealProps) => {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -62,7 +74,7 @@ const Reveal = ({ as = "div", delay = 0, y = 24, scale = 1, style, children, ...
   } as CSSProperties;
 
   return (
-    <Tag ref={ref} style={variables} {...props}>
+    <Tag ref={ref} style={variables} data-efecto={efecto === "aparecer" ? undefined : efecto} {...props}>
       {children}
     </Tag>
   );

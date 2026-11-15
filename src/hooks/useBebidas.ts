@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 import { COLUMNAS_BEBIDAS } from '@/lib/carta-consultas.mjs';
+import { fotoPropia } from '@/lib/carta';
 
 export interface Bebida {
   id: string;
@@ -72,7 +73,7 @@ export const transformBebidasToUI = (bebidas: Bebida[] | undefined): BebidaUI[] 
     type: bebida.tipo || undefined,
     tag: bebida.tag || undefined,
     size: bebida.tamano || undefined,
-    image: bebida.imagen_url || undefined,
+    image: fotoPropia(bebida.imagen_url) || undefined,
     description: bebida.descripcion || undefined,
   }));
 };

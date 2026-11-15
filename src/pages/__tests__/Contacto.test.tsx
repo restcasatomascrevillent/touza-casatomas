@@ -54,23 +54,21 @@ function renderContacto() {
 // ---------------------------------------------------------------------------
 
 describe("Contacto — renderizado", () => {
-  it("muestra el título 'Contacto'", () => {
+  it("el h1 dice 'Cómo llegar'", () => {
     renderContacto();
-    expect(screen.getByRole("heading", { level: 1, name: /contacto/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Cómo llegar" })).toBeInTheDocument();
   });
 
   it("muestra la dirección del local", () => {
     renderContacto();
-    // La dirección sale en el bloque de datos y en la respuesta de la FAQ.
     expect(screen.getAllByText(/C\/ Santa María de la Cabeza, 4/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/San Vicente/i)).not.toBeInTheDocument();
   });
 
-  it("muestra las preguntas frecuentes (sin reservas, al lado de Casa Tomás)", () => {
+  it("ya no hay preguntas frecuentes (ni la pregunta en inglés)", () => {
     renderContacto();
-    expect(screen.getByRole("heading", { level: 2, name: /preguntas frecuentes/i })).toBeInTheDocument();
-    expect(screen.getByText(/no se reserva: ven directamente/i)).toBeInTheDocument();
-    expect(screen.getByText(/al lado del Restaurante Casa Tomás/i)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /preguntas frecuentes/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/cocktail bar in Crevillent/i)).not.toBeInTheDocument();
   });
 
   it("muestra el número de teléfono", () => {
@@ -83,9 +81,10 @@ describe("Contacto — renderizado", () => {
     expect(screen.getByText("info@touzabar.es")).toBeInTheDocument();
   });
 
-  it("muestra el horario del bar", () => {
+  it("muestra el horario del bar, sacado de NEGOCIO", () => {
     renderContacto();
-    expect(screen.getByText(/Jue - Sáb/i)).toBeInTheDocument();
+    expect(screen.getByText(/Jueves a sábado: 20:00 – 02:00/)).toBeInTheDocument();
+    expect(screen.getByText(/Domingo: 18:00 – 00:00/)).toBeInTheDocument();
   });
 
   it("el enlace de teléfono tiene href=tel correcto", () => {
@@ -112,46 +111,57 @@ describe("Contacto — renderizado", () => {
     expect(fbLink.getAttribute("href")).toContain("facebook.com/touzabar");
   });
 
-  it("sin consentimiento, NO carga el iframe de Google Maps (cookies de terceros)", () => {
-    localStorage.removeItem("touza_cookie_consent");
-    renderContacto();
-    expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /abrir en google maps/i })).toBeInTheDocument();
-  });
-
-  it("con 'Rechazar' guardado, el mapa tampoco se carga solo", () => {
-    localStorage.setItem("touza_cookie_consent", "rejected");
-    renderContacto();
-    expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
-    localStorage.removeItem("touza_cookie_consent");
-  });
-
-  it("el iframe del mapa aparece al pedirlo, con su título de accesibilidad", () => {
-    localStorage.removeItem("touza_cookie_consent");
-    renderContacto();
-    fireEvent.click(screen.getByRole("button", { name: /cargar mapa/i }));
-    expect(screen.getByTitle("Ubicación Touza")).toBeInTheDocument();
-  });
-
-  it("con 'Aceptar' guardado, el mapa se carga directamente", () => {
-    localStorage.setItem("touza_cookie_consent", "accepted");
-    renderContacto();
-    expect(screen.getByTitle("Ubicación Touza")).toBeInTheDocument();
-    localStorage.removeItem("touza_cookie_consent");
-  });
-
-  it("en el móvil, acciones rápidas para llegar y escribir, sin llamar", () => {
+  it("botón 'Cómo llegar' a Google Maps en todos los tamaños (sin clases que lo oculten)", () => {
     renderContacto();
     const acciones = screen.getByRole("navigation", { name: /acciones rápidas/i });
+    expect(acciones.className).not.toMatch(/(^|\s)(hidden|lg:hidden|md:hidden)(\s|$)/);
     const enlaces = Array.from(acciones.querySelectorAll("a")).map((a) => a.getAttribute("href"));
     expect(enlaces).toHaveLength(2);
     expect(enlaces[0]).toContain("google.com/maps/dir/");
     expect(enlaces[1]).toBe("mailto:info@touzabar.es");
+    expect(acciones.textContent).toMatch(/Cómo llegar/);
     expect(acciones.textContent).not.toMatch(/llamar/i);
   });
 
   it("muestra el encabezado 'Encuéntranos'", () => {
     renderContacto();
     expect(screen.getByRole("heading", { name: /encuéntranos/i })).toBeInTheDocument();
+  });
+});
+
+describe("Contacto — mapa", () => {
+  it("por defecto, mapa estático alojado en la web con la atribución de OpenStreetMap", () => {
+    localStorage.removeItem("touza_cookie_consent");
+    renderContacto();
+    expect(screen.getByRole("img", { name: /mapa del centro de crevillent/i })).toHaveAttribute("src", "/mapa-touza.webp");
+    expect(screen.getByRole("link", { name: "© OpenStreetMap" })).toHaveAttribute(
+      "href",
+      "https://www.openstreetmap.org/copyright"
+    );
+    expect(screen.getByRole("link", { name: /abrir en google maps/i })).toBeInTheDocument();
+  });
+
+  it("sin consentimiento, ni iframe ni opción de mapa interactivo (cookies de terceros)", () => {
+    localStorage.removeItem("touza_cookie_consent");
+    renderContacto();
+    expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /mapa interactivo/i })).not.toBeInTheDocument();
+  });
+
+  it("con 'Rechazar' guardado, tampoco", () => {
+    localStorage.setItem("touza_cookie_consent", "rejected");
+    renderContacto();
+    expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /mapa interactivo/i })).not.toBeInTheDocument();
+    localStorage.removeItem("touza_cookie_consent");
+  });
+
+  it("con 'Aceptar' guardado, el mapa interactivo es una opción: no se carga solo, sí al pedirlo", () => {
+    localStorage.setItem("touza_cookie_consent", "accepted");
+    renderContacto();
+    expect(screen.queryByTitle("Ubicación Touza")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /ver mapa interactivo/i }));
+    expect(screen.getByTitle("Ubicación Touza")).toBeInTheDocument();
+    localStorage.removeItem("touza_cookie_consent");
   });
 });

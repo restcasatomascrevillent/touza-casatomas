@@ -77,9 +77,6 @@ vi.mock("@/components/ui/optimized-image", () => ({
 vi.mock("@/components/ui/svg/LiquidLoaderSVG", () => ({
   LiquidLoaderSVG: () => React.createElement("div", { "data-testid": "liquid-loader" }),
 }));
-vi.mock("@/components/ui/svg/CocktailHoverOutlineSVG", () => ({
-  CocktailHoverOutlineSVG: () => null,
-}));
 
 vi.mock("lenis", () => ({
   default: vi.fn().mockImplementation(() => ({
@@ -133,6 +130,7 @@ vi.mock("@/components/layout/Header", () => ({
 const Index = React.lazy(() => import("../Index"));
 const Carta = React.lazy(() => import("../Carta"));
 const Contacto = React.lazy(() => import("../Contacto"));
+const DespuesDeCenar = React.lazy(() => import("../DespuesDeCenar"));
 const NotFound = React.lazy(() => import("../NotFound"));
 
 // ---------------------------------------------------------------------------
@@ -163,6 +161,7 @@ function renderRoute(path: string) {
             React.createElement(Route, { path: "/", element: React.createElement(Index) }),
             React.createElement(Route, { path: "/carta", element: React.createElement(Carta) }),
             React.createElement(Route, { path: "/contacto", element: React.createElement(Contacto) }),
+            React.createElement(Route, { path: "/despues-de-cenar", element: React.createElement(DespuesDeCenar) }),
             React.createElement(Route, { path: "*", element: React.createElement(NotFound) })
           )
         )
@@ -197,7 +196,7 @@ describe("Rutas de la aplicación — renderizan sin crash", () => {
       () => expect(screen.queryByText("Cargando...")).not.toBeInTheDocument(),
       { timeout: 5000 }
     );
-    expect(screen.getByText("Nuestra Carta")).toBeInTheDocument();
+    expect(screen.getByText("Nuestra carta")).toBeInTheDocument();
   });
 
   it("ruta '/contacto' — renderiza la página Contacto", async () => {
@@ -207,7 +206,18 @@ describe("Rutas de la aplicación — renderizan sin crash", () => {
       { timeout: 5000 }
     );
     expect(
-      screen.getByRole("heading", { level: 1, name: /contacto/i })
+      screen.getByRole("heading", { level: 1, name: /cómo llegar/i })
+    ).toBeInTheDocument();
+  });
+
+  it("ruta '/despues-de-cenar' — renderiza la página nueva", async () => {
+    renderRoute("/despues-de-cenar");
+    await waitFor(
+      () => expect(screen.queryByText("Cargando...")).not.toBeInTheDocument(),
+      { timeout: 5000 }
+    );
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Copas después de cenar en Casa Tomás" })
     ).toBeInTheDocument();
   });
 

@@ -210,4 +210,16 @@ describe("transformCoctelesToUI", () => {
   it("retorna [] cuando se pasa undefined", () => {
     expect(transformCoctelesToUI(undefined)).toEqual([]);
   });
+
+  // Auditoría del 15/11/2026: ninguna foto de banco en la carta. Sin foto
+  // propia, `image` vacía y la carta pinta el cóctel como fila de texto.
+  it("descarta las fotos de Unsplash: image vacía", () => {
+    const result = transformCoctelesToUI([
+      { ...mockCoctelA, imagen_url: "https://images.unsplash.com/photo-1513558161293?w=500" },
+      mockCoctelB,
+    ]);
+    expect(result[0].image).toBe("");
+    expect(result[1].image).toBe("");
+    expect(transformCoctelesToUI([mockCoctelA])[0].image).toBe("https://example.com/negroni.jpg");
+  });
 });

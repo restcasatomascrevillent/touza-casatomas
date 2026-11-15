@@ -99,6 +99,10 @@ export const routes: RouteRecord[] = [
       // /reservado y /reserva/respuesta ya no existen y vercel.json las
       // redirige (301) a /contacto.
       { path: "contacto", handle: SIN_BARRA_MOVIL, lazy: lazyRoute(() => import("./pages/Contacto")) },
+      // «Copas después de cenar en Casa Tomás» (auditoría SEO/GEO del
+      // 15/11/2026). El SSG la prerenderiza como las demás (sale de esta
+      // lista) y el sitemap la recoge del `dist/despues-de-cenar.html`.
+      { path: "despues-de-cenar", lazy: lazyRoute(() => import("./pages/DespuesDeCenar")) },
       // Textos legales (LSSI-CE, RGPD/LOPDGDD y cookies). Datos del titular en
       // src/lib/legal.ts; el pie y el aviso de cookies enlazan aquí.
       { path: "aviso-legal", lazy: lazyRoute(() => import("./pages/AvisoLegal")) },
