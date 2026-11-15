@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { FOTO_BOTELLA, fotoResponsive, volverAFotoOriginal } from "@/lib/foto";
 
 /**
  * Una fila de la carta: botella, copa o cóctel sin foto propia («la vitrina»).
@@ -23,7 +24,12 @@ import { cn } from "@/lib/utils";
  * `--i`. Sin JS el contenido está igual; con reduced-motion no se anima.
  *
  * La foto (ver `FotoNicho`) sube dentro del nicho solo cuando ya ha llegado:
- * mientras tanto el nicho enseña su fondo cálido, nunca un hueco negro.
+ * mientras tanto el nicho enseña su fondo cálido, nunca un hueco negro. Se
+ * pide a su tamaño real (60–68 px, ~5 KB por Vercel Image Optimization; ver
+ * src/lib/foto.ts), no la original de 900×1500 y ~550 KB.
+ *
+ * Las filas sin foto en una lista con fotos (`conHueco`) llevan en el hueco
+ * la silueta tenue de una botella: el hueco vacío parecía una foto rota.
  */
 interface Props {
   nombre: string;
@@ -43,7 +49,10 @@ interface Props {
   etiquetaBoton?: string;
   /** Debajo de la descripción (etiquetas de alérgenos). */
   children?: ReactNode;
-  /** Primeras filas de la pestaña visible: sin `lazy` y con prioridad alta. */
+  /**
+   * Primeras filas de la pestaña VISIBLE: sin `lazy` y con prioridad alta.
+   * Nunca en una pestaña oculta: competiría con lo que sí se ve.
+   */
   prioritaria?: boolean;
 }
 
@@ -60,10 +69,16 @@ type EstadoFoto = "esperando" | "lista" | "llego";
 const FotoNicho = ({ src, alt, prioritaria }: { src: string; alt: string; prioritaria: boolean }) => {
   const imgRef = useRef<HTMLImageElement>(null);
   const [estado, setEstado] = useState<EstadoFoto | undefined>(undefined);
+  const foto = fotoResponsive(src, FOTO_BOTELLA.anchos, FOTO_BOTELLA.sizes);
 
   useEffect(() => {
     const img = imgRef.current;
     if (!img) return;
+    // Falló antes de hidratar (en el HTML del SSG): se reintenta con la original.
+    if (img.complete && img.naturalWidth === 0 && img.currentSrc && volverAFotoOriginal(img, src)) {
+      setEstado("esperando");
+      return;
+    }
     setEstado(img.complete && img.naturalWidth > 0 ? "lista" : "esperando");
   }, [src]);
 
@@ -74,22 +89,41 @@ const FotoNicho = ({ src, alt, prioritaria }: { src: string; alt: string; priori
     >
       <img
         ref={imgRef}
-        src={src}
+        src={foto.src}
+        srcSet={foto.srcSet}
+        sizes={foto.sizes}
         alt={alt}
-        width={900}
-        height={1500}
+        width={120}
+        height={200}
         loading={prioritaria ? "eager" : "lazy"}
         {...(prioritaria ? { fetchpriority: "high" } : {})}
         decoding="async"
         onLoad={() => setEstado((previo) => (previo === "esperando" ? "llego" : previo ?? "lista"))}
-        // Si falla, se queda el fondo cálido del nicho (sin icono de imagen rota).
-        onError={() => setEstado("esperando")}
+        // Si falla la optimizada, la original; si falla también, se queda el
+        // fondo cálido del nicho (sin icono de imagen rota).
+        onError={(evento) => {
+          volverAFotoOriginal(evento.currentTarget, src);
+          setEstado("esperando");
+        }}
         className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
       />
       <span aria-hidden="true" className="luz-nicho pointer-events-none absolute inset-0" />
     </div>
   );
 };
+
+/**
+ * Hueco del nicho en las filas sin foto de una lista con fotos: la silueta de
+ * una botella al 8 %, para que se lea como intencionado y no como una foto
+ * que no ha cargado.
+ */
+const SiluetaBotella = () => (
+  <div aria-hidden="true" className="flex w-[60px] shrink-0 aspect-[3/5] items-end justify-center pb-1 md:w-[68px]">
+    <svg viewBox="0 0 24 60" className="h-[82%] w-auto text-white/[0.08]" fill="currentColor">
+      <path d="M9.5 0h5v3h-.6v9.2c0 1.6.7 3 1.9 4.2 2.6 2.4 4.2 5.7 4.2 9.3V57a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V25.7c0-3.6 1.6-6.9 4.2-9.3 1.2-1.2 1.9-2.6 1.9-4.2V3h-.6z" />
+    </svg>
+  </div>
+);
 
 /** Por debajo de esto la descripción cabe en una línea y no hace falta «más». */
 const LARGO_UNA_LINEA = 64;
@@ -156,7 +190,7 @@ const FilaBotella = ({
       {imagen ? (
         <FotoNicho src={imagen} alt={nombre} prioritaria={prioritaria} />
       ) : (
-        conHueco && <div aria-hidden="true" className="w-[60px] shrink-0 aspect-[3/5] md:w-[68px]" />
+        conHueco && <SiluetaBotella />
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-3">

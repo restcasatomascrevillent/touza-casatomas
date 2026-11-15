@@ -842,6 +842,13 @@
       radial-gradient(95% 55% at 50% 100%, rgb(216 180 126 / 0.3), transparent 75%),
       linear-gradient(to bottom, #19120b, #2b1e11);
   }
+  /* El mismo fondo cálido, más suave, en las tarjetas de cócteles (carta y
+     /despues-de-cenar) mientras llega la foto: antes, un gris casi blanco. */
+  .fondo-foto {
+    background:
+      radial-gradient(90% 50% at 50% 100%, rgb(216 180 126 / 0.18), transparent 75%),
+      linear-gradient(to bottom, #120d08, #22180e);
+  }
   /* La foto sube (clip-path) solo cuando ya está cargada; antes la animación
      arrancaba sin foto y destapaba un hueco negro. `data-foto` lo pone
      FilaBotella en el navegador: sin él (HTML del SSG, sin JS) la foto se ve

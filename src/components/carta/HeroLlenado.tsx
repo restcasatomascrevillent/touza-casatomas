@@ -19,11 +19,15 @@ import { limitar, opacidadFotograma } from "@/lib/carta";
  *   trae el HTML del SSG. Mientras llega, el hueco enseña un resplandor cálido
  *   (degradado CSS; no una miniatura incrustada, porque los fotogramas se
  *   pueden regenerar con los mismos nombres y la miniatura se quedaría vieja).
- * - Los otros nueve se piden desde que monta la página, en orden, de dos en
- *   dos y con prioridad baja (no compiten con el LCP). Cada uno entra en la
- *   secuencia en cuanto está decodificado: el scroll usa los que ya han
- *   llegado (si falta uno, funde del anterior al siguiente) sin esperar a
- *   tenerlos todos.
+ * - Los otros nueve se piden cuando la página ya ha cargado (`load`), en
+ *   orden, de dos en dos y con prioridad baja: no compiten con el LCP ni con
+ *   las fotos de los cócteles. Cada uno entra en la secuencia en cuanto está
+ *   decodificado: el scroll usa los que ya han llegado (si falta uno, funde
+ *   del anterior al siguiente) sin esperar a tenerlos todos.
+ * - En el móvil vertical, fotogramas recortados a la franja que se ve
+ *   (704×819, ~29 KB cada uno, en vez de 1280×1024 y ~57 KB; ver
+ *   scripts/retoque/llenado_movil.py). El primero lo elige el <picture>
+ *   (`MOVIL`); los demás, el mismo media query al empezar la precarga.
  * - Con reduced-motion: copa llena y quieta, sin tramo fijo. El <picture>
  *   elige el último fotograma por CSS (`prefers-reduced-motion`), así que ni
  *   siquiera hay cambio de foto al hidratar, y no se precarga nada.
@@ -39,8 +43,26 @@ const fotogramas = Object.entries(
   .sort(([a], [b]) => a.localeCompare(b))
   .map(([, url]) => url);
 
+const fotogramasMovil = Object.entries(
+  import.meta.glob("../../assets/secuencias/llenado-movil/*.webp", { eager: true, query: "?url", import: "default" }) as Record<
+    string,
+    string
+  >
+)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([, url]) => url);
+
 const ULTIMO = fotogramas.length - 1;
 const REDUCIR_MOVIMIENTO = "(prefers-reduced-motion: reduce)";
+/** Móvil en vertical: la foto ocupa una franja alta y estrecha. */
+const MOVIL = "(max-width: 767px) and (orientation: portrait)";
+const HAY_MOVIL = fotogramasMovil.length === fotogramas.length;
+
+/** Qué serie de fotogramas toca en esta pantalla (la misma que elige el <picture>). */
+const serie = (): string[] =>
+  HAY_MOVIL && typeof window !== "undefined" && (window.matchMedia?.(MOVIL).matches ?? false)
+    ? fotogramasMovil
+    : fotogramas;
 const A_LA_VEZ = 2;
 
 interface Props {
@@ -60,13 +82,16 @@ const HeroLlenado = ({ alt, children }: Props) => {
   const capasRef = useRef<(HTMLImageElement | null)[]>([]);
   // Qué fotogramas ya están decodificados (el 0 lo pinta el HTML).
   const [llegados, setLlegados] = useState<boolean[]>(() => fotogramas.map(() => false));
+  // La serie (escritorio o móvil) se decide al empezar la precarga.
+  const [urls, setUrls] = useState<string[]>(fotogramas);
   const programarRef = useRef<() => void>(() => undefined);
 
-  // Precarga en orden, de dos en dos, desde que monta la página.
+  // Precarga en orden, de dos en dos, cuando la página ya ha cargado.
   useEffect(() => {
     if (quiereQuieto()) return;
     let cancelado = false;
     let siguiente = 1;
+    let lista = fotogramas;
     const pedir = () => {
       if (cancelado || siguiente > ULTIMO) return;
       const k = siguiente++;
@@ -74,9 +99,9 @@ const HeroLlenado = ({ alt, children }: Props) => {
       (img as HTMLImageElement & { fetchPriority?: string }).fetchPriority = "low";
       const cargado = new Promise<void>((ok, ko) => {
         img.onload = () => ok();
-        img.onerror = () => ko(new Error(fotogramas[k]));
+        img.onerror = () => ko(new Error(lista[k]));
       });
-      img.src = fotogramas[k];
+      img.src = lista[k];
       // Cargado y, si se puede, ya decodificado (sin tirón al entrar). Pero
       // sin esperar a `decode` más de 250 ms: con la pestaña en segundo plano
       // Chrome no decodifica y la promesa se queda colgada. `decode` tampoco
@@ -94,9 +119,17 @@ const HeroLlenado = ({ alt, children }: Props) => {
         .catch(() => undefined)
         .finally(pedir);
     };
-    for (let i = 0; i < A_LA_VEZ; i++) pedir();
+    const empezar = () => {
+      if (cancelado) return;
+      lista = serie();
+      setUrls(lista);
+      for (let i = 0; i < A_LA_VEZ; i++) pedir();
+    };
+    if (document.readyState === "complete") empezar();
+    else window.addEventListener("load", empezar, { once: true });
     return () => {
       cancelado = true;
+      window.removeEventListener("load", empezar);
     };
   }, []);
 
@@ -149,7 +182,16 @@ const HeroLlenado = ({ alt, children }: Props) => {
             mientras llega el primer fotograma, nunca negro. */}
         <div className="absolute inset-x-0 top-0 h-[64%] bg-[radial-gradient(70%_60%_at_50%_42%,#6e2717_0%,#311710_45%,#0b0806_100%)] md:h-full">
           <picture>
+            {HAY_MOVIL && (
+              <source
+                media={`${REDUCIR_MOVIMIENTO} and ${MOVIL}`}
+                srcSet={fotogramasMovil[ULTIMO]}
+                width={704}
+                height={819}
+              />
+            )}
             <source media={REDUCIR_MOVIMIENTO} srcSet={fotogramas[ULTIMO]} />
+            {HAY_MOVIL && <source media={MOVIL} srcSet={fotogramasMovil[0]} width={704} height={819} />}
             <img
               src={fotogramas[0]}
               alt={alt}
@@ -160,7 +202,7 @@ const HeroLlenado = ({ alt, children }: Props) => {
               className={ENCUADRE}
             />
           </picture>
-          {fotogramas.map((src, k) =>
+          {urls.map((src, k) =>
             k > 0 && llegados[k] ? (
               <img
                 key={src}

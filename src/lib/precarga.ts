@@ -3,8 +3,11 @@
  *
  * La usa la carta para que las fotos de las botellas ya estén cuando se abre
  * una pestaña: la <img> de la fila, con la misma URL, la encuentra en la
- * caché del documento (como mucho, una revalidación con su ETag: Storage las
- * sirve con `no-cache`) en vez de bajar ~500 KB al cambiar de pestaña.
+ * caché del documento en vez de pedirla al cambiar de pestaña.
+ *
+ * - Con `srcSet` y `sizes` (src/lib/foto.ts) la precarga elige el mismo
+ *   candidato que elegirá la <img> (el ancho de la miniatura en esa pantalla),
+ *   no la foto original de ~500 KB.
  *
  * - Cada URL se pide una sola vez por visita.
  * - De dos en dos: las primeras de la lista llegan antes que si se pidieran
@@ -13,8 +16,12 @@
  *   visitante está a punto de ver gana a la precarga «por si acaso»).
  * - Prioridad baja: nunca compite con el LCP ni con lo que ya está en pantalla.
  */
+import type { FotoResponsive } from "@/lib/foto";
+
 const pedidas = new Set<string>();
 const cola: string[] = [];
+/** srcset y sizes de cada `src` en cola, si los tiene. */
+const variantes = new Map<string, FotoResponsive>();
 let enCurso = 0;
 const A_LA_VEZ = 2;
 
@@ -29,13 +36,32 @@ function siguiente() {
       enCurso -= 1;
       siguiente();
     };
+    const foto = variantes.get(src);
+    variantes.delete(src);
+    // `sizes` y `srcset` antes que `src`: así se elige el candidato una sola vez.
+    if (foto?.srcSet) {
+      img.sizes = foto.sizes ?? "100vw";
+      img.srcset = foto.srcSet;
+    }
     img.src = src;
   }
 }
 
-export function precargarImagenes(urls: ReadonlyArray<string | undefined | null>, { delante = false } = {}): void {
+export function precargarImagenes(
+  fotos: ReadonlyArray<string | FotoResponsive | undefined | null>,
+  { delante = false } = {},
+): void {
   if (typeof window === "undefined" || typeof Image === "undefined") return;
-  const validas = [...new Set(urls.filter((url): url is string => !!url))];
+  const urls: string[] = [];
+  for (const foto of fotos) {
+    if (!foto) continue;
+    if (typeof foto === "string") urls.push(foto);
+    else if (foto.src) {
+      urls.push(foto.src);
+      if (foto.srcSet && !pedidas.has(foto.src)) variantes.set(foto.src, foto);
+    }
+  }
+  const validas = [...new Set(urls)];
   const nuevas = validas.filter((url) => !pedidas.has(url));
   nuevas.forEach((url) => pedidas.add(url));
   if (delante) {
@@ -64,5 +90,6 @@ export function conexionRapida(): boolean {
 export function _reiniciarPrecarga(): void {
   pedidas.clear();
   cola.length = 0;
+  variantes.clear();
   enCurso = 0;
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { CoctelUI } from "@/hooks/useCocteles";
+import { FOTO_TARJETA, fotoResponsive, volverAFotoOriginal } from "@/lib/foto";
 
 /**
  * Tarjeta de un cóctel CON foto propia (los que no la tienen van como fila de
@@ -11,8 +12,13 @@ import type { CoctelUI } from "@/hooks/useCocteles";
  * - `<img>` normal, sin fundido ni esqueleto: cuando llegan los datos frescos
  *   de Supabase y cambia la URL, el navegador cambia la foto sin que la
  *   rejilla se quede en negro y vuelva con un fundido.
+ * - La foto se pide a su tamaño (~160–270 px de ancho, con srcset; ver
+ *   src/lib/foto.ts), no la original de 900×1200. Mientras llega, el hueco
+ *   enseña el degradado cálido del nicho de las botellas, no un gris.
+ * - Las primeras de la rejilla (`prioritaria`), sin `lazy`.
  * - Si la foto no carga (también si falló antes de hidratar, en el HTML del
- *   SSG), avisa con `alFallar` y la página pasa el cóctel a la lista de texto.
+ *   SSG), primero se reintenta con la original y, si tampoco, avisa con
+ *   `alFallar` y la página pasa el cóctel a la lista de texto.
  */
 interface Props {
   coctel: CoctelUI;
@@ -20,16 +26,19 @@ interface Props {
   id: string;
   alAbrir: () => void;
   alFallar: () => void;
+  /** Primeras tarjetas de la rejilla: sin `lazy`. */
+  prioritaria?: boolean;
 }
 
-const TarjetaCoctel = ({ coctel, id, alAbrir, alFallar }: Props) => {
+const TarjetaCoctel = ({ coctel, id, alAbrir, alFallar, prioritaria = false }: Props) => {
   const imgRef = useRef<HTMLImageElement>(null);
+  const foto = fotoResponsive(coctel.image, FOTO_TARJETA.anchos, FOTO_TARJETA.sizes);
 
   useEffect(() => {
     const img = imgRef.current;
     // `complete` con `naturalWidth` 0: la foto falló antes de que React
     // escuchara el `error`. Una diferida aún sin pedir da `complete` false.
-    if (img?.complete && img.naturalWidth === 0 && img.currentSrc) alFallar();
+    if (img?.complete && img.naturalWidth === 0 && img.currentSrc && !volverAFotoOriginal(img, coctel.image)) alFallar();
     // Solo al cambiar de foto: `alFallar` es una función nueva en cada render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coctel.image]);
@@ -43,16 +52,20 @@ const TarjetaCoctel = ({ coctel, id, alAbrir, alFallar }: Props) => {
         aria-label={`Ver detalle de ${coctel.name}, ${coctel.price}`}
         className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
       />
-      <div className="marco-zoom relative mb-3 aspect-[3/4] overflow-hidden rounded-2xl bg-white/[0.04] md:mb-4">
+      <div className="marco-zoom fondo-foto relative mb-3 aspect-[3/4] overflow-hidden rounded-2xl md:mb-4">
         <img
           ref={imgRef}
-          src={coctel.image}
+          src={foto.src}
+          srcSet={foto.srcSet}
+          sizes={foto.sizes}
           alt={coctel.name}
           width={900}
           height={1200}
-          loading="lazy"
+          loading={prioritaria ? "eager" : "lazy"}
           decoding="async"
-          onError={alFallar}
+          onError={(evento) => {
+            if (!volverAFotoOriginal(evento.currentTarget, coctel.image)) alFallar();
+          }}
           className="foto-zoom h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
         />
       </div>

@@ -10,7 +10,8 @@ import Layout from "@/components/layout/Layout";
 import { cn } from "@/lib/utils";
 import { BARRA_BAJO_CABECERA } from "@/lib/cabecera";
 import { irA } from "@/lib/scroll";
-import { conexionRapida, precargarImagenes } from "@/lib/precarga";
+import { precargarImagenes } from "@/lib/precarga";
+import { FOTO_BOTELLA, FOTO_DETALLE, fotoResponsive, volverAFotoOriginal } from "@/lib/foto";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
 import { useEspumosos, esChampagne, PREFIJO_ESPUMOSOS, transformVinosToUI, type Vino, type VinoUI } from "@/hooks/useVinos";
 import { useBebidas, transformBebidasToUI, type BebidaUI } from "@/hooks/useBebidas";
@@ -268,43 +269,20 @@ const Carta = () => {
       default: return [];
     }
   };
-  // Fotos de una pestaña en el orden en que se ven (el champagne, agrupado).
-  const fotosDePestana = (id: string): string[] => {
+  // Fotos de una pestaña en el orden en que se ven (el champagne, agrupado),
+  // con el mismo srcset que la fila: se precarga la miniatura, no la original.
+  const fotosDePestana = (id: string) => {
     const filas = id === "champagne" ? agruparChampagne(champagneData).flatMap((g) => g.items) : bebidasDePestana(id);
-    return filas.map((fila) => fila.image).filter((url): url is string => !!url);
+    return filas
+      .map((fila) => fila.image)
+      .filter((url): url is string => !!url)
+      .map((url) => fotoResponsive(url, FOTO_BOTELLA.anchos, FOTO_BOTELLA.sizes));
   };
   // Al acercarse a una pestaña (ratón encima, foco o primer toque) se piden
   // ya sus fotos, delante de todo lo demás: así al abrirla están o casi.
+  // Nada más: las pestañas ocultas no se precargan «por si acaso» al entrar
+  // (auditoría de carga v0.10: competían con lo que sí se ve en el móvil).
   const precargarPestana = (id: string) => precargarImagenes(fotosDePestana(id), { delante: true });
-
-  // Al entrar en la carta, cuando la página ya ha cargado y está ociosa, las
-  // tres primeras fotos de cada pestaña de botellas (las que se ven al
-  // abrirla). Solo con buena conexión: cada foto pesa ~500 KB.
-  const hayFotosBotellas = champagneData.length + whiskiesData.length + cavasData.length + copasData.length > 0;
-  useEffect(() => {
-    if (!hayFotosBotellas || !conexionRapida()) return;
-    let cancelado = false;
-    let espera: number | undefined;
-    const precargar = () => {
-      if (cancelado) return;
-      precargarImagenes(["champagne", "whiskies", "cavas", "copas"].flatMap((id) => fotosDePestana(id).slice(0, 3)));
-    };
-    const cuandoOcioso = () => {
-      const ocioso = (window as Window & { requestIdleCallback?: (fn: () => void, o?: { timeout: number }) => number })
-        .requestIdleCallback;
-      if (ocioso) ocioso(precargar, { timeout: 3000 });
-      else espera = window.setTimeout(precargar, 1500);
-    };
-    if (document.readyState === "complete") cuandoOcioso();
-    else window.addEventListener("load", cuandoOcioso, { once: true });
-    return () => {
-      cancelado = true;
-      window.removeEventListener("load", cuandoOcioso);
-      window.clearTimeout(espera);
-    };
-    // Una vez, cuando hay datos.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hayFotosBotellas]);
 
   const cargandoPestana = (id: string): boolean => {
     switch (id) {
@@ -464,11 +442,13 @@ const Carta = () => {
                     <>
                       {conFoto.length > 0 && (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-8 md:gap-x-5 md:gap-y-12">
-                          {conFoto.map((cocktail) => (
+                          {conFoto.map((cocktail, indice) => (
                             <TarjetaCoctel
                               key={cocktail.id}
                               id={slugCarta(cocktail.name)}
                               coctel={cocktail}
+                              // Las cuatro primeras (las que se ven al bajar del hero), sin `lazy`.
+                              prioritaria={activa && indice < 4}
                               alAbrir={() => setSelectedCocktail(cocktail)}
                               alFallar={() => marcarFotoRota(cocktail.id)}
                             />
@@ -548,8 +528,10 @@ const Carta = () => {
                           descripcion={drink.description}
                           tipo={(drink as GenericDrink).type}
                           imagen={drink.image}
-                          // Las primeras filas de la pestaña abierta, sin `lazy`.
-                          prioritaria={activa && numeroGrupo === 0 && indice < 4}
+                          // Solo las primeras filas de la pestaña VISIBLE, sin `lazy`
+                          // y con prioridad alta. Las ocultas, `lazy`: no se piden
+                          // hasta abrir su pestaña.
+                          prioritaria={activa && !cargando && numeroGrupo === 0 && indice < 4}
                         />
                       ))}
                     </ul>
@@ -653,12 +635,13 @@ const Carta = () => {
         >
           <div className={cn("grid", fotoDetalle && "grid-rows-[40vh_auto] md:grid-rows-none md:grid-cols-2")}>
             {fotoDetalle && selectedCocktail && (
-              <div className="relative bg-white/5 md:min-h-[480px]">
+              <div className="fondo-foto relative md:min-h-[480px]">
                 <img
-                  src={selectedCocktail.image}
+                  {...fotoResponsive(selectedCocktail.image, FOTO_DETALLE.anchos, FOTO_DETALLE.sizes)}
                   alt={selectedCocktail.name}
                   width={900}
                   height={1200}
+                  onError={(evento) => volverAFotoOriginal(evento.currentTarget, selectedCocktail.image)}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               </div>

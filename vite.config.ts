@@ -31,6 +31,12 @@ function versionJsonPlugin(): Plugin {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  define: {
+    // Fotos de Supabase por Vercel Image Optimization (src/lib/foto.ts): solo
+    // en los builds de Vercel, donde existe `/_vercel/image`. En `npm run dev`,
+    // `npm run preview`, el CI y los tests se usa la URL original.
+    __FOTOS_VERCEL__: JSON.stringify(!!process.env.VERCEL && mode !== "development"),
+  },
   server: {
     host: "::",
     port: 8080,

@@ -11,6 +11,12 @@ declare module "virtual:touza/carta" {
   export default carta;
 }
 
+/**
+ * `true` solo en los builds de Vercel: las fotos de Supabase pasan por
+ * `/_vercel/image` (src/lib/foto.ts). Lo define vite.config.ts.
+ */
+declare const __FOTOS_VERCEL__: boolean;
+
 interface ImportMetaEnv {
   /** URL base pública del sitio. Sin ella se usa el fallback de src/lib/site.ts. */
   readonly VITE_SITE_URL?: string;
