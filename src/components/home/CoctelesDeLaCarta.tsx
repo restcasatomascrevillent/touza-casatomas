@@ -32,7 +32,8 @@ const CoctelesDeLaCarta = () => (
         className={`w-[62vw] max-w-[260px] shrink-0 snap-start md:w-auto md:max-w-none ${i === 2 ? "md:mt-16" : i % 2 === 1 ? "md:mt-8" : ""}`}
       >
         <Link to="/carta" className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-          <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-white/5">
+          {/* Mientras llega la foto, el fondo cálido de las tarjetas (no gris). */}
+          <div className="fondo-foto aspect-[3/4] overflow-hidden rounded-2xl">
             <FotoPortada
               imagen={c.imagen}
               alt={c.alt}

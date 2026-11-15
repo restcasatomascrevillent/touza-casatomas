@@ -150,7 +150,7 @@ const TiraClips = ({ clips }: { clips: Clip[] }) => {
             className="w-[62vw] max-w-[17rem] shrink-0 snap-start md:w-[14.5rem] md:max-w-none"
           >
             <figure>
-              <div className="relative aspect-[9/16] overflow-hidden rounded-2xl bg-white/5">
+              <div className="fondo-foto relative aspect-[9/16] overflow-hidden rounded-2xl">
                 {clip.poster && (
                   <img
                     src={clip.poster}

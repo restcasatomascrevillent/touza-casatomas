@@ -147,6 +147,12 @@ export const IMAGENES = {
   logo: construir("touza-logo"),
   /** Copa coupé con espuma blanca y una flor seca encima, sobre el mármol. Vertical. */
   copaFlor: construir("touza-copa-flor"),
+  /**
+   * La sala de Touza sin gente: banco corrido mostaza, sillones, mesas de
+   * mármol y los aros de luz (IMG_0420 de «Local y ambiente», 15/11/2026,
+   * con la receta de retoque común). Vertical 3:4. Cabecera de /despues-de-cenar.
+   */
+  sala: construir("touza-sala"),
 } satisfies Record<string, ImagenResponsive>;
 
 /**

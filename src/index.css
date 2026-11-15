@@ -587,9 +587,11 @@
 
   /* ── Hero de la portada: un solo momento de scroll ──────────────────────
      (components/home/Hero.tsx). Al empezar a bajar, el escenario se queda
-     fijo (`sticky`) durante 50svh: el vídeo hace un zoom lento hacia dentro,
-     TOUZA y la línea de hechos se desvanecen y un velo oscurece la imagen.
-     Después el hero sube y entra la sección de cócteles. Va ligado al scroll
+     fijo (`sticky`) durante 25svh: el vídeo hace un zoom lento hacia dentro,
+     TOUZA y la línea de hechos se desvanecen y un velo oscurece un poco la
+     imagen (como mucho al 45 %). Después el hero sube y la sección de
+     cócteles entra 12svh antes, por encima del final del hero (`.tras-hero`).
+     Antes eran 50svh y un velo al 80 %: casi una pantalla en negro. Va ligado al scroll
      de la página (`scroll(root)`; el hero siempre está arriba del todo), sin
      JS. Sin soporte, con «reducir movimiento» o con menos de 501 px de alto,
      el escenario mide lo que el hero (sin tramo fijo) y no se anima nada. En
@@ -610,7 +612,7 @@
     .barra-tras-hero {
       animation: barra-aparece linear both;
       animation-timeline: scroll(root);
-      animation-range: 42svh 62svh;
+      animation-range: 22svh 42svh;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -621,26 +623,34 @@
 
     @media (prefers-reduced-motion: no-preference) and (min-height: 501px) {
       .hero-escenario {
-        height: 150svh;
+        height: 125svh;
+      }
+
+      /* La sección siguiente sube por encima del final del hero. Solo aquí:
+         sin el tramo fijo, el margen negativo taparía «Cómo llegar». */
+      .tras-hero {
+        position: relative;
+        z-index: 1;
+        margin-top: -12svh;
       }
 
       .hero-zoom {
         animation: hero-zoom linear both;
         animation-timeline: scroll(root);
-        animation-range: 0svh 50svh;
+        animation-range: 0svh 40svh;
       }
 
       /* Primero se va la letra pequeña y después la marca. */
       .hero-pie {
         animation: hero-pie linear both;
         animation-timeline: scroll(root);
-        animation-range: 0svh 24svh;
+        animation-range: 0svh 16svh;
       }
 
       .hero-titulo {
         animation: hero-titulo linear both;
         animation-timeline: scroll(root);
-        animation-range: 4svh 42svh;
+        animation-range: 3svh 30svh;
       }
 
       /* Quien llega con el teclado a «Cómo llegar» lo ve aunque haya bajado. */
@@ -651,7 +661,7 @@
       .hero-velo {
         animation: hero-velo linear both;
         animation-timeline: scroll(root);
-        animation-range: 18svh 56svh;
+        animation-range: 10svh 40svh;
       }
     }
   }
@@ -688,7 +698,7 @@
     }
 
     to {
-      background-color: rgb(10 10 10 / 0.8);
+      background-color: rgb(10 10 10 / 0.45);
     }
   }
 
@@ -769,9 +779,11 @@
     }
   }
 
+  /* Desde 0,45 (no 0,2): a mitad de scroll el texto se tiene que poder leer
+     (auditoría visual v0.10, fallo 16). */
   @keyframes palabra-encendida {
     from {
-      opacity: 0.2;
+      opacity: 0.45;
     }
   }
 
@@ -841,6 +853,13 @@
     background:
       radial-gradient(95% 55% at 50% 100%, rgb(216 180 126 / 0.3), transparent 75%),
       linear-gradient(to bottom, #19120b, #2b1e11);
+  }
+  /* El hueco de la barra fija «Cómo llegar» del móvil, dentro del pie (en su
+     negro) y solo si la barra está en la página (BarraAccionesMovil). */
+  @media (max-width: 1023px) {
+    body:has(.barra-movil) .pie-contenido {
+      padding-bottom: calc(var(--barra-movil) + 1rem);
+    }
   }
   /* El mismo fondo cálido, más suave, en las tarjetas de cócteles (carta y
      /despues-de-cenar) mientras llega la foto: antes, un gris casi blanco. */

@@ -24,6 +24,8 @@ interface ShowcaseProps {
   cta: { texto: string; ruta: string };
   /** Lo que va debajo dentro de la misma sección (el carrusel de cócteles). */
   children?: ReactNode;
+  /** Va justo después del hero: entra antes y por encima de su final (`.tras-hero`). */
+  trasHero?: boolean;
 }
 
 /**
@@ -35,8 +37,11 @@ interface ShowcaseProps {
  * a 1) y el título entra por líneas. Fuera el parallax de las dos fotos y la
  * numeración «01/02», que no era ninguna secuencia.
  */
-const Showcase = ({ id, antetitulo, titulo, texto, foto, detalle, cta, children }: ShowcaseProps) => (
-  <section aria-labelledby={id} className="py-20 md:py-28 lg:py-36">
+const Showcase = ({ id, antetitulo, titulo, texto, foto, detalle, cta, children, trasHero = false }: ShowcaseProps) => (
+  <section
+    aria-labelledby={id}
+    className={trasHero ? "tras-hero pt-12 pb-20 md:pt-16 md:pb-28 lg:pt-20 lg:pb-36" : "py-20 md:py-28 lg:py-36"}
+  >
     <div className="mx-auto grid max-w-7xl gap-10 px-5 md:px-8 lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:px-10">
       <div className="relative lg:col-span-6 lg:pb-20">
         <Reveal efecto="destapar" className="aspect-[4/5] overflow-hidden rounded-2xl bg-white/5 md:rounded-3xl">

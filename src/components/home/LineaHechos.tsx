@@ -15,7 +15,10 @@ const LineaHechos = ({ className }: { className?: string }) => (
     <h2 className="font-sans text-[15px] font-medium leading-snug tracking-normal text-cream md:text-base">
       Coctelería en {LOCALIDAD}, junto a Casa Tomás.
     </h2>
-    <p className="mt-1 text-[15px] leading-relaxed text-white/75 md:text-base">{lineaDeHechos()}</p>
+    {/* Sombra: va sobre la foto con la pared trenzada (auditoría visual v0.10, fallo 20). */}
+    <p className="mt-1 text-[15px] leading-relaxed text-white/80 [text-shadow:0_1px_12px_rgb(0_0_0/0.6)] md:text-base">
+      {lineaDeHechos()}
+    </p>
   </div>
 );
 

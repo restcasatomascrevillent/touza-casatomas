@@ -37,6 +37,11 @@ const contactInfo = [
  * cookies en la web: el permiso se pide aquí, en el propio hueco del mapa, solo
  * cuando el visitante pulsa «Ver mapa interactivo de Google» (si ya lo había
  * aceptado, se carga directamente). La elección se puede cambiar en /cookies.
+ *
+ * Sobre el mapa, un solo botón (el interactivo): con dos apilados se tapaba
+ * casi la mitad del plano en el móvil. «Abrir en Google Maps» va debajo, como
+ * enlace de texto (auditoría visual v0.10, fallo 11). El teselado oscuro se
+ * aclara un poco con CSS para que se lean las calles.
  */
 const BOTON_MAPA =
   "inline-flex min-h-11 items-center gap-2 rounded-full bg-black/80 px-4 text-sm text-white/90 ring-1 ring-white/15 backdrop-blur transition-colors hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
@@ -81,7 +86,7 @@ const MapaTouza = () => {
         height={600}
         loading="lazy"
         decoding="async"
-        className="absolute inset-0 h-full w-full object-none object-center"
+        className="absolute inset-0 h-full w-full object-none object-center [filter:brightness(1.35)_contrast(1.1)]"
       />
       {/* Viñeteado: lleva la vista al pin y apaga los bordes. */}
       <div
@@ -109,22 +114,21 @@ const MapaTouza = () => {
         <p className="mt-1 text-[11px] leading-none text-white/75">n.º 4, junto a Casa Tomás</p>
       </div>
       <figcaption>
-        <div className="absolute inset-x-3 bottom-3 flex flex-wrap gap-2">
-          <a href={URL_MAPS} target="_blank" rel="noopener noreferrer" className={BOTON_MAPA}>
-            Abrir en Google Maps
-            <ExternalLink className="h-4 w-4" aria-hidden="true" />
-          </a>
+        <div className="absolute inset-x-3 bottom-3 flex justify-start">
           <button type="button" onClick={() => setPedido(true)} className={BOTON_MAPA}>
             Ver mapa interactivo de Google
           </button>
         </div>
+        {/* Zona táctil de 44 px; la etiqueta, pequeña. */}
         <a
           href="https://www.openstreetmap.org/copyright"
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute right-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-[11px] text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="group absolute right-0 top-0 inline-flex min-h-11 items-start p-2 focus-visible:outline-none"
         >
-          © OpenStreetMap
+          <span className="rounded bg-black/70 px-1.5 py-0.5 text-[11px] text-white/70 group-hover:text-white group-focus-visible:ring-2 group-focus-visible:ring-primary">
+            © OpenStreetMap
+          </span>
         </a>
       </figcaption>
 
@@ -194,7 +198,10 @@ const Contacto = () => {
             imagen={IMAGENES.estanteria}
             alt=""
             className="w-full h-full object-cover"
-            sizes="100vw"
+            // En el móvil la caja es casi cuadrada y la foto (4:3) se escala
+            // por el alto: se ve a ~130vw. Con «100vw» llegaba una variante
+            // pequeña y se veía borrosa (auditoría de carga v0.10, punto 14).
+            sizes="(max-width: 767px) 130vw, 100vw"
             priority={true}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-background" />
@@ -300,6 +307,15 @@ const Contacto = () => {
 
           <div className="lg:col-span-7">
             <MapaTouza />
+            <a
+              href={URL_MAPS}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex min-h-11 items-center gap-2 rounded text-sm text-white/80 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-[#D8B47E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              Abrir en Google Maps
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+            </a>
           </div>
         </div>
       </section>

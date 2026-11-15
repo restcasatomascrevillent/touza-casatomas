@@ -62,6 +62,9 @@ AJUSTES: dict[str, R.Ajustes] = {
     "touza-aperol": A(rb_objetivo=1.65, ruido=4, notas="aperol"),
     "touza-mojito-2": A(rb_objetivo=1.55, ruido=4, notas="mojito barra"),
     "touza-estanteria": A(rb_objetivo=1.50, ruido=9, notas="estantería: +calidez, ruido fuerte"),
+    # La sala (IMG_0420 de «Local y ambiente», 15/11/2026), reducida a 1708 px
+    # de ancho antes del retoque. Muy fría (1,23): se calienta a 1,55.
+    "touza-sala": A(rb_objetivo=1.55, ruido=4, notas="sala: +calidez"),
 }
 
 

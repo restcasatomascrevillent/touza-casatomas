@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Navigation } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,19 +19,52 @@ import { URL_COMO_LLEGAR } from "@/lib/negocio";
  *
  * Si sale o no lo decide la ruta que pinta la página (`handle` en App.tsx),
  * no la URL: ver src/lib/barra-movil.ts.
+ *
+ * Se aparta (baja y se desvanece) cuando ya se ve el pie o un bloque con su
+ * propio «Cómo llegar» (`data-oculta-barra-movil`): antes tapaba el pie y,
+ * cerca del final, salía dos veces el mismo botón (auditoría visual v0.10,
+ * fallo 5). El hueco para no tapar el pie ya no es un relleno suelto al final
+ * del documento, de otro tono que el pie: lo pone el propio pie
+ * (Footer.tsx), por si la barra no llega a apartarse (sin JS).
  */
+export const SELECTOR_OCULTA_BARRA = "footer, [data-oculta-barra-movil]";
+
+/** `true` mientras se vea en pantalla el pie o un bloque marcado. */
+function useHayQueApartarse(activo: boolean, ruta: string): boolean {
+  const [apartada, setApartada] = useState(false);
+  useEffect(() => {
+    setApartada(false);
+    if (!activo || typeof IntersectionObserver === "undefined") return;
+    const visibles = new Set<Element>();
+    const observador = new IntersectionObserver((entradas) => {
+      for (const entrada of entradas) {
+        if (entrada.isIntersecting) visibles.add(entrada.target);
+        else visibles.delete(entrada.target);
+      }
+      setApartada(visibles.size > 0);
+    });
+    // La página nueva entra con la transición: se busca cuando ya está.
+    const temporizador = window.setTimeout(() => {
+      document.querySelectorAll(SELECTOR_OCULTA_BARRA).forEach((el) => observador.observe(el));
+    }, 400);
+    return () => {
+      window.clearTimeout(temporizador);
+      observador.disconnect();
+    };
+  }, [activo, ruta]);
+  return apartada;
+}
 const BarraAccionesMovil = () => {
   const conBarra = useBarraMovil();
   // En la portada no compite con el hero (que ya lleva su «Cómo llegar»):
   // aparece al bajar, con CSS ligado al scroll (`.barra-tras-hero`, index.css).
-  const enPortada = (useLocation().pathname.replace(/\/+$/, "") || "/") === "/";
+  const ruta = useLocation().pathname.replace(/\/+$/, "") || "/";
+  const enPortada = ruta === "/";
+  const apartada = useHayQueApartarse(conBarra, ruta);
   if (!conBarra) return null;
 
   return (
     <>
-      {/* Reserva espacio al final del documento para que la barra no tape el footer */}
-      <div aria-hidden="true" className="h-[var(--barra-movil)] lg:hidden" />
-
       {/* Vidrio oscuro con borde dorado (auditoría del 15/11/2026): antes era
           una franja negra a todo el ancho con una píldora blanca, lo más
           llamativo de la web y tapando siempre los últimos 70 px. Ahora la
@@ -39,9 +73,12 @@ const BarraAccionesMovil = () => {
       <nav
         aria-label="Acciones rápidas"
         className={cn(
-          "pointer-events-none fixed bottom-0 left-0 right-0 z-40 lg:hidden h-[var(--barra-movil)] safe-bottom safe-x",
+          "barra-movil pointer-events-none fixed bottom-0 left-0 right-0 z-40 lg:hidden h-[var(--barra-movil)] safe-bottom safe-x",
+          "transition-[opacity,transform,visibility] duration-300 ease-out",
+          apartada && "invisible translate-y-4 opacity-0",
           enPortada && "barra-tras-hero"
         )}
+        data-apartada={apartada || undefined}
       >
         {/* En tablet y en horizontal, un botón de 400 px pesaba demasiado: se
             queda en una columna centrada. */}

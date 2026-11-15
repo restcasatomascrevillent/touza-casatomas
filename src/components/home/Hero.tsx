@@ -19,9 +19,15 @@ import LineaHechos from "./LineaHechos";
  *   a la ruta de Google Maps) y «Ver la carta», discreto.
  *
  * Un solo momento de scroll, en CSS (`.hero-escenario` en index.css): al
- * empezar a bajar, el hero se queda fijo un tramo corto (`sticky`) mientras
- * el vídeo hace un zoom lento hacia dentro y el título se desvanece; después
- * sube la sección de cócteles. Sin `animation-timeline`, con «reducir
+ * empezar a bajar, el hero se queda fijo un tramo corto (`sticky`, 25svh)
+ * mientras el vídeo hace un zoom lento hacia dentro y el título se
+ * desvanece; después sube la sección de cócteles, que entra por encima del
+ * final del hero (`.tras-hero`). Antes el tramo era de 50svh y el velo
+ * llegaba al 80 % de negro: al bajar quedaba casi una pantalla en negro
+ * (auditoría visual v0.10, fallo 2).
+ *
+ * En escritorio el vídeo vertical se funde por los lados con el fondo
+ * desenfocado (máscara), en vez de una caja con sombra y bordes duros. Sin `animation-timeline`, con «reducir
  * movimiento» o con muy poco alto (móvil en horizontal) no hay ni tramo fijo
  * ni efecto: el hero es una pantalla normal. En el HTML del SSG todo se ve.
  *
@@ -41,8 +47,9 @@ const Hero = () => (
           <div aria-hidden="true" className="absolute inset-0 hidden overflow-hidden lg:block">
             <HeroFondo />
           </div>
-          <div className="absolute inset-0 lg:left-auto lg:right-[9%] lg:aspect-[9/16] lg:h-full lg:shadow-[0_0_120px_60px_rgb(0_0_0/0.55)] xl:right-[11%]">
-            <HeroVideo botonClassName="right-4 top-20 lg:top-auto lg:bottom-8 lg:right-5" />
+          <div className="absolute inset-0 lg:left-auto lg:right-[9%] lg:aspect-[9/16] lg:h-full lg:[mask-image:linear-gradient(to_right,transparent,#000_14%,#000_86%,transparent)] xl:right-[11%]">
+            {/* En el móvil, bien separado del botón del menú (antes, a 28 px). */}
+            <HeroVideo botonClassName="right-4 top-[6.75rem] lg:top-auto lg:bottom-8 lg:right-[16%]" />
           </div>
         </div>
       </div>

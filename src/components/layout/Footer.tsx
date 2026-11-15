@@ -35,6 +35,9 @@ const redes = [
 const enlace =
   "rounded transition-colors duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
 
+/** Enlaces de texto del pie con zona táctil de 44 px de alto (auditoría visual v0.10, fallo 13). */
+const enlaceTactil = `inline-flex min-h-11 items-center ${enlace}`;
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   // La portada (con «Visítanos») y Contacto (con el mapa) ya acaban con la
@@ -70,17 +73,20 @@ const Footer = () => {
       )}
 
       <footer className="border-t border-white/10 bg-black">
-        <div className="mx-auto max-w-7xl px-5 py-10 md:px-8 md:py-14 lg:px-10">
+        {/* `.pie-contenido`: si hay barra fija en el móvil, el pie deja al final
+            su alto, en su mismo negro (index.css). Sin JS la barra no se
+            aparta y taparía los legales. */}
+        <div className="pie-contenido mx-auto max-w-7xl px-5 py-10 md:px-8 md:py-14 lg:px-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
             <Link to="/" className="inline-flex min-h-11 items-center self-start lg:self-auto" aria-label="Touza, ir al inicio">
               <span className="font-serif text-2xl font-bold tracking-wider text-primary">TOUZA</span>
             </Link>
 
             <nav aria-label="Pie de página">
-              <ul className="flex flex-wrap gap-x-6 gap-y-1 text-[15px] text-white/75">
+              <ul className="-mx-1 flex flex-wrap gap-x-4 gap-y-1 text-[15px] text-white/75">
                 {footerLinks.map((link) => (
                   <li key={link.path}>
-                    <Link to={link.path} className={`inline-flex min-h-11 items-center ${enlace}`}>
+                    <Link to={link.path} className={`${enlaceTactil} px-1`}>
                       {link.name}
                     </Link>
                   </li>
@@ -106,13 +112,13 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-6 text-[13px] text-white/70 md:flex-row md:items-center md:justify-between md:gap-6">
-            <p>© {currentYear} Touza Cocktail Bar</p>
+          <div className="mt-8 flex flex-col gap-1 border-t border-white/10 pt-5 text-sm text-white/70 md:flex-row md:items-center md:justify-between md:gap-6">
+            <p className="py-2 md:py-0">© {currentYear} Touza Cocktail Bar</p>
             <nav aria-label="Información legal">
-              <ul className="flex flex-wrap gap-x-5">
+              <ul className="-mx-1 flex flex-wrap gap-x-4">
                 {legalLinks.map((link) => (
                   <li key={link.path}>
-                    <Link to={link.path} className={`inline-flex min-h-11 items-center md:min-h-0 md:py-1 ${enlace}`}>
+                    <Link to={link.path} className={`${enlaceTactil} px-1`}>
                       {link.name}
                     </Link>
                   </li>
@@ -125,7 +131,7 @@ const Footer = () => {
                 href="https://restaurantecasatomascrevillente.es/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`text-white/85 underline-offset-4 hover:underline ${enlace}`}
+                className={`${enlaceTactil} text-white/85 underline-offset-4 hover:underline`}
               >
                 Restaurante Casa Tomás
               </a>

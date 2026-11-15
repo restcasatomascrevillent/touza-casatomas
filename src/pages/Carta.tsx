@@ -332,7 +332,12 @@ const Carta = () => {
 
       {/* Tabs */}
       <div ref={barraPestanasRef} className={cn(BARRA_BAJO_CABECERA, "bg-black/85 backdrop-blur-2xl border-y border-white/5 py-2.5")}>
-        <div ref={filaPestanasRef} className="relative max-w-6xl mx-auto overflow-x-auto scrollbar-hide px-4">
+        {/* En el móvil la fila no cabe: el borde derecho se desvanece para que
+            se vea que sigue (antes se cortaba «Cer…» sin más). */}
+        <div
+          ref={filaPestanasRef}
+          className="relative max-w-6xl mx-auto overflow-x-auto scrollbar-hide px-4 [mask-image:linear-gradient(to_right,#000_calc(100%-28px),transparent)] md:[mask-image:none]"
+        >
           <div className="flex justify-start md:justify-center min-w-max">
             <Tabs value={activeMainCategory} onValueChange={cambiarPestana}>
               <TabsList className="bg-transparent p-0 gap-1">
@@ -396,7 +401,11 @@ const Carta = () => {
           </div>
 
           {subFilterOptions.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0" role="group" aria-label="Filtrar">
+            <div
+              className="flex gap-2 overflow-x-auto scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0 [mask-image:linear-gradient(to_right,#000_calc(100%-28px),transparent)] md:[mask-image:none]"
+              role="group"
+              aria-label="Filtrar"
+            >
               {subFilterOptions.map(cat => (
                 <button
                   type="button"
@@ -596,7 +605,8 @@ const Carta = () => {
 
       {/* Pie de la carta: el aviso de alérgenos una sola vez (antes salía
           arriba, en cada pestaña) y dónde está el bar. */}
-      <div className="max-w-6xl mx-auto px-5 pt-12 pb-16 md:px-6 md:pt-20 md:pb-24">
+      {/* Lleva su propio «Cómo llegar»: aquí se aparta la barra fija del móvil. */}
+      <div data-oculta-barra-movil="" className="max-w-6xl mx-auto px-5 pt-12 pb-16 md:px-6 md:pt-20 md:pb-24">
         <div className="grid gap-8 border-t border-white/10 pt-8 md:grid-cols-12 md:gap-12 md:pt-10">
           <p className="flex items-start gap-2 text-[13px] leading-relaxed text-white/75 md:col-span-5 md:text-sm">
             <Info className="mt-[3px] h-3.5 w-3.5 flex-shrink-0 text-white/60" aria-hidden="true" />
@@ -615,7 +625,7 @@ const Carta = () => {
               </Link>
               <Link
                 to="/despues-de-cenar"
-                className="text-sm text-white/80 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-[#D8B47E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
+                className="inline-flex min-h-11 items-center text-sm text-white/80 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-[#D8B47E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
               >
                 Copas después de cenar en Casa Tomás
               </Link>

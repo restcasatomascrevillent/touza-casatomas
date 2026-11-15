@@ -43,6 +43,7 @@ const Index = () => {
       <Hero />
 
       <Showcase
+        trasHero
         id="cocteles-titulo"
         antetitulo="La carta"
         titulo={["Cócteles", "de autor"]}

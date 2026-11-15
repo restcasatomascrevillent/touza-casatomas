@@ -53,7 +53,7 @@ const ImagenHero = ({ prioridad, alt, className }: { prioridad: boolean; alt: st
  * del vídeo costaría decodificarlo dos veces.
  */
 export const HeroFondo = () => (
-  <ImagenHero prioridad={false} alt="" className="scale-125 blur-3xl brightness-[0.5] saturate-[1.1]" />
+  <ImagenHero prioridad={false} alt="" className="scale-125 blur-3xl brightness-[0.62] saturate-[1.15]" />
 );
 
 interface HeroVideoProps {
@@ -163,6 +163,7 @@ const HeroVideo = ({ botonClassName }: HeroVideoProps) => {
           type="button"
           onClick={alternar}
           aria-label={pausado ? "Reanudar el vídeo" : "Pausar el vídeo"}
+          title={pausado ? "Reanudar el vídeo" : "Pausar el vídeo"}
           className={cn(
             "pointer-events-auto absolute z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/40 text-white/85 backdrop-blur-md transition-colors hover:border-white/50 hover:text-white",
             botonClassName
