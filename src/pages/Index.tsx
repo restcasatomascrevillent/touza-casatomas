@@ -1,62 +1,53 @@
+import { useMemo } from "react";
 import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
 import VisitUs from "@/components/VisitUs";
 import Hero from "@/components/home/Hero";
-import Showcase from "@/components/home/Showcase";
 import CoctelesDeLaCarta from "@/components/home/CoctelesDeLaCarta";
 import ElLocal from "@/components/home/ElLocal";
-import FranjaClips from "@/components/home/FranjaClips";
-import { IMAGENES } from "@/assets/imagenes";
 import { canonical } from "@/lib/site";
-import { barSchema } from "@/lib/negocio";
+import { barSchema, sinDuplicados } from "@/lib/negocio";
+import { descripcionPortada } from "@/lib/carta";
+import { useCocteles } from "@/hooks/useCocteles";
 
 /**
- * Portada en 5 bloques (rediseño del 15/11/2026, auditoría visual):
+ * Portada sencilla, con la carta primero (16/11/2026: al dueño no le gustó
+ * la demo del rediseño y pidió el hero de antes y una web fácil de usar).
  *
- * 1. Hero a pantalla completa con el bucle de vídeo vertical, TOUZA enorme,
- *    la línea de hechos y «Cómo llegar».
- * 2. Cócteles: la vitrina de la «T» y el carrusel de la carta.
- * 3. El local: el salón a sangre, dos líneas y «Más sobre Touza» plegado.
- * 4. Franja de clips (solo si hay vídeos).
- * 5. Visítanos (horario y «Cómo llegar»), y el pie mínimo.
+ * 1. Hero: la foto del salón a pantalla completa, TOUZA y dos botones.
+ * 2. La carta: ocho cócteles con foto, nombre y precio, y «Ver la carta
+ *    completa».
+ * 3. El local: tres fotos, un clip de la trasbarra y dos líneas, con «Más
+ *    sobre Touza» plegado.
+ * 4. Visítanos: horario, dirección y «Cómo llegar».
  *
- * Se quitaron «Filosofía», «De la coctelera a la copa» y «Lo que nos define»:
- * eslóganes, datos repetidos y numeraciones que no eran secuencias. Todo el
- * texto útil para buscadores sigue en el HTML (el de «coctelería y bar de
- * copas en Crevillente», dentro del desplegable de «El local»).
+ * Fuera el vídeo del hero, la vitrina con la foto del camarero y la franja de
+ * clips «En la barra». En la web no sale gente.
  *
- * Un solo árbol responsive: cada sección decide su composición con clases
- * `md:`/`lg:` desde el primer pintado. Lo que depende del JS (vídeo,
- * apariciones) es una mejora y nunca esconde contenido en el HTML del SSG.
+ * Todo el texto útil para buscadores sigue en el HTML (el de «coctelería y
+ * bar de copas en Crevillente», dentro del desplegable de «El local»). Un
+ * solo árbol responsive: cada sección decide su composición con clases
+ * `md:`/`lg:` desde el primer pintado, y nada depende del JS para verse.
  */
 const Index = () => {
+  // El rango de precios de la descripción sale de la carta (misma consulta que
+  // «La carta», con la instantánea del build: va en el HTML del SSG).
+  const { data: cocteles } = useCocteles();
+  const descripcion = useMemo(() => descripcionPortada(sinDuplicados(cocteles ?? [])), [cocteles]);
+
   return (
     <Layout>
       <Seo
         title="Coctelería y bar de copas en Crevillent · Touza"
-        description="Coctelería y bar de copas en Crevillent, junto a Casa Tomás: cócteles de autor, champagne, cava y whisky. Sin reservas: ven directamente."
+        description={descripcion}
         canonical={canonical("/")}
         keywords={["coctelería crevillent", "bar de copas crevillent", "coctelería crevillente", "cócteles de autor", "copas después de cenar", "cocktail bar"]}
         schema={barSchema()}
       />
 
       <Hero />
-
-      <Showcase
-        trasHero
-        id="cocteles-titulo"
-        antetitulo="La carta"
-        titulo={["Cócteles", "de autor"]}
-        texto="Recetas de la casa y clásicos bien hechos, también sin alcohol. Para acompañar, champagne, cava y whisky."
-        foto={{ imagen: IMAGENES.coctelLogo, alt: "Cóctel rojo en copa coupé con arándanos, delante de la T iluminada de Touza" }}
-        detalle={{ imagen: IMAGENES.barra, alt: "Bartender de Touza colando un cóctel sobre hielo en vaso bajo" }}
-        cta={{ texto: "Ver la carta", ruta: "/carta" }}
-      >
-        <CoctelesDeLaCarta />
-      </Showcase>
-
+      <CoctelesDeLaCarta />
       <ElLocal />
-      <FranjaClips />
       <VisitUs />
     </Layout>
   );

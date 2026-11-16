@@ -1,5 +1,7 @@
 # Fotos necesarias — web de Touza
 
+> **16/11/2026.** En la web no sale gente (pedido del dueño): se retiraron `touza-5` y `touza-7` (el camarero que ya no trabaja en Touza) y el resto de fotos con personal o clientes. Lo que este documento dice de esas dos fotos, de la vitrina «Cócteles de Autor» y de `/galeria` ya no aplica. El hero vuelve a ser `touza-2`; «El local» de la portada usa `touza-salon-noche`, `touza-botellero` y `touza-letrero` (fotos del móvil del dueño, en color natural).
+
 - **Fecha:** 01/10/2026 (rama `revision-diseno-touza`)
 - **Origen:** comprobación de todas las imágenes que ve un visitante. Las de la carta vienen de Supabase (`Cocteles.imagen_url`) y las demás son fotos propias en `src/assets/originales/` o URL de Unsplash escritas en `src/pages/Galeria.tsx`. Cada URL se ha comprobado con `curl` y se ha revisado a ojo qué enseña.
 - **Qué hay hoy:** 5 fotos propias, todas buenas y del local: interior con sofá mostaza, barman con colador, barman con mojito, un bodegón de champán Laurent-Perrier y un bodegón de botellas (Select, Kraken). (El recorte cuadrado del champán, `touza-8`, solo lo usaba /reservado y se retiró con él.)

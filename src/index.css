@@ -187,7 +187,8 @@
     @apply font-sans text-[11px] md:text-xs font-medium uppercase leading-normal tracking-[0.3em] text-primary;
   }
 
-  /* Botones de la portada. El blanco macizo es SOLO para «Cómo llegar»; todo
+  /* Botones de la portada. El blanco macizo es para la acción principal de
+     cada bloque («Ver la carta» en el hero, «Cómo llegar» en «Visítanos»);
      lo demás va de contorno. */
   .boton {
     @apply inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full px-7 text-[15px] font-medium transition-[background-color,color,border-color,transform] duration-300 active:scale-[0.98] md:h-14 md:px-9 md:text-base;
@@ -558,55 +559,22 @@
     transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--reveal-delay, 0s) + 0.25s);
   }
 
-  /* Texto que se enciende palabra a palabra con el scroll (ScrollTextReveal),
-     en todos los tamaños y solo con CSS. Antes, desde md lo hacía
-     framer-motion (un valor animado por palabra que se recalcula en cada
-     requestAnimationFrame): en una pestaña o un panel en segundo plano el rAF
-     se congela y el texto se quedaba al 20 % aunque se hubiera pasado de
-     largo, que es lo que vio la auditoría en escritorio. La línea de tiempo
-     de scroll la mueve el propio navegador, sin JS. Cada palabra lleva su
-     índice (`--i`) y el párrafo el total (`--n`); todas acaban encendidas
-     cuando el párrafo llega a media pantalla. Fill `backwards`: antes de su
-     tramo, atenuada; después, sin animación (opacidad normal). Sin soporte o
-     con reduced-motion, el texto sale entero. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .texto-encendido {
-        view-timeline-name: --texto;
-      }
+  /* ── Hero de la portada (components/home/Hero.tsx) ──────────────────────
+     Una foto quieta a pantalla completa: sin tramo fijo, sin zoom y sin velo
+     ligados al scroll (se quitaron con el vídeo el 16/11/2026).
 
-      .texto-encendido > * {
-        animation: palabra-encendida linear backwards;
-        animation-timeline: --texto;
-        animation-range:
-          cover calc(6% + var(--i, 0) / var(--n, 1) * 22%)
-          cover calc(16% + var(--i, 0) / var(--n, 1) * 22%);
-      }
-    }
-  }
-
-  /* ── Hero de la portada: un solo momento de scroll ──────────────────────
-     (components/home/Hero.tsx). Al empezar a bajar, el escenario se queda
-     fijo (`sticky`) durante 25svh: el vídeo hace un zoom lento hacia dentro,
-     TOUZA y la línea de hechos se desvanecen y un velo oscurece un poco la
-     imagen (como mucho al 45 %). Después el hero sube y la sección de
-     cócteles entra 12svh antes, por encima del final del hero (`.tras-hero`).
-     Antes eran 50svh y un velo al 80 %: casi una pantalla en negro. Va ligado al scroll
-     de la página (`scroll(root)`; el hero siempre está arriba del todo), sin
-     JS. Sin soporte, con «reducir movimiento» o con menos de 501 px de alto,
-     el escenario mide lo que el hero (sin tramo fijo) y no se anima nada. En
-     reposo (scroll 0) todo está a la vista, también en el HTML del SSG.
-
-     La barra «Cómo llegar» del móvil (`.barra-tras-hero`, solo en la
-     portada) no compite con el hero: entra desde abajo al terminar el tramo
-     fijo. Sin soporte, la barra está siempre y el hero le deja su hueco. */
-  .hero-contenido {
-    padding-bottom: calc(var(--barra-movil) + 1.25rem);
+     Lo único que queda aquí es la barra «Cómo llegar» del móvil
+     (`.barra-tras-hero`, solo en la portada), que no compite con los botones
+     del hero: entra desde abajo al empezar a bajar, con CSS ligado al scroll
+     de la página y sin JS. Sin soporte de `animation-timeline`, la barra está
+     siempre y el hero (`.hero-portada`) le deja su hueco en el móvil. */
+  .hero-portada {
+    padding-bottom: calc(var(--barra-movil) + 1.5rem);
   }
 
   @supports (animation-timeline: scroll()) {
-    .hero-contenido {
-      padding-bottom: 2rem;
+    .hero-portada {
+      padding-bottom: 2.25rem;
     }
 
     .barra-tras-hero {
@@ -620,85 +588,12 @@
         animation-timing-function: steps(1, end);
       }
     }
-
-    @media (prefers-reduced-motion: no-preference) and (min-height: 501px) {
-      .hero-escenario {
-        height: 125svh;
-      }
-
-      /* La sección siguiente sube por encima del final del hero. Solo aquí:
-         sin el tramo fijo, el margen negativo taparía «Cómo llegar». */
-      .tras-hero {
-        position: relative;
-        z-index: 1;
-        margin-top: -12svh;
-      }
-
-      .hero-zoom {
-        animation: hero-zoom linear both;
-        animation-timeline: scroll(root);
-        animation-range: 0svh 40svh;
-      }
-
-      /* Primero se va la letra pequeña y después la marca. */
-      .hero-pie {
-        animation: hero-pie linear both;
-        animation-timeline: scroll(root);
-        animation-range: 0svh 16svh;
-      }
-
-      .hero-titulo {
-        animation: hero-titulo linear both;
-        animation-timeline: scroll(root);
-        animation-range: 3svh 30svh;
-      }
-
-      /* Quien llega con el teclado a «Cómo llegar» lo ve aunque haya bajado. */
-      .hero-pie:focus-within {
-        animation: none;
-      }
-
-      .hero-velo {
-        animation: hero-velo linear both;
-        animation-timeline: scroll(root);
-        animation-range: 10svh 40svh;
-      }
-    }
   }
 
-  @media (min-width: 1024px) {
-    .hero-contenido {
-      padding-bottom: 3rem;
-    }
-  }
-
-  @keyframes hero-zoom {
-    to {
-      scale: 1.15;
-    }
-  }
-
-  @keyframes hero-titulo {
-    to {
-      opacity: 0;
-      translate: 0 -6vh;
-    }
-  }
-
-  @keyframes hero-pie {
-    to {
-      opacity: 0;
-      translate: 0 -3vh;
-    }
-  }
-
-  @keyframes hero-velo {
-    from {
-      background-color: rgb(0 0 0 / 0);
-    }
-
-    to {
-      background-color: rgb(10 10 10 / 0.45);
+  /* Desde md el contenido del hero va centrado: sin hueco abajo. */
+  @media (min-width: 768px) {
+    .hero-portada {
+      padding-bottom: 0;
     }
   }
 
@@ -776,14 +671,6 @@
     to {
       opacity: 0;
       translate: 0 3rem;
-    }
-  }
-
-  /* Desde 0,45 (no 0,2): a mitad de scroll el texto se tiene que poder leer
-     (auditoría visual v0.10, fallo 16). */
-  @keyframes palabra-encendida {
-    from {
-      opacity: 0.45;
     }
   }
 

@@ -21,11 +21,10 @@ import Seo from "@/components/Seo";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { canonical } from "@/lib/site";
 import { NEGOCIO, menuSchema, sinDuplicados } from "@/lib/negocio";
-import { agruparChampagne, nombreBase, resumenCocteles, slugCarta } from "@/lib/carta";
+import { agruparChampagne, descripcionCarta, nombreBase, resumenCocteles, slugCarta } from "@/lib/carta";
 import { CARTA_SSG, platosParaJsonLd } from "@/lib/carta-ssg";
 import FilaBotella from "@/components/carta/FilaBotella";
 import TarjetaCoctel from "@/components/carta/TarjetaCoctel";
-import HeroLlenado from "@/components/carta/HeroLlenado";
 import { LiquidLoaderSVG } from "@/components/ui/svg/LiquidLoaderSVG";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
@@ -172,6 +171,7 @@ const Carta = () => {
   const coctelesUnicos = useMemo(() => sinDuplicados(coctelesData ?? []), [coctelesData]);
   const cocktailsData = useMemo(() => transformCoctelesToUI(coctelesUnicos), [coctelesUnicos]);
   const resumen = useMemo(() => resumenCocteles(coctelesUnicos), [coctelesUnicos]);
+  const descripcionSeo = useMemo(() => descripcionCarta(coctelesUnicos), [coctelesUnicos]);
 
   const { data: espumososRaw, isLoading: loadingEspumosos } = useEspumosos();
   const espumososUnicos = useMemo(() => sinDuplicados(espumososRaw ?? []), [espumososRaw]);
@@ -301,34 +301,29 @@ const Carta = () => {
   return (
     <Layout>
       <Seo
-        title="Carta de cócteles, champagne y whisky · Touza Crevillente"
-        description="Carta de Touza, bar de copas en Crevillente: cócteles de autor y clásicos, cócteles sin alcohol, champagne, cava, cervezas y whiskies, con precios."
+        title="Cócteles en Crevillent: carta y precios · Touza"
+        description={descripcionSeo}
         canonical={canonical("/carta")}
-        keywords={['carta touza', 'cócteles crevillente', 'coctelería crevillente', 'champagne', 'precios']}
+        keywords={['carta touza', 'cócteles crevillent', 'cócteles crevillente', 'coctelería crevillente', 'champagne', 'precios']}
         schema={schemaCarta}
       />
 
-      {/* Hero: la copa se llena con el scroll (ver HeroLlenado). El texto va
-          en la franja oscura de abajo, nunca encima del líquido. */}
-      <HeroLlenado alt="El bartender de Touza llenando una copa coupé con un cóctel rojo">
-        <div className="max-w-6xl mx-auto w-full text-center">
-          <h1
-            style={{ animationDelay: "0.15s" }}
-            className="entrada-hero font-serif font-bold text-white leading-[0.9] text-5xl md:text-7xl lg:text-8xl"
-          >
-            Nuestra carta
-            <span className="sr-only"> de cócteles y copas</span>
-          </h1>
-          <p
-            style={{ animationDelay: "0.3s" }}
-            className="entrada-hero mx-auto mt-4 max-w-xl text-base text-white/80 [font-variant-numeric:lining-nums] md:mt-6 md:text-lg"
-          >
-            {resumen
-              ? `${resumen}. También champagne, cava, whisky y cerveza.`
-              : "Cócteles de autor y clásicos, champagne, cava, whisky y cerveza."}
-          </p>
-        </div>
-      </HeroLlenado>
+      {/* Cabecera compacta: título y una línea de hechos. Justo debajo van las
+          pestañas y los cócteles, que se ven en la primera pantalla en móvil y
+          en escritorio. Antes había un hero a pantalla completa con la copa
+          que se llenaba al hacer scroll: tapaba la carta, pesaba diez
+          fotogramas y salía un camarero (16/11/2026). */}
+      <header className="mx-auto max-w-6xl px-5 pb-4 pt-24 md:px-6 md:pb-7 md:pt-28 md:text-center">
+        <h1 className="font-serif text-[2.5rem] font-bold leading-none text-white md:text-6xl">
+          Nuestra carta
+          <span className="sr-only"> de cócteles y copas</span>
+        </h1>
+        <p className="mt-2 max-w-xl text-[15px] leading-snug text-white/75 [font-variant-numeric:lining-nums] md:mx-auto md:mt-4 md:text-lg">
+          {resumen
+            ? `${resumen}. También champagne, cava, whisky y cerveza.`
+            : "Cócteles de autor y clásicos, champagne, cava, whisky y cerveza."}
+        </p>
+      </header>
 
       {/* Tabs */}
       <div ref={barraPestanasRef} className={cn(BARRA_BAJO_CABECERA, "bg-black/85 backdrop-blur-2xl border-y border-white/5 py-2.5")}>
@@ -374,10 +369,10 @@ const Carta = () => {
       </div>
 
       {/* Search + Filters */}
-      <div ref={inicioListaRef} className="max-w-6xl mx-auto py-5 px-5 md:px-6 md:py-8">
+      <div ref={inicioListaRef} className="max-w-6xl mx-auto py-4 px-5 md:px-6 md:py-7">
         {/* items-stretch en móvil: con items-center la fila de filtros, más
             ancha que la pantalla, desbordaba por los DOS lados. */}
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center mb-6 md:mb-10">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-between items-stretch md:items-center mb-5 md:mb-8">
           <div className="relative w-full md:w-80 group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" aria-hidden="true" />
             <Input
@@ -456,7 +451,7 @@ const Carta = () => {
                               key={cocktail.id}
                               id={slugCarta(cocktail.name)}
                               coctel={cocktail}
-                              // Las cuatro primeras (las que se ven al bajar del hero), sin `lazy`.
+                              // Las cuatro primeras (se ven nada más entrar), sin `lazy`.
                               prioritaria={activa && indice < 4}
                               alAbrir={() => setSelectedCocktail(cocktail)}
                               alFallar={() => marcarFotoRota(cocktail.id)}

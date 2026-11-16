@@ -107,6 +107,16 @@ export const FOTO_TARJETA = {
   sizes: "(min-width: 1024px) 270px, (min-width: 768px) 33vw, 50vw",
 } as const;
 
+/**
+ * Tarjeta de «La carta» en la portada: 2 columnas en el móvil (≈170 px) y 3 o
+ * 4 desde md (≈290 px como mucho). Con densidad 3 en el móvil pide 585 px y
+ * con densidad 2 en escritorio 600: en los dos casos se lleva la de 640.
+ */
+export const FOTO_PORTADA = {
+  anchos: [256, 384, 480, 640, 828],
+  sizes: "(min-width: 1280px) 300px, (min-width: 768px) 33vw, 50vw",
+} as const;
+
 /** Tarjeta de «Para la sobremesa» (/despues-de-cenar): 64vw en el móvil, 3 columnas desde md. */
 export const FOTO_SOBREMESA = { anchos: [256, 384, 480, 640, 828], sizes: "(min-width: 768px) 360px, 64vw" } as const;
 

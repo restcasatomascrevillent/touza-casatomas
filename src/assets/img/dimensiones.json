@@ -7,35 +7,15 @@
     "width": 2560,
     "height": 1708
   },
-  "touza-5": {
-    "width": 1708,
-    "height": 2560
-  },
-  "touza-7": {
-    "width": 1708,
-    "height": 2560
-  },
   "touza-8-1": {
     "width": 1708,
     "height": 2560
   },
-  "touza-agitando": {
-    "width": 1440,
-    "height": 2560
-  },
-  "touza-aperol": {
-    "width": 1500,
-    "height": 2000
-  },
-  "touza-coctel-t": {
-    "width": 1500,
-    "height": 2000
-  },
-  "touza-copa-espuma": {
+  "touza-botellero": {
     "width": 1920,
     "height": 2560
   },
-  "touza-copa-flor": {
+  "touza-copa-espuma": {
     "width": 1920,
     "height": 2560
   },
@@ -59,7 +39,7 @@
     "width": 1920,
     "height": 2560
   },
-  "touza-kiwi-vaso-bajo": {
+  "touza-letrero": {
     "width": 1920,
     "height": 2560
   },
@@ -67,60 +47,24 @@
     "width": 1920,
     "height": 2560
   },
-  "touza-mango": {
-    "width": 1500,
-    "height": 2000
-  },
-  "touza-mojito-2": {
-    "width": 1500,
-    "height": 2000
-  },
-  "touza-mojito-preparando": {
-    "width": 1920,
-    "height": 2560
-  },
-  "touza-moscow-mule-2": {
-    "width": 1920,
-    "height": 2560
-  },
-  "touza-moscow-mule": {
-    "width": 1500,
-    "height": 2000
-  },
-  "touza-pina-botellas": {
-    "width": 1500,
-    "height": 2000
-  },
-  "touza-pina-preparando": {
-    "width": 1440,
-    "height": 2560
-  },
   "touza-pina": {
     "width": 1440,
     "height": 2560
   },
-  "touza-sirviendo": {
-    "width": 1920,
-    "height": 2560
+  "touza-sala": {
+    "width": 1708,
+    "height": 2277
   },
-  "touza-tiki": {
-    "width": 1920,
-    "height": 2560
-  },
-  "touza-tres-copas": {
-    "width": 1920,
-    "height": 2560
+  "touza-salon-noche": {
+    "width": 2560,
+    "height": 1920
   },
   "touza-trio": {
     "width": 1536,
     "height": 2048
   },
   "touza-2-movil": {
-    "width": 1280,
+    "width": 1080,
     "height": 1708
-  },
-  "touza-sala": {
-    "width": 1708,
-    "height": 2277
   }
 }

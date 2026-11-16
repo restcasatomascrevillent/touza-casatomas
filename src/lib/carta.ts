@@ -91,17 +91,66 @@ export function resumenCocteles(
   const cuantos = `${cocteles.length} ${uno ? "cóctel" : "cócteles"}`;
   const tipos = categorias.length > 0 ? ` ${enumerar(categorias.map((id) => NOMBRE_CATEGORIA[id][uno ? 0 : 1]))}` : "";
 
+  const rango = rangoPrecios(cocteles);
+  return `${cuantos}${tipos}${rango ? `, ${rango}` : ""}`;
+}
+
+/**
+ * Cócteles de «La carta» en la portada: solo los que tienen foto propia (la
+ * genérica de la «T» no cuenta), en el orden de la carta, y 8, 6 o 4 para que
+ * la cuadrícula cierre filas enteras (2 columnas en el móvil; 4 o 3 desde md).
+ */
+export function cuantosCaben(disponibles: number): number {
+  if (disponibles >= 8) return 8;
+  if (disponibles >= 6) return 6;
+  if (disponibles >= 4) return 4;
+  return disponibles;
+}
+
+export function elegirCoctelesPortada<T extends { image: string; fotoGenerica?: boolean }>(cocteles: T[]): T[] {
+  const conFoto = cocteles.filter((c) => c.image && !c.fotoGenerica);
+  return conFoto.slice(0, cuantosCaben(conFoto.length));
+}
+
+type ConPrecio = { precio_eur?: number | null };
+
+/** «de 7 a 10 €», «a 9 €» si todos cuestan lo mismo, o `null` si no hay precios. */
+export function rangoPrecios(cocteles: ReadonlyArray<ConPrecio>): string | null {
   const precios = cocteles.map((c) => c.precio_eur).filter((p): p is number => typeof p === "number" && p > 0);
-  let rango = "";
-  if (precios.length > 0) {
-    const min = Math.min(...precios);
-    const max = Math.max(...precios);
-    rango =
-      min === max
-        ? `, a ${importe(min)}${ESPACIO_PRECIO}€`
-        : `, de ${importe(min)} a ${importe(max)}${ESPACIO_PRECIO}€`;
-  }
-  return `${cuantos}${tipos}${rango}`;
+  if (precios.length === 0) return null;
+  const min = Math.min(...precios);
+  const max = Math.max(...precios);
+  return min === max
+    ? `a ${importe(min)}${ESPACIO_PRECIO}€`
+    : `de ${importe(min)} a ${importe(max)}${ESPACIO_PRECIO}€`;
+}
+
+/**
+ * Meta descripciones (auditoría de posicionamiento del 16/11/2026). El número
+ * de cócteles y el rango de precios salen de la carta, como la línea de
+ * `resumenCocteles`: si el panel cambia un precio, la descripción cambia con
+ * el siguiente despliegue y no hay cifras escritas a mano que envejezcan. Sin
+ * datos (carta vacía o sin cargar), la misma frase sin cifras. Con espacio
+ * normal antes del «€»: es texto para el buscador, no para maquetar.
+ */
+const rangoPlano = (cocteles: ReadonlyArray<ConPrecio>): string | null =>
+  rangoPrecios(cocteles)?.split(ESPACIO_PRECIO).join(" ") ?? null;
+
+export function descripcionPortada(cocteles: ReadonlyArray<ConPrecio>): string {
+  const rango = rangoPlano(cocteles);
+  return `Touza, coctelería y bar de copas en Crevillent (Crevillente), junto a Casa Tomás. Cócteles ${rango ?? "de autor"}, champagne y whisky. Sin reservas.`;
+}
+
+export function descripcionCarta(cocteles: ReadonlyArray<ConPrecio & { categoria?: string | null }>): string {
+  const rango = rangoPlano(cocteles);
+  const cuantos = cocteles.length > 1 ? `${cocteles.length} cócteles` : "cócteles";
+  const sinAlcohol = cocteles.length === 0 || cocteles.some((c) => c.categoria === "sin-alcohol");
+  return `Carta de Touza: ${cuantos} de autor y clásicos${rango ? ` ${rango}` : ""}, ${sinAlcohol ? "con y sin alcohol, " : ""}además de champagne, cava, cerveza y whisky. Crevillent.`;
+}
+
+export function descripcionDespuesDeCenar(cocteles: ReadonlyArray<ConPrecio>): string {
+  const rango = rangoPlano(cocteles);
+  return `Cena en Casa Tomás y toma la copa en Touza, la puerta de al lado (n.º 4), en Crevillent. ${rango ? `Cócteles ${rango}. ` : ""}Sin reservas: ven directamente.`;
 }
 
 export interface GrupoCarta<T> {
@@ -142,14 +191,3 @@ export function agruparChampagne<T extends { name: string }>(items: T[]): GrupoC
   if (grupos.length < 2 || items.length < 8) return [{ titulo: null, items }];
   return grupos;
 }
-
-/** Recorta a 0…1. */
-export const limitar = (n: number): number => Math.min(1, Math.max(0, n));
-
-/**
- * Opacidad del fotograma `k` (k ≥ 1; el 0 siempre está entero, debajo) cuando
- * la secuencia va por la posición `f` (0…último, con decimales). Cada
- * fotograma está encima del anterior: el `f = 2,4` deja el 2 entero y el 3 al
- * 40 %, un fundido cruzado entre los dos.
- */
-export const opacidadFotograma = (k: number, f: number): number => limitar(f - (k - 1));

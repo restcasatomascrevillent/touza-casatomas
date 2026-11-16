@@ -101,13 +101,7 @@ vi.mock("@/components/SmoothScroll", () => ({
 vi.mock("@/components/home/Hero", () => ({
   default: () => React.createElement("div", { "data-testid": "hero" }, "TOUZA Hero"),
 }));
-vi.mock("@/components/home/Showcase", () => ({
-  default: () => null,
-}));
 vi.mock("@/components/home/Claves", () => ({
-  default: () => null,
-}));
-vi.mock("@/components/ScrollTextReveal", () => ({
   default: () => null,
 }));
 vi.mock("@/components/VisitUs", () => ({

@@ -1,10 +1,13 @@
 /**
- * Datos de la portada: frases de horario generadas desde NEGOCIO y la lectura
- * de los vídeos de src/assets/videos (components/home/hechos.ts y medios.ts).
+ * Datos de la portada: frases de horario generadas desde NEGOCIO
+ * (components/home/hechos.ts), el clip de «El local» (medios.ts) y qué
+ * cócteles salen en «La carta» (`elegirCoctelesPortada`, lib/carta.ts).
  */
 import { describe, it, expect } from "vitest";
 import { fraseHorario, filasHorario, hastaLaHora, lineaDeHechos, nombreDias } from "@/components/home/hechos";
-import { CLIPS_DESPUES_DE_CENAR, VIDEOS_EL_LOCAL, agruparClips, nombreDeClip } from "@/components/home/medios";
+import { CLIP_EL_LOCAL } from "@/components/home/medios";
+import { cuantosCaben, elegirCoctelesPortada as elegirCocteles } from "@/lib/carta";
+import type { CoctelUI } from "@/hooks/useCocteles";
 
 describe("hechos de la portada", () => {
   it("frase de horario desde NEGOCIO: días y hora de cierre", () => {
@@ -36,39 +39,48 @@ describe("hechos de la portada", () => {
   });
 });
 
-describe("vídeos de la portada", () => {
-  it("nombre legible del clip a partir del fichero", () => {
-    expect(nombreDeClip("03-clover-club")).toBe("Clover Club");
-    expect(nombreDeClip("05-gin-de-la-casa")).toBe("Gin de la Casa");
-    expect(nombreDeClip("1_moscow_mule")).toBe("Moscow Mule");
-  });
-
-  it("agrupa webm, mp4 y póster por nombre, ordena por número y descarta los que no tienen vídeo", () => {
-    const clips = agruparClips(
-      {
-        "../../assets/videos/clips/10-aperol.mp4": "/a/10.mp4",
-        "../../assets/videos/clips/02-clover-club.webm": "/a/02.webm",
-        "../../assets/videos/clips/02-clover-club.mp4": "/a/02.mp4",
-        "../../assets/videos/clips/02-clover-club.webp": "/a/02.webp",
-        "../../assets/videos/clips/05-solo-poster.webp": "/a/05.webp",
-      },
-      "barra"
-    );
-    expect(clips.map((c) => c.id)).toEqual(["02-clover-club", "10-aperol"]);
-    expect(clips[0]).toMatchObject({ nombre: "Clover Club", webm: "/a/02.webm", mp4: "/a/02.mp4", poster: "/a/02.webp", origen: "barra" });
-    expect(clips[1].poster).toBeUndefined();
-  });
-
-  it("clips del local: los tres de «El local» y los tres de /despues-de-cenar, con WebM, MP4 y póster", () => {
-    for (const fuentes of Object.values(VIDEOS_EL_LOCAL)) {
-      expect(fuentes.webm).toBeTruthy();
+describe("el clip de «El local»", () => {
+  it("la trasbarra en vertical y en horizontal, con MP4 y póster", () => {
+    for (const fuentes of Object.values(CLIP_EL_LOCAL)) {
       expect(fuentes.mp4).toBeTruthy();
       expect(fuentes.poster).toBeTruthy();
     }
-    expect(CLIPS_DESPUES_DE_CENAR.map((c) => c.id)).toEqual(["barra-botellas", "vitrina-krug", "figuras-vitrina-bucle"]);
-    for (const clip of CLIPS_DESPUES_DE_CENAR) {
-      expect(clip).toMatchObject({ origen: "local", webm: expect.any(String), mp4: expect.any(String), poster: expect.any(String) });
-      expect(clip.alt).toBeTruthy();
-    }
+  });
+});
+
+describe("cócteles de «La carta» en la portada", () => {
+  const coctel = (name: string, extra: Partial<CoctelUI> = {}): CoctelUI => ({
+    id: name,
+    name,
+    category: "autor",
+    base: "all",
+    price: "9 €",
+    description: "",
+    ingredients: [],
+    image: `https://sfonaclosuafvlhutkon.supabase.co/storage/v1/object/public/cocteles/${name}.webp`,
+    alergenos: [],
+    alergenosNota: null,
+    ...extra,
+  });
+
+  it("solo los que tienen foto propia: la genérica de la «T» no cuenta", () => {
+    const elegidos = elegirCocteles([
+      coctel("Mojito"),
+      coctel("Sin foto", { image: "/assets/touza-logo-640.webp", fotoGenerica: true }),
+      coctel("Aperol Spritz"),
+    ]);
+    expect(elegidos.map((c) => c.name)).toEqual(["Mojito", "Aperol Spritz"]);
+  });
+
+  it("como mucho ocho, y siempre filas enteras (8, 6 o 4)", () => {
+    expect(cuantosCaben(12)).toBe(8);
+    expect(cuantosCaben(8)).toBe(8);
+    expect(cuantosCaben(7)).toBe(6);
+    expect(cuantosCaben(5)).toBe(4);
+    expect(cuantosCaben(3)).toBe(3);
+    expect(cuantosCaben(0)).toBe(0);
+    const doce = Array.from({ length: 12 }, (_, i) => coctel(`Cóctel ${i}`));
+    expect(elegirCocteles(doce)).toHaveLength(8);
+    expect(elegirCocteles(doce)[0].name).toBe("Cóctel 0");
   });
 });

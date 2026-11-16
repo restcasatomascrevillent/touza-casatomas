@@ -22,7 +22,6 @@ const Header = () => {
   const [isHidden, setIsHidden] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const enPortada = (location.pathname.replace(/\/+$/, "") || "/") === "/";
   const lastScrollY = useRef(0);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -92,16 +91,12 @@ const Header = () => {
     >
       <div className="max-w-6xl mx-auto px-6">
         <nav className="flex items-center justify-between">
-          {/* Logo. En lo alto de la portada no está: el hero ya es TOUZA a
-              pantalla completa y la cabecera se queda en lo mínimo. Aparece
-              al bajar. */}
-          {(!enPortada || isScrolled) && (
-            <Link to="/" className="relative z-10 inline-flex items-center min-h-11 animate-in fade-in duration-500" aria-label="Touza, ir al inicio">
-              <span className="font-serif text-xl lg:text-2xl font-bold tracking-wider text-primary">
-                TOUZA
-              </span>
-            </Link>
-          )}
+          {/* Logo, también en lo alto de la portada, como en la web de antes. */}
+          <Link to="/" className="relative z-10 inline-flex items-center min-h-11" aria-label="Touza, ir al inicio">
+            <span className="font-serif text-xl lg:text-2xl font-bold tracking-wider text-primary">
+              TOUZA
+            </span>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="ml-auto hidden lg:flex items-center gap-1">
@@ -132,7 +127,7 @@ const Header = () => {
             {/* En escritorio no hay barra fija: al bajar del hero, «Cómo
                 llegar» queda a mano en la cabecera, en el mismo vidrio con
                 borde dorado que la barra del móvil. Arriba del todo no está
-                (ni en el HTML del SSG): el hero ya lo tiene en blanco. */}
+                (ni en el HTML del SSG): el hero ya tiene su «Cómo llegar». */}
             {isScrolled && (
               <a
                 href={URL_COMO_LLEGAR}

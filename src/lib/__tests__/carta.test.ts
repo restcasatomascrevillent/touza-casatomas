@@ -1,5 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { agruparChampagne, fotoPropia, nombreBase, opacidadFotograma, resumenCocteles, slugCarta } from "@/lib/carta";
+import {
+  agruparChampagne,
+  descripcionCarta,
+  descripcionDespuesDeCenar,
+  descripcionPortada,
+  fotoPropia,
+  nombreBase,
+  rangoPrecios,
+  resumenCocteles,
+  slugCarta,
+} from "@/lib/carta";
 
 describe("nombreBase", () => {
   it("enseña el nombre bonito, no el identificador de la base de datos", () => {
@@ -96,15 +106,48 @@ describe("agruparChampagne", () => {
   });
 });
 
-describe("opacidadFotograma (fundido cruzado del hero de la carta)", () => {
-  it("en f = 2,4 el fotograma 2 está entero, el 3 al 40 % y el 4 apagado", () => {
-    expect(opacidadFotograma(2, 2.4)).toBe(1);
-    expect(opacidadFotograma(3, 2.4)).toBeCloseTo(0.4);
-    expect(opacidadFotograma(4, 2.4)).toBe(0);
+describe("meta descripciones con las cifras de la carta (auditoría del 16/11/2026)", () => {
+  const carta = [
+    ...Array.from({ length: 9 }, () => ({ categoria: "autor", precio_eur: 10 })),
+    ...Array.from({ length: 7 }, () => ({ categoria: "clasicos", precio_eur: 9 })),
+    ...Array.from({ length: 2 }, () => ({ categoria: "sin-alcohol", precio_eur: 7 })),
+  ];
+
+  it("rango de precios: «de 7 a 10 €», «a 9 €» o nada", () => {
+    expect(rangoPrecios(carta)).toBe("de 7 a 10\u00A0€");
+    expect(rangoPrecios([{ precio_eur: 9 }, { precio_eur: 9 }])).toBe("a 9\u00A0€");
+    expect(rangoPrecios([{ precio_eur: null }])).toBeNull();
+    expect(rangoPrecios([])).toBeNull();
   });
 
-  it("al principio solo se ve el primero y al final todos encima", () => {
-    expect(opacidadFotograma(1, 0)).toBe(0);
-    expect(opacidadFotograma(9, 9)).toBe(1);
+  it("portada, carta y /despues-de-cenar: el texto de la auditoría con los números de los datos", () => {
+    expect(descripcionPortada(carta)).toBe(
+      "Touza, coctelería y bar de copas en Crevillent (Crevillente), junto a Casa Tomás. Cócteles de 7 a 10 €, champagne y whisky. Sin reservas."
+    );
+    expect(descripcionCarta(carta)).toBe(
+      "Carta de Touza: 18 cócteles de autor y clásicos de 7 a 10 €, con y sin alcohol, además de champagne, cava, cerveza y whisky. Crevillent."
+    );
+    expect(descripcionDespuesDeCenar(carta)).toBe(
+      "Cena en Casa Tomás y toma la copa en Touza, la puerta de al lado (n.º 4), en Crevillent. Cócteles de 7 a 10 €. Sin reservas: ven directamente."
+    );
+  });
+
+  it("caben en el resultado de Google (≤ 160 caracteres)", () => {
+    for (const texto of [descripcionPortada(carta), descripcionCarta(carta), descripcionDespuesDeCenar(carta)]) {
+      expect(texto.length).toBeLessThanOrEqual(160);
+    }
+  });
+
+  it("sin datos, la misma frase sin cifras inventadas", () => {
+    expect(descripcionPortada([])).toBe(
+      "Touza, coctelería y bar de copas en Crevillent (Crevillente), junto a Casa Tomás. Cócteles de autor, champagne y whisky. Sin reservas."
+    );
+    expect(descripcionCarta([])).toBe(
+      "Carta de Touza: cócteles de autor y clásicos, con y sin alcohol, además de champagne, cava, cerveza y whisky. Crevillent."
+    );
+    expect(descripcionDespuesDeCenar([])).toBe(
+      "Cena en Casa Tomás y toma la copa en Touza, la puerta de al lado (n.º 4), en Crevillent. Sin reservas: ven directamente."
+    );
+    expect(descripcionCarta(carta.filter((c) => c.categoria !== "sin-alcohol"))).not.toMatch(/sin alcohol/);
   });
 });

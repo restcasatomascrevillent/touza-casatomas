@@ -5,13 +5,11 @@ import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
 import { canonical } from "@/lib/site";
 import { HORARIO_EN_FRASE, VIA, paginaSchema, sinDuplicados } from "@/lib/negocio";
-import { slugCarta } from "@/lib/carta";
+import { descripcionDespuesDeCenar, slugCarta } from "@/lib/carta";
 import { FOTO_SOBREMESA, fotoResponsive, volverAFotoOriginal } from "@/lib/foto";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { IMAGENES } from "@/assets/imagenes";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
-import FranjaClips from "@/components/home/FranjaClips";
-import { CLIPS_DESPUES_DE_CENAR } from "@/components/home/medios";
 
 /**
  * /despues-de-cenar: la página que responde a «copas después de cenar en Casa
@@ -25,16 +23,12 @@ import { CLIPS_DESPUES_DE_CENAR } from "@/components/home/medios";
  * derecha del título. Es la misma <img> en los dos casos (una sola descarga).
  * El texto va en la misma rejilla que la cabecera: `max-w-6xl` con `px-6`.
  *
- * Tras «Para la sobremesa», «Dentro de Touza»: tres clips del local (la
- * trasbarra, la vitrina del champagne y las figuras), con la franja de la
- * portada en su versión de página. Solo pósters en el HTML; cada vídeo se crea
- * al acercarse y solo va uno en marcha.
+ * «Dentro de Touza» (tres clips del local a 406×720) se quitó el 16/11/2026:
+ * a ese tamaño se veían mal. El local se enseña con la foto de la cabecera.
  */
 const CONTENEDOR = "mx-auto max-w-6xl px-6";
 
 const TITULO = "Copas después de cenar en Casa Tomás";
-const DESCRIPCION =
-  `Después de cenar en Casa Tomás, la copa en Touza: la puerta de al lado, en el n.º 4 de la ${VIA} (Crevillent). Cócteles de autor y clásicos, champagne y whisky. Sin reservas.`;
 
 /** Los primeros de esta lista que tengan foto propia; si faltan, los primeros con foto. */
 const PREFERIDOS = ["Clover Club", "Pornstar Martini", "Espresso Martini", "Moscow Mule", "Aperol Spritz"];
@@ -51,16 +45,19 @@ function elegirTres(cocteles: CoctelUI[]): CoctelUI[] {
 
 const DespuesDeCenar = () => {
   const { data } = useCocteles();
-  const tres = useMemo(() => elegirTres(transformCoctelesToUI(sinDuplicados(data ?? []))), [data]);
+  const unicos = useMemo(() => sinDuplicados(data ?? []), [data]);
+  const tres = useMemo(() => elegirTres(transformCoctelesToUI(unicos)), [unicos]);
+  // El rango de precios sale de la carta (ver `descripcionDespuesDeCenar`).
+  const descripcion = useMemo(() => descripcionDespuesDeCenar(unicos), [unicos]);
 
   return (
     <Layout>
       <Seo
-        title={`${TITULO} · Touza Crevillente`}
-        description={DESCRIPCION}
+        title={`${TITULO} · Touza`}
+        description={descripcion}
         canonical={canonical("/despues-de-cenar")}
         keywords={["copas después de cenar", "casa tomás crevillente", "copas crevillente", "coctelería junto a casa tomás"]}
-        schema={paginaSchema({ ruta: "/despues-de-cenar", nombre: TITULO, descripcion: DESCRIPCION })}
+        schema={paginaSchema({ ruta: "/despues-de-cenar", nombre: TITULO, descripcion })}
       />
 
       <section className="pb-12 md:pb-20">
@@ -170,8 +167,6 @@ const DespuesDeCenar = () => {
           </div>
         </section>
       )}
-
-      <FranjaClips clips={CLIPS_DESPUES_DE_CENAR} titulo="Dentro de Touza" id="dentro-titulo" estilo="pagina" />
 
       {/* Lleva su propio «Cómo llegar»: aquí se aparta la barra fija del móvil. */}
       <section data-oculta-barra-movil="" className="pb-20 md:pb-28">

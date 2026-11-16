@@ -1,6 +1,7 @@
 /**
- * Portada (rediseño del 15/11/2026): cinco bloques, SEO de la portada y
- * limpieza de textos. Se pinta con el Layout real (cabecera y pie).
+ * Portada (16/11/2026: el hero de antes y la carta primero): los cuatro
+ * bloques, SEO de la portada y limpieza de textos. Se pinta con el Layout real
+ * (cabecera y pie).
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
@@ -9,6 +10,37 @@ import { MemoryRouter } from "react-router-dom";
 import Index from "../Index";
 
 const seo = vi.hoisted(() => ({ props: null as null | { title: string; description: string } }));
+
+// Nueve cócteles con foto propia y uno sin ella (lleva la genérica de la «T»).
+const filas = vi.hoisted(() => {
+  const nombres = ["Clover Club", "Pornstar Martini", "Espresso Martini", "Moscow Mule", "Aperol Spritz", "Mojito", "Piña Colada", "Spicy Mango Margarita", "Negroni"];
+  const fila = (nombre: string, orden: number, imagen: string | null) => ({
+    id: `c${orden}`,
+    nombre,
+    descripcion: null,
+    precio_eur: 9 + (orden % 2),
+    imagen_url: imagen,
+    categoria: "clasicos",
+    base: null,
+    ingredientes: null,
+    orden,
+    alergenos_oficiales: null,
+    alergenos_notas: null,
+  });
+  return [
+    fila("Sin Foto Sour", 0, null),
+    ...nombres.map((nombre, i) =>
+      fila(nombre, i + 1, `https://sfonaclosuafvlhutkon.supabase.co/storage/v1/object/public/cocteles/c${i + 1}.webp`)
+    ),
+  ];
+});
+
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: vi.fn() } }));
+
+vi.mock("@/hooks/useCocteles", async (original) => ({
+  ...(await original<typeof import("@/hooks/useCocteles")>()),
+  useCocteles: () => ({ data: filas, isLoading: false }),
+}));
 
 vi.mock("@/components/Seo", () => ({
   default: (props: { title: string; description: string }) => {
@@ -28,19 +60,51 @@ describe("Portada", () => {
     expect(seo.props?.title).toBe("Coctelería y bar de copas en Crevillent · Touza");
   });
 
-  it("hero: TOUZA en el h1, la línea de hechos con Crevillent en un h2 y «Cómo llegar» a Google Maps", () => {
+  it("descripción de la auditoría, con el rango de precios sacado de la carta", () => {
     pintar();
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(/TOUZA/);
-    expect(screen.getByRole("heading", { level: 2, name: /Crevillent/ })).toBeInTheDocument();
+    expect(seo.props?.description).toBe(
+      "Touza, coctelería y bar de copas en Crevillent (Crevillente), junto a Casa Tomás. Cócteles de 9 a 10 €, champagne y whisky. Sin reservas."
+    );
+  });
+
+  it("hero: TOUZA en el h1, los hechos con Crevillent en un h2 y los dos botones", () => {
+    pintar();
+    const h1 = screen.getAllByRole("heading", { level: 1 });
+    expect(h1).toHaveLength(1);
+    expect(h1[0]).toHaveTextContent("TOUZA · Coctelería y bar de copas en Crevillent");
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Coctelería y bar de copas en Crevillent, junto a Casa Tomás." })
+    ).toBeInTheDocument();
     expect(
       screen.getByText("Abrimos el jueves hasta la 1:00, el viernes y sábado hasta las 2:00 y el domingo hasta las 20:00. Sin reservas: ven directamente.")
     ).toBeInTheDocument();
 
+    expect(screen.getByRole("link", { name: "Ver la carta" })).toHaveAttribute("href", "/carta");
+    expect(screen.getByRole("link", { name: "Cómo llegar" })).toHaveAttribute("href", "/contacto");
+
+    // «Cómo llegar» de «Visítanos» y de la barra del móvil: a la ruta de Google Maps.
     const llegar = screen.getAllByRole("link", { name: "Cómo llegar a Touza (abre Google Maps)" });
     expect(llegar.length).toBeGreaterThan(0);
     for (const enlace of llegar) {
       expect(enlace.getAttribute("href")).toMatch(/^https:\/\/www\.google\.com\/maps\/dir\//);
     }
+  });
+
+  it("el hero es la foto del salón, con el recorte vertical para el móvil y variantes hasta 2560 px", () => {
+    const { container } = pintar();
+    const foto = container.querySelector('img[fetchpriority="high"]') as HTMLImageElement;
+    expect(foto).toHaveAttribute("alt", expect.stringMatching(/salón de Touza/));
+    expect(foto).toHaveAttribute("loading", "eager");
+    const fuentes = [...(foto.closest("picture")?.querySelectorAll("source") ?? [])];
+    const movil = fuentes.filter((f) => f.getAttribute("media"));
+    expect(movil.map((f) => f.getAttribute("type"))).toEqual(["image/avif", "image/webp"]);
+    for (const fuente of movil) {
+      expect(fuente.getAttribute("srcset")).toMatch(/touza-2-movil-1080\.\w+ 1080w/);
+      expect(fuente).toHaveAttribute("sizes", "64vh");
+    }
+    const apaisada = fuentes.filter((f) => !f.getAttribute("media"));
+    expect(apaisada.map((f) => f.getAttribute("type"))).toEqual(["image/avif", "image/webp"]);
+    for (const fuente of apaisada) expect(fuente.getAttribute("srcset")).toMatch(/touza-2-2560\.\w+ 2560w/);
   });
 
   it("la imagen del hero es la del LCP y no hay vídeo en el primer pintado", () => {
@@ -89,15 +153,44 @@ describe("Portada", () => {
     expect(container.querySelectorAll("[data-reveal]")).toHaveLength(0);
   });
 
-  it("los bloques: cócteles, el local y visítanos; fuera los pasos numerados de «En la barra»", () => {
+  it("los bloques, en orden: la carta, el local y visítanos; fuera la vitrina y «En la barra»", () => {
     pintar();
-    expect(screen.getByRole("heading", { level: 2, name: "Cócteles de autor" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "El local" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "Visítanos" })).toBeInTheDocument();
-    // «En la barra» ahora es el título de la franja de clips (solo sale si hay
-    // vídeos en src/assets/videos/clips); los pasos de la sección vieja no vuelven.
+    const titulos = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent?.trim());
+    const orden = ["Cócteles de autor", "El local", "Visítanos"].map((t) => titulos.indexOf(t));
+    expect(orden.every((i) => i >= 0)).toBe(true);
+    expect(orden).toEqual([...orden].sort((a, b) => a - b));
+    expect(screen.queryByRole("heading", { name: "En la barra" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Se sirve" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Y a disfrutarla" })).not.toBeInTheDocument();
+  });
+
+  it("«La carta»: ocho cócteles con foto propia, nombre y precio, cada uno a su ficha, y «Ver la carta completa»", () => {
+    pintar();
+    const lista = screen.getByRole("list", { name: "Algunos cócteles de la carta" });
+    const tarjetas = within(lista).getAllByRole("listitem");
+    expect(tarjetas).toHaveLength(8);
+    expect(within(lista).queryByText("Sin Foto Sour")).not.toBeInTheDocument();
+    expect(within(lista).queryByText("Negroni")).not.toBeInTheDocument();
+
+    const primera = within(tarjetas[0]);
+    expect(primera.getByRole("link")).toHaveAttribute("href", "/carta#clover-club");
+    expect(primera.getByRole("heading", { level: 3, name: "Clover Club" })).toBeInTheDocument();
+    expect(tarjetas[0]).toHaveTextContent(/10\s€/);
+    expect(primera.getByRole("img", { name: "Clover Club, cóctel de la carta de Touza" })).toHaveAttribute("loading", "lazy");
+    expect(within(tarjetas[6]).getByRole("link")).toHaveAttribute("href", "/carta#pina-colada");
+
+    expect(screen.getByRole("link", { name: "Ver la carta completa" })).toHaveAttribute("href", "/carta");
+  });
+
+  it("«El local»: tres fotos del local y el póster del clip, sin gente y sin <video> en el HTML", () => {
+    const { container } = pintar();
+    for (const alt of [/salón de Touza de noche/, /botellero de Touza/, /T de Touza retroiluminada/, /trasbarra de Touza/]) {
+      expect(screen.getByRole("img", { name: alt })).toHaveAttribute("loading", "lazy");
+    }
+    expect(screen.getByRole("link", { name: "copas después de cenar" })).toHaveAttribute("href", "/despues-de-cenar");
+    for (const img of container.querySelectorAll("img")) {
+      expect(img.getAttribute("alt") ?? "").not.toMatch(/bartender|camarero|barman/i);
+    }
   });
 
   it("el pie enlaza a /despues-de-cenar y no repite la dirección", () => {

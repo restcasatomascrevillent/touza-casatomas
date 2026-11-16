@@ -9,10 +9,9 @@ const VISIBLE_PARA_REPRODUCIR = 0.35;
 const UMBRALES = Array.from({ length: 11 }, (_, i) => i / 10);
 
 /**
- * Los vídeos de ambiente de una misma zona se reparten la reproducción: va en
- * marcha el que más superficie enseña (por encima del umbral) y los demás se
- * quedan en su fotograma. Así, si «El local» enseña a la vez el marco grande y
- * la pared de madera, no se pisan al hacer scroll.
+ * Si hay más de un vídeo de ambiente a la vista, se reparten la reproducción:
+ * va en marcha el que más superficie enseña (por encima del umbral) y los
+ * demás se quedan en su fotograma. Hoy solo hay uno (la trasbarra).
  */
 const superficie = new Map<HTMLVideoElement, { area: number; fraccion: number }>();
 const pausadosAMano = new Set<HTMLVideoElement>();
@@ -50,15 +49,15 @@ interface VideoAmbienteProps {
 
 /**
  * Vídeo decorativo que rellena su marco (el padre lo posiciona y le da
- * tamaño). Mismo patrón que la franja de clips:
+ * tamaño):
  *
  * - En el HTML del SSG solo está el póster (<picture> con `loading="lazy"`):
  *   no compite con el LCP y, con dos clips, el <source media> hace que el
  *   navegador baje solo el póster que toca.
- * - En el navegador, el <video muted loop playsinline preload="metadata">
- *   se crea al acercarse (300 px antes), arranca al entrar en pantalla y se
- *   pausa al salir. Lleva `.foto-asienta`, como el póster, para no saltar si
- *   aparece durante el destapado de <Reveal>.
+ * - En el navegador, el <video muted loop playsinline preload="none"> se crea
+ *   al acercarse (300 px antes) pero no baja nada hasta que entra en pantalla
+ *   y arranca (pesa 3–6 MB); se pausa al salir. Lleva `.foto-asienta`, como
+ *   el póster, para no saltar si aparece durante el destapado de <Reveal>.
  * - Con «reducir movimiento», ahorro de datos o 3G: solo el póster.
  * - Repite en bucle más de 5 s: botón para pararlo (WCAG 2.2.2).
  */
@@ -159,7 +158,7 @@ const VideoAmbiente = ({ clip, medidas, alternativo, alt, etiquetaPausa, classNa
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="none"
           disablePictureInPicture
           aria-hidden="true"
           tabIndex={-1}
