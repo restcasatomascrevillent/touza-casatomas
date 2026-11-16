@@ -139,14 +139,18 @@ const fuentesLocal = (nombre: string): FuentesVideo => ({
 export const MEDIA_LOCAL_ANCHO = "(min-width: 768px) and (orientation: landscape)";
 
 /**
- * «El local» de la portada. `sala-panoramica` se descartó porque la tele
- * encendida se lleva la mirada; `sala-mesa-tv`, por lo mismo.
+ * «El local» de la portada. `sala-panoramica`, `sala-mesa-tv` y
+ * `vitrina-vinos-panoramica` se descartaron porque sale la tele encendida (en
+ * escritorio, la del paisaje se comía el marco; 16/11/2026).
  */
 export const VIDEOS_EL_LOCAL = {
   /** Vitrinas de vino y champagne y, al final, los sofás. 406×720, móvil. */
   vitrinas: fuentesLocal("vitrinas-sofas"),
-  /** Pared de vitrinas con el sofá a la derecha. 1280×720, escritorio. */
-  vitrinasAncho: fuentesLocal("vitrina-vinos-panoramica"),
+  /**
+   * Las mismas vitrinas de champagne, recortadas en horizontal del vertical
+   * (IMG_0412, a cámara lenta y en ida y vuelta). 1280×720, escritorio.
+   */
+  vitrinasAncho: fuentesLocal("vitrinas-ancho"),
   /** Pared de madera en abanico, casi quieta: el mejor bucle. 406×720. */
   pared: fuentesLocal("pared-madera-bucle"),
 } as const;

@@ -35,9 +35,10 @@ interface RevealProps extends HTMLAttributes<HTMLElement> {
  * Ahora el HTML sale siempre visible. Ya en el navegador, y solo si el
  * elemento está por DEBAJO de la pantalla al montar (así que nadie lo está
  * viendo), se marca `data-reveal="pendiente"` (oculto por CSS) y un
- * IntersectionObserver lo pasa a `"visto"` al llegar. Lo que ya está a la
- * vista o por encima no se toca. Con `prefers-reduced-motion` no se anima nada.
- * Los estilos están en `index.css` (`[data-reveal]`).
+ * IntersectionObserver (o, en `destapar`, el scroll) lo pasa a `"visto"` al
+ * llegar. Lo que ya está a la vista o por encima no se toca. Con
+ * `prefers-reduced-motion` no se anima nada. Los estilos están en `index.css`
+ * (`[data-reveal]`).
  */
 const Reveal = ({ as = "div", delay = 0, y = 24, scale = 1, efecto = "aparecer", style, children, ...props }: RevealProps) => {
   const ref = useRef<HTMLElement>(null);
@@ -49,21 +50,53 @@ const Reveal = ({ as = "div", delay = 0, y = 24, scale = 1, efecto = "aparecer",
     if (el.getBoundingClientRect().top < window.innerHeight) return;
 
     el.dataset.reveal = "pendiente";
-    const observador = new IntersectionObserver(
-      ([entrada]) => {
-        if (!entrada.isIntersecting) return;
-        el.dataset.reveal = "visto";
-        observador.disconnect();
-      },
-      { rootMargin: "0px 0px -8% 0px" }
-    );
-    observador.observe(el);
+    let parar = () => {};
+    const ver = () => {
+      el.dataset.reveal = "visto";
+      parar();
+    };
+
+    if (efecto === "destapar") {
+      // `destapar` esconde con `clip-path: inset(100% 0 0 0)` en el propio
+      // elemento, y Chrome mide el IntersectionObserver con ese recorte: solo
+      // «ve» el borde de arriba. Si se llega con ese borde ya por encima de la
+      // pantalla (un salto, un ancla, recargar a media página), el observador
+      // no avisa nunca y el marco se queda tapado: unos 700 px de negro sobre
+      // «El local» en escritorio (16/11/2026). Aquí se mide la caja sin
+      // recortar, con el scroll (una vez por fotograma) y el tamaño.
+      let fotograma = 0;
+      const comprobar = () => {
+        fotograma = 0;
+        const caja = el.getBoundingClientRect();
+        if (caja.top < window.innerHeight * 0.92 && caja.bottom > 0) ver();
+      };
+      const alMover = () => {
+        if (!fotograma) fotograma = requestAnimationFrame(comprobar);
+      };
+      window.addEventListener("scroll", alMover, { passive: true });
+      window.addEventListener("resize", alMover);
+      parar = () => {
+        cancelAnimationFrame(fotograma);
+        window.removeEventListener("scroll", alMover);
+        window.removeEventListener("resize", alMover);
+      };
+    } else {
+      const observador = new IntersectionObserver(
+        ([entrada]) => {
+          if (entrada.isIntersecting) ver();
+        },
+        { rootMargin: "0px 0px -8% 0px" }
+      );
+      observador.observe(el);
+      parar = () => observador.disconnect();
+    }
+
     return () => {
-      observador.disconnect();
+      parar();
       // Si se desmonta o el efecto se repite (StrictMode), que no quede oculto.
       if (el.dataset.reveal === "pendiente") delete el.dataset.reveal;
     };
-  }, []);
+  }, [efecto]);
 
   const Tag = as as ElementType;
   const variables = {

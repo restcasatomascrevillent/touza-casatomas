@@ -32,13 +32,13 @@ Del zip «Local y ambiente» (15/11/2026), procesados fuera del repo (HLG a SDR,
 | Clip | Medidas | MP4 / WebM | Dónde |
 |---|---|---|---|
 | `vitrinas-sofas` | 406×720 | ≈896 / 682 KB | «El local», marco a sangre en el móvil y en la tableta en vertical |
-| `vitrina-vinos-panoramica` | 1280×720 | ≈1.380 / 961 KB | «El local», marco a sangre en pantalla ancha y apaisada (`MEDIA_LOCAL_ANCHO`) |
+| `vitrinas-ancho` | 1280×720 | ≈1.150 / 840 KB | «El local», marco a sangre en pantalla ancha y apaisada (`MEDIA_LOCAL_ANCHO`). De `IMG_0412` (el de `vitrinas-sofas`), 4,1-5,1 s, franja de 1920×1080 en x=240, y=1317 del vertical; cámara lenta ×2 y en ida y vuelta (3,9 s, bucle sin salto) |
 | `pared-madera-bucle` | 406×720 | ≈910 / 530 KB | «El local», junto al texto (decorativo) |
 | `barra-botellas` | 406×720 | ≈1.030 / 900 KB | /despues-de-cenar, «Dentro de Touza» |
 | `vitrina-krug` | 406×720 | ≈1.120 / 970 KB | /despues-de-cenar, «Dentro de Touza» |
 | `figuras-vitrina-bucle` | 540×720 | ≈610 / 495 KB | /despues-de-cenar, «Dentro de Touza» |
 
-Descartados: `sala-panoramica` y `sala-mesa-tv` (la tele encendida se lleva la mirada). En `vitrina-vinos-panoramica` la tele también sale, a la derecha y más pequeña.
+Descartados: `sala-panoramica`, `sala-mesa-tv` y `vitrina-vinos-panoramica` (sale la tele encendida con un paisaje; en la última, en escritorio, se comía el marco). Siguen en `touza-recursos/videos-interior/web/`.
 
 ## Presupuesto
 

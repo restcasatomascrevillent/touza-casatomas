@@ -21,7 +21,7 @@ import {
  *
  * El marco a sangre es un vídeo de las vitrinas (clips del local, 15/11/2026):
  * el vertical (`vitrinas-sofas`) en el móvil y el horizontal
- * (`vitrina-vinos-panoramica`) en pantallas anchas y apaisadas. Junto al
+ * (`vitrinas-ancho`, sin la tele) en pantallas anchas y apaisadas. Junto al
  * texto, la pared de madera en bucle (decorativa). Ver `VideoAmbiente`: en el
  * HTML solo van los pósters, con carga diferida, y los vídeos se crean al
  * acercarse.
