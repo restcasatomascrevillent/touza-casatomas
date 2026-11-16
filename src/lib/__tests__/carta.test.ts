@@ -1,5 +1,24 @@
 import { describe, it, expect } from "vitest";
-import { agruparChampagne, fotoPropia, opacidadFotograma, resumenCocteles, slugCarta } from "@/lib/carta";
+import { agruparChampagne, fotoPropia, nombreBase, opacidadFotograma, resumenCocteles, slugCarta } from "@/lib/carta";
+
+describe("nombreBase", () => {
+  it("enseña el nombre bonito, no el identificador de la base de datos", () => {
+    expect(nombreBase("sin-alcohol")).toBe("Sin alcohol");
+    expect(nombreBase("cachaca")).toBe("Cachaça");
+    expect(nombreBase("ginebra")).toBe("Ginebra");
+    expect(nombreBase("Whisky")).toBe("Whisky");
+  });
+
+  it("sin base (o la de por defecto, «all») no enseña nada", () => {
+    expect(nombreBase("all")).toBeNull();
+    expect(nombreBase("")).toBeNull();
+    expect(nombreBase(null)).toBeNull();
+  });
+
+  it("una base nueva sale legible aunque no esté en la lista", () => {
+    expect(nombreBase("brandy-de-jerez")).toBe("Brandy de jerez");
+  });
+});
 
 describe("slugCarta", () => {
   it("minúsculas, sin tildes ni apóstrofos, con guiones", () => {

@@ -47,6 +47,25 @@ export const FOTO_COCTEL_SIN_FOTO: string = (() => {
 })();
 
 
+/** Nombre visible de la base de un cóctel («cachaca» → «Cachaça»). `null` si no hay base que enseñar. */
+const NOMBRE_BASE: Record<string, string> = {
+  aperol: "Aperol",
+  cachaca: "Cachaça",
+  ginebra: "Ginebra",
+  prosecco: "Prosecco",
+  ron: "Ron",
+  "sin-alcohol": "Sin alcohol",
+  tequila: "Tequila",
+  vodka: "Vodka",
+  whisky: "Whisky",
+};
+
+export function nombreBase(base: string | null | undefined): string | null {
+  const id = (base ?? "").trim().toLowerCase();
+  if (!id || id === "all") return null;
+  return NOMBRE_BASE[id] ?? id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g, " ");
+}
+
 /** «a», «a y b», «a, b y c». */
 const enumerar = (partes: string[]): string =>
   partes.length <= 1 ? (partes[0] ?? "") : `${partes.slice(0, -1).join(", ")} y ${partes[partes.length - 1]}`;

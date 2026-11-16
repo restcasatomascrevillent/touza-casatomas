@@ -296,7 +296,7 @@ export const etiquetasAlergenos = (datos: DatosAlergenos): string[] =>
  * 1169/2011 — la diferencia entre "no contiene" y "no consta" es la que
  * importa legalmente, así que nunca se rellena este hueco con una suposición.
  */
-export const AVISO_SIN_ALERGENOS = "Sin información de alérgenos — consulte al personal";
+export const AVISO_SIN_ALERGENOS = "Pregunta al personal por los alérgenos.";
 
 /**
  * Aviso de alérgenos a nivel de CARTA: se pinta UNA vez por página, no una

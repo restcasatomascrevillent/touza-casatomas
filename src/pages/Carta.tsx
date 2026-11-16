@@ -21,7 +21,7 @@ import Seo from "@/components/Seo";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { canonical } from "@/lib/site";
 import { NEGOCIO, menuSchema, sinDuplicados } from "@/lib/negocio";
-import { agruparChampagne, resumenCocteles, slugCarta } from "@/lib/carta";
+import { agruparChampagne, nombreBase, resumenCocteles, slugCarta } from "@/lib/carta";
 import { CARTA_SSG, platosParaJsonLd } from "@/lib/carta-ssg";
 import FilaBotella from "@/components/carta/FilaBotella";
 import TarjetaCoctel from "@/components/carta/TarjetaCoctel";
@@ -692,14 +692,18 @@ const Carta = () => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-red-300">{AVISO_SIN_ALERGENOS}</p>
+                      <p className="text-sm text-white/70">{AVISO_SIN_ALERGENOS}</p>
                     )}
                     {selectedCocktail.alergenosNota && (
                       <p className="mt-2 text-xs italic text-red-300">{selectedCocktail.alergenosNota}</p>
                     )}
                   </div>
                   <div className="flex items-center justify-between pt-8 mt-8 border-t border-white/5">
-                    <span className="text-sm text-white/70">Base: <span className="text-white/80 capitalize">{selectedCocktail.base}</span></span>
+                    {nombreBase(selectedCocktail.base) ? (
+                      <span className="text-sm text-white/70">Base: <span className="text-white/80">{nombreBase(selectedCocktail.base)}</span></span>
+                    ) : (
+                      <span />
+                    )}
                     <span className="text-3xl font-serif text-primary [font-variant-numeric:lining-nums]">{selectedCocktail.price}</span>
                   </div>
                 </>
