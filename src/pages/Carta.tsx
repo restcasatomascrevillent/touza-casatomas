@@ -25,6 +25,7 @@ import { agruparChampagne, descripcionCarta, nombreBase, resumenCocteles, slugCa
 import { CARTA_SSG, platosParaJsonLd } from "@/lib/carta-ssg";
 import FilaBotella from "@/components/carta/FilaBotella";
 import TarjetaCoctel from "@/components/carta/TarjetaCoctel";
+import HeroCopa from "@/components/carta/HeroCopa";
 import { LiquidLoaderSVG } from "@/components/ui/svg/LiquidLoaderSVG";
 
 const appleEase = [0.25, 0.1, 0.25, 1] as const;
@@ -308,22 +309,28 @@ const Carta = () => {
         schema={schemaCarta}
       />
 
-      {/* Cabecera compacta: título y una línea de hechos. Justo debajo van las
-          pestañas y los cócteles, que se ven en la primera pantalla en móvil y
-          en escritorio. Antes había un hero a pantalla completa con la copa
-          que se llenaba al hacer scroll: tapaba la carta, pesaba diez
-          fotogramas y salía un camarero (16/11/2026). */}
-      <header className="mx-auto max-w-6xl px-5 pb-4 pt-24 md:px-6 md:pb-7 md:pt-28 md:text-center">
-        <h1 className="font-serif text-[2.5rem] font-bold leading-none text-white md:text-6xl">
-          Nuestra carta
-          <span className="sr-only"> de cócteles y copas</span>
-        </h1>
-        <p className="mt-2 max-w-xl text-[15px] leading-snug text-white/75 [font-variant-numeric:lining-nums] md:mx-auto md:mt-4 md:text-lg">
-          {resumen
-            ? `${resumen}. También champagne, cava, whisky y cerveza.`
-            : "Cócteles de autor y clásicos, champagne, cava, whisky y cerveza."}
-        </p>
-      </header>
+      {/* Hero: la copa se llena sola al entrar (vídeo corto, ver HeroCopa).
+          Sin tramo fijo: justo debajo van las pestañas y los cócteles. El
+          texto va abajo, sobre el degradado. */}
+      <HeroCopa alt="Una copa coupé llenándose de Clover Club, un cóctel rojo con espuma, en la barra de Touza">
+        <div className="mx-auto w-full max-w-6xl text-center">
+          <h1
+            style={{ animationDelay: "0.15s" }}
+            className="entrada-hero font-serif text-5xl font-bold leading-[0.9] text-white md:text-7xl lg:text-8xl apaisado:text-5xl"
+          >
+            Nuestra carta
+            <span className="sr-only"> de cócteles y copas</span>
+          </h1>
+          <p
+            style={{ animationDelay: "0.3s" }}
+            className="entrada-hero mx-auto mt-3 max-w-xl text-[15px] leading-snug text-white/85 [font-variant-numeric:lining-nums] md:mt-5 md:text-lg"
+          >
+            {resumen
+              ? `${resumen}. También champagne, cava, whisky y cerveza.`
+              : "Cócteles de autor y clásicos, champagne, cava, whisky y cerveza."}
+          </p>
+        </div>
+      </HeroCopa>
 
       {/* Tabs */}
       <div ref={barraPestanasRef} className={cn(BARRA_BAJO_CABECERA, "bg-black/85 backdrop-blur-2xl border-y border-white/5 py-2.5")}>
