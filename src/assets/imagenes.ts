@@ -72,46 +72,89 @@ function construir(nombre: string): ImagenResponsive {
  * `reservado` (un mojito), `local` y `mesaPrivada` (bodegones de champán) y
  * `decoracion` (botellas), y acababan presentadas como la sala de El
  * Reservado. El argumento de `construir` es el nombre del maestro en
- * `src/assets/originales/` (`touza-2`, `touza-5`…) para rastrear cada foto.
+ * `src/assets/originales/` (`touza-2`, `touza-sala`…) para rastrear cada foto.
+ *
+ * En la web no sale gente (16/11/2026, pedido del dueño): se quitaron del
+ * catálogo las fotos del camarero que ya no trabaja en Touza (`touza-5`,
+ * `touza-7`) y las demás con personal o clientes, también al fondo. Una foto
+ * nueva con alguien reconocible no entra aquí.
  *
  * Las fotos nuevas van a `src/assets/originales/` con una clave propia;
- * formatos y huecos en docs/fotos-necesarias.md. (El recorte cuadrado del
- * champán, `touza-8`, solo lo usaba /reservado y se retiró con las reservas
- * web el 01/10/2026.)
+ * formatos y huecos en docs/fotos-necesarias.md.
  */
 export const IMAGENES = {
-  /** Sala principal (sofá mostaza, mesas de mármol), apaisada. Hero de la portada, og:image y `image` del JSON-LD. */
+  /**
+   * Sala principal de día (sofá mostaza, mesas de mármol), vista desde arriba.
+   * Apaisada 3:2. Hero de la portada, og:image y `image` del JSON-LD. Los
+   * cristales de la puerta del fondo van desenfocados (ver DESENFOQUES en
+   * scripts/generar-imagenes.mjs): dejaban ver a clientes de Casa Tomás.
+   */
   interior: construir("touza-2"),
   /**
-   * Recorte central ≈3:4 de `interior` para el hero en móvil vertical (ver
-   * RECORTES en scripts/generar-imagenes.mjs). Mismo encuadre, menos bytes.
+   * Recorte central 1080×1708 de `interior` para el hero en pantallas
+   * verticales (ver RECORTES en scripts/generar-imagenes.mjs). Mismo encuadre.
    */
   interiorMovil: construir("touza-2-movil"),
-  /** Bartender colando un cóctel en la barra, vertical. Hero de /carta y vitrina "Cócteles de Autor". */
-  barra: construir("touza-5"),
-  /** Mojito con pajita de Touza en la barra, con el bartender desenfocado detrás. Vertical. */
-  mojito: construir("touza-7"),
   /** Tres botellas de champán Laurent-Perrier y una copa sobre mármol, vertical. */
   champanMesa: construir("touza-8-1"),
   /** Botellas de aperitivo (Select), ron (Kraken) y licores junto a un spritz, vertical. */
   botellas: construir("touza-10"),
+
+  // ── Fotos del local que pasó el dueño (móvil, 15/11/2026), en color natural:
+  // solo recorte y reducción, sin la receta de retoque. «El local» de la portada.
+  /** El salón de noche: banco corrido mostaza, sillones azules, mesas de mármol y los aros de luz (IMG_0417). Apaisada 4:3. */
+  salonNoche: construir("touza-salon-noche"),
+  /** El botellero iluminado en dorado: whiskies, tequilas de cerámica y copas (IMG_0247, sin la cámara ni la pared). Vertical 3:4. */
+  botellero: construir("touza-botellero"),
+  /** La «T» de Touza retroiluminada sobre la pared trenzada (IMG_0313). Vertical 3:4. */
+  letrero: construir("touza-letrero"),
+
+  // ── Sesión de fotos de la barra (Drive «Cócteles», 12/11/2026). Los nombres
+  // de cóctel que no se pueden asegurar por la foto se describen por lo que se
+  // ve (copa roja, espuma…). Las de la carta se sirven desde Supabase.
+  /** Tres copas coupé (naranja con espuma, roja con arándanos, amarilla) en la barra, con la estantería detrás. Vertical. */
+  trio: construir("touza-trio"),
+  /** Estantería de botellas iluminada en dorado, de pared a pared. Apaisada (4:3). */
+  estanteria: construir("touza-estanteria"),
+  /** Cóctel verde de hielo picado con rodaja de kiwi, en vaso labrado. Vertical. */
+  verde: construir("touza-green"),
+  /** Piña Colada en vaso con forma de piña sobre una caja dorada, papel pintado detrás. Vertical. */
+  pinaColada: construir("touza-pina"),
+  /** Copa coupé roja con espuma y arándanos en la barra, fondo azul. Vertical. */
+  copaRoja: construir("touza-copa-roja"),
+  /** Copa coupé naranja con espuma blanca, sobre el mármol, fondo azul. Vertical. */
+  copaEspuma: construir("touza-copa-espuma"),
+  /** Tres copas coupé distintas vistas desde arriba, en diagonal sobre el mármol. Vertical. */
+  copasCenital: construir("touza-copas-cenital"),
+  /** Copa coupé roja con espuma y arándanos sobre el mármol, en primer plano. Vertical. */
+  copaRoja2: construir("touza-copa-roja-2"),
+  /** La «T» de Touza retroiluminada, con la receta de retoque (más fría). Foto de los cócteles sin foto propia. Vertical. */
+  logo: construir("touza-logo"),
+  /**
+   * La sala de Touza sin gente: banco corrido mostaza, sillones, mesas de
+   * mármol y los aros de luz (IMG_0420 de «Local y ambiente», 15/11/2026,
+   * con la receta de retoque común). Vertical 3:4. Cabecera de /despues-de-cenar.
+   */
+  sala: construir("touza-sala"),
 } satisfies Record<string, ImagenResponsive>;
 
 /**
  * Hero de la portada en pantallas verticales (móvil), como dirección de arte
  * del único `<img>` del hero (`components/home/Hero.tsx`).
  *
- * - `media`: el recorte es ≈3:4 y la caja ocupa todo el viewport (100dvh ≥
- *   alto del viewport de las media queries), así que con proporción ≤ 2:3 el
- *   recorte siempre cubre lo que `object-cover` deja ver → mismo encuadre.
- * - `sizes="300px"` NO es el ancho real (≈75vh): es un presupuesto para que
- *   DPR 3 elija la de 900 y DPR ≤ 2 la de 600. Ambas dan más píxeles útiles
- *   que la apaisada de 1600/1024 que se usaba antes, pesando ~40 % menos.
+ * - `media`: el recorte es 1080×1708 (≈ 5:8) y la caja ocupa todo el
+ *   viewport, así que con proporción ≤ 5:8 el recorte siempre cubre lo que
+ *   `object-cover` deja ver → mismo encuadre que la apaisada.
+ * - `sizes="64vh"` es el ancho real con el que se pinta: el alto de la
+ *   pantalla × 1080/1708. Un móvil de 390×844 a densidad 3 pide 1620 px y se
+ *   lleva la de 1080 (toda la altura del maestro: 2 px de foto por px CSS).
+ *   Antes se declaraba un presupuesto de `300px` para ahorrar bytes y el
+ *   móvil recibía la de 600 o 900: el salón se veía blando.
  */
 export const HERO_VARIANTE_MOVIL = {
   imagen: IMAGENES.interiorMovil,
-  media: "(max-aspect-ratio: 2/3)",
-  sizes: "300px",
+  media: "(max-aspect-ratio: 5/8)",
+  sizes: "64vh",
 };
 
 /**

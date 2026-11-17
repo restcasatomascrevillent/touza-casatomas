@@ -2,12 +2,23 @@ import { Link, useLocation } from "react-router-dom";
 import { Instagram, Facebook, Navigation } from "lucide-react";
 import Reveal from "@/components/Reveal";
 import { RUTAS_LEGALES } from "@/lib/legal";
-import { NEGOCIO, TELEFONO, URL_COMO_LLEGAR } from "@/lib/negocio";
+import { NEGOCIO, URL_COMO_LLEGAR } from "@/lib/negocio";
 
+/**
+ * Pie mínimo (auditoría del 15/11/2026): enlaces, redes y legales. La
+ * dirección, el horario, el teléfono y el correo viven en «Visítanos» (la
+ * portada) y en Contacto; antes el pie los repetía justo debajo. Fuera el lema
+ * de «raíces gallegas», que nadie había confirmado.
+ *
+ * `/despues-de-cenar` es la página para quien busca «copas después de cenar
+ * en Casa Tomás» (auditoría SEO, hallazgo 4); el texto del enlace es esa
+ * búsqueda.
+ */
 const footerLinks = [
+  { name: "Inicio", path: "/" },
   { name: "Carta", path: "/carta" },
-  { name: "Galería", path: "/galeria" },
   { name: "Contacto", path: "/contacto" },
+  { name: "Copas después de cenar en Casa Tomás", path: "/despues-de-cenar" },
 ];
 
 const legalLinks = [
@@ -16,150 +27,115 @@ const legalLinks = [
   { name: "Cookies", path: RUTAS_LEGALES.cookies },
 ];
 
+const redes = [
+  { nombre: "Instagram", url: NEGOCIO.redes.find((r) => r.includes("instagram")), Icono: Instagram },
+  { nombre: "Facebook", url: NEGOCIO.redes.find((r) => r.includes("facebook")), Icono: Facebook },
+];
+
+const enlace =
+  "rounded transition-colors duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+
+/** Enlaces de texto del pie con zona táctil de 44 px de alto (auditoría visual v0.10, fallo 13). */
+const enlaceTactil = `inline-flex min-h-11 items-center ${enlace}`;
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  // La portada (con "Visítanos") y Contacto (con el mapa) ya acaban con la
+  // La portada (con «Visítanos») y Contacto (con el mapa) ya acaban con la
   // dirección justo encima: el CTA repetiría lo que acaba de leerse.
   const ruta = useLocation().pathname.replace(/\/+$/, "") || "/";
   const conCta = ruta !== "/" && ruta !== "/contacto";
 
   return (
     <>
-      {/* Pre-footer CTA. Hasta el 01/10/2026 era "Reserva tu experiencia" →
-          El Reservado; Touza ya no acepta reservas por la web, así que invita
-          a venir y lleva a la ruta en Google Maps. Solo desde lg: por debajo
-          está la barra fija (lg:hidden) con el mismo "Cómo llegar" siempre a
-          mano, y repetirlo encima del pie solo alargaba la página. */}
+      {/* Antes del pie, en el resto de páginas: dónde está y cómo llegar.
+          Solo desde lg: por debajo está la barra fija con el mismo «Cómo
+          llegar» siempre a mano. Solo el título aparece con <Reveal>. */}
       {conCta && (
-      <section className="hidden lg:block bg-black py-24 text-center px-6">
-        {/* <Reveal> y no `whileInView`: este CTA va en el pie de TODAS las
-            páginas y el `opacity:0` de framer salía en línea en el HTML del
-            SSG, oculto hasta hidratar. La línea dorada crece desde el centro
-            (scale 0 → 1; con 1 px de alto, en la práctica es un scaleX). */}
-        <Reveal y={0} scale={0} aria-hidden="true" className="h-px bg-primary/40 max-w-xl mx-auto mb-6 md:mb-16" />
-        <Reveal as="h3" y={20} delay={0.3} className="font-serif text-3xl md:text-6xl text-white mb-3 md:mb-5">
-          Te esperamos en Touza
-        </Reveal>
-        <Reveal as="p" y={0} delay={0.4} className="text-white/65 text-[15px] md:text-lg font-light mb-6 md:mb-8">
-          {NEGOCIO.calle} · {NEGOCIO.localidad}
-        </Reveal>
-        <Reveal y={0} delay={0.5}>
+        <section className="hidden bg-black px-6 py-24 text-center lg:block">
+          <span aria-hidden="true" className="mx-auto mb-14 block h-px max-w-xl bg-primary/40" />
+          <Reveal as="h3" className="mb-4 font-serif text-6xl font-medium tracking-normal text-cream">
+            Te esperamos en Touza
+          </Reveal>
+          <p className="mb-9 text-lg text-white/75">
+            {NEGOCIO.calle}, {NEGOCIO.localidad}
+          </p>
           <a
             href={URL_COMO_LLEGAR}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Cómo llegar a Touza (abre Google Maps)"
-            className="inline-flex items-center gap-2 px-8 md:px-10 py-3.5 md:py-4 border border-white/25 rounded-full text-white/85 hover:text-white hover:border-white/50 active:scale-[0.97] transition-all duration-300 text-base md:text-lg font-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="boton boton-macizo"
           >
-            <Navigation className="w-4 h-4 md:w-5 md:h-5" aria-hidden="true" />
+            <Navigation className="h-4 w-4" aria-hidden="true" />
             Cómo llegar
           </a>
-        </Reveal>
-      </section>
+        </section>
       )}
 
-      <footer className="bg-black border-t border-white/5">
-        <div className="max-w-6xl mx-auto px-5 md:px-6 py-10 md:py-20">
-          {/* En el móvil, Explora y Contacto van en dos columnas (antes, todo
-              apilado: el pie medía casi dos pantallas). */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-8 md:gap-16">
-            {/* Brand */}
-            <div className="col-span-2 md:col-span-1">
-              <Link to="/" className="inline-flex items-center min-h-11">
-                <span className="font-serif text-2xl font-bold tracking-wider text-primary">
-                  TOUZA
-                </span>
-              </Link>
-              <p className="mt-3 md:mt-4 text-white/60 text-sm font-light leading-relaxed max-w-xs">
-                Un rincón donde las raíces gallegas se funden con el encanto
-                mediterráneo. Cócteles artesanales en un ambiente único.
-              </p>
-            </div>
+      <footer className="border-t border-white/10 bg-black">
+        {/* `.pie-contenido`: si hay barra fija en el móvil, el pie deja al final
+            su alto, en su mismo negro (index.css). Sin JS la barra no se
+            aparta y taparía los legales. */}
+        <div className="pie-contenido mx-auto max-w-7xl px-5 py-10 md:px-8 md:py-14 lg:px-10">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
+            <Link to="/" className="inline-flex min-h-11 items-center self-start lg:self-auto" aria-label="Touza, ir al inicio">
+              <span className="font-serif text-2xl font-bold tracking-wider text-primary">TOUZA</span>
+            </Link>
 
-            {/* Links */}
-            <div>
-              <h4 className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3 md:mb-6">
-                Explora
-              </h4>
-              <ul className="md:space-y-4">
+            <nav aria-label="Pie de página">
+              <ul className="-mx-1 flex flex-wrap gap-x-4 gap-y-1 text-[15px] text-white/75">
                 {footerLinks.map((link) => (
                   <li key={link.path}>
-                    <Link
-                      to={link.path}
-                      className="text-white/70 text-[15px] md:text-sm font-light hover:text-white active:text-white transition-colors duration-200 inline-flex items-center min-h-11 md:min-h-0 md:py-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    >
+                    <Link to={link.path} className={`${enlaceTactil} px-1`}>
                       {link.name}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
 
-            {/* Contact + Social */}
-            <div>
-              <h4 className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3 md:mb-6">
-                Contacto
-              </h4>
-              <div className="space-y-1.5 md:space-y-3 text-white/70 text-[15px] md:text-sm font-light mb-5 md:mb-8">
-                <p className="leading-snug pt-2.5 md:pt-0">{NEGOCIO.calle}<br />{NEGOCIO.cp} {NEGOCIO.localidad}, {NEGOCIO.region}</p>
-                {/* Con prefijo internacional, como en el resto de la web: sin él
-                    falla al llamar desde un móvil con SIM extranjera. */}
-                <a href={TELEFONO.href} className="flex min-h-11 items-center md:inline-block md:min-h-0 md:py-1 hover:text-white active:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">{TELEFONO.texto}</a>
-                <a href="mailto:info@touzabar.es" className="flex min-h-11 items-center md:block md:min-h-0 md:py-1 break-all hover:text-white active:text-white transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">info@touzabar.es</a>
-              </div>
-              <div className="flex gap-3">
-                <a
-                  href="https://www.instagram.com/touzabar/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full bg-white/5 flex items-center justify-center text-white/65 hover:text-white hover:bg-white/10 active:bg-white/15 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label="Instagram"
-                >
-                  <Instagram className="w-[18px] h-[18px]" aria-hidden="true" />
-                </a>
-                <a
-                  href="https://www.facebook.com/touzabar/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full bg-white/5 flex items-center justify-center text-white/65 hover:text-white hover:bg-white/10 active:bg-white/15 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  aria-label="Facebook"
-                >
-                  <Facebook className="w-[18px] h-[18px]" aria-hidden="true" />
-                </a>
-              </div>
+            <div className="flex gap-3">
+              {redes.map(({ nombre, url, Icono }) =>
+                url ? (
+                  <a
+                    key={nombre}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${nombre} de Touza (se abre en otra pestaña)`}
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-white/75 transition-colors duration-200 hover:border-white/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <Icono className="h-[18px] w-[18px]" aria-hidden="true" />
+                  </a>
+                ) : null
+              )}
             </div>
           </div>
 
-          <div className="mt-8 md:mt-16 pt-5 md:pt-8 border-t border-white/5">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 text-xs text-white/50 font-light">
-              <p>© {currentYear} Touza Cocktail Bar</p>
-              <nav aria-label="Información legal">
-                <ul className="flex flex-wrap items-center justify-center gap-x-1">
-                  {legalLinks.map((link, i) => (
-                    <li key={link.path} className="flex items-center">
-                      {i > 0 && <span aria-hidden="true" className="text-white/25 px-1">·</span>}
-                      <Link
-                        to={link.path}
-                        className="inline-flex min-h-[44px] md:min-h-0 items-center px-1 md:py-1 text-white/65 hover:text-white transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-              <p>
-                Parte de{" "}
-                <a
-                  href="https://restaurantecasatomascrevillente.es/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/65 hover:text-white transition-colors duration-200"
-                >
-                  Restaurante Casa Tomás
-                </a>
-              </p>
-            </div>
+          <div className="mt-8 flex flex-col gap-1 border-t border-white/10 pt-5 text-sm text-white/70 md:flex-row md:items-center md:justify-between md:gap-6">
+            <p className="py-2 md:py-0">© {currentYear} Touza Cocktail Bar</p>
+            <nav aria-label="Información legal">
+              <ul className="-mx-1 flex flex-wrap gap-x-4">
+                {legalLinks.map((link) => (
+                  <li key={link.path}>
+                    <Link to={link.path} className={`${enlaceTactil} px-1`}>
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <p>
+              Parte de{" "}
+              <a
+                href="https://restaurantecasatomascrevillente.es/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${enlaceTactil} text-white/85 underline-offset-4 hover:underline`}
+              >
+                Restaurante Casa Tomás
+              </a>
+            </p>
           </div>
         </div>
       </footer>

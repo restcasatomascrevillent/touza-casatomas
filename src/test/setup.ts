@@ -29,6 +29,10 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }));
 
+// jsdom no reproduce vídeo: `play` y `pause` solo avisan de que no existen.
+window.HTMLMediaElement.prototype.play = vi.fn(() => Promise.resolve());
+window.HTMLMediaElement.prototype.pause = vi.fn();
+
 // Mock window.scrollTo (not available in jsdom)
 Object.defineProperty(window, "scrollTo", {
   writable: true,

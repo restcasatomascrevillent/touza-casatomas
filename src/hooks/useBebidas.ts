@@ -2,12 +2,15 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 import { COLUMNAS_BEBIDAS } from '@/lib/carta-consultas.mjs';
+import { fotoPropia } from '@/lib/carta';
+import { formatearPrecio } from '@/lib/precio';
 
 export interface Bebida {
   id: string;
   nombre: string | null;
   descripcion: string | null;
   precio_eur: number | null;
+  imagen_url?: string | null;
   categoria: string | null;
   tipo: string | null;
   tag: string | null;
@@ -24,6 +27,9 @@ export interface BebidaUI {
   type?: string;
   tag?: string;
   size?: string;
+  /** Foto de la botella (Storage, 3:5). Sin foto, la fila va sin imagen. */
+  image?: string;
+  description?: string;
 }
 
 export const useBebidas = (categoria: string, soloTouza: boolean = true) => {
@@ -63,10 +69,12 @@ export const transformBebidasToUI = (bebidas: Bebida[] | undefined): BebidaUI[] 
   return bebidas.map((bebida) => ({
     id: bebida.id,
     name: bebida.nombre || '',
-    price: bebida.precio_eur ? `${bebida.precio_eur.toFixed(2).replace('.', ',')}€` : '',
+    price: formatearPrecio(bebida.precio_eur),
     featured: bebida.featured || false,
     type: bebida.tipo || undefined,
     tag: bebida.tag || undefined,
     size: bebida.tamano || undefined,
+    image: fotoPropia(bebida.imagen_url) || undefined,
+    description: bebida.descripcion || undefined,
   }));
 };

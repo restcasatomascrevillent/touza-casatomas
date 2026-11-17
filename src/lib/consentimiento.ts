@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 
 /**
- * Consentimiento de cookies de terceros (hoy, solo el mapa de Google de
- * /contacto: la web no usa ninguna otra cookie; Vercel Analytics no usa
- * cookies). Antes "Rechazar" se guardaba en localStorage pero nadie lo leía:
- * el iframe de Google Maps cargaba igual. Ahora el mapa solo se carga con
- * "Aceptar" o si el visitante lo pide expresamente en la propia página.
+ * Consentimiento de cookies de terceros (hoy, solo el mapa interactivo de
+ * Google de /contacto: la web no usa ninguna otra cookie; Vercel Analytics no
+ * usa cookies). No hay aviso global (se quitó el 15/11/2026: tapaba el hero y
+ * pedía permiso para algo que casi nadie usa): se pregunta en el propio hueco
+ * del mapa cuando el visitante pide el mapa interactivo, y se puede cambiar
+ * en /cookies (ConfigurarCookies).
  */
 export const CLAVE_CONSENTIMIENTO = "touza_cookie_consent";
 const EVENTO = "touza:consentimiento";
@@ -31,22 +32,6 @@ export function guardarConsentimiento(valor: Exclude<Consentimiento, null>) {
   window.dispatchEvent(new CustomEvent(EVENTO, { detail: valor }));
 }
 
-/**
- * Retira la elección guardada y vuelve a mostrar el aviso de cookies (botón
- * "Configurar cookies" de /cookies). Retirar el consentimiento tiene que ser
- * tan fácil como darlo (art. 7.3 RGPD). Quien escuche `useConsentimiento`
- * recibe `null`, así que el mapa de Google deja de cargarse en la próxima
- * visita a /contacto.
- */
-export function reiniciarConsentimiento() {
-  try {
-    window.localStorage.removeItem(CLAVE_CONSENTIMIENTO);
-  } catch {
-    // Sin almacenamiento no había nada guardado.
-  }
-  window.dispatchEvent(new CustomEvent<Consentimiento>(EVENTO, { detail: null }));
-}
-
 /** Escucha cambios de consentimiento (aceptar, rechazar o reiniciar). */
 export function alCambiarConsentimiento(fn: (valor: Consentimiento) => void): () => void {
   const manejador = (e: Event) => fn((e as CustomEvent<Consentimiento>).detail);
@@ -54,7 +39,7 @@ export function alCambiarConsentimiento(fn: (valor: Consentimiento) => void): ()
   return () => window.removeEventListener(EVENTO, manejador);
 }
 
-/** Valor actual, y se actualiza si el visitante responde al aviso estando en la página. */
+/** Valor actual, y se actualiza si el visitante cambia su elección estando en la página. */
 export function useConsentimiento(): Consentimiento {
   // null en el primer render (también en el SSG): no hay localStorage en Node.
   const [valor, setValor] = useState<Consentimiento>(null);

@@ -34,9 +34,6 @@ vi.mock("@/components/ui/svg/LiquidLoaderSVG", () => ({
     React.createElement("div", { "data-testid": "liquid-loader" }),
 }));
 
-vi.mock("@/components/ui/svg/CocktailHoverOutlineSVG", () => ({
-  CocktailHoverOutlineSVG: () => null,
-}));
 
 // framer-motion — sin animaciones en tests
 vi.mock("framer-motion", () => ({
@@ -106,10 +103,13 @@ function mockAllHooksIdle() {
   } as any);
   vi.mocked(useVinosModule.transformVinosToUI).mockReturnValue([]);
 
-  vi.mocked(useVinosModule.useVinosRestantes).mockReturnValue({
+  vi.mocked(useVinosModule.useEspumosos).mockReturnValue({
     data: undefined,
     isLoading: false,
   } as any);
+  vi.mocked(useVinosModule.esChampagne).mockImplementation((categoria) =>
+    /CHAMPAGNE\s*$/i.test(categoria ?? "")
+  );
 
   vi.mocked(useBebidasModule.useBebidas).mockReturnValue({
     data: undefined,
@@ -436,9 +436,9 @@ describe("Carta — estructura general", () => {
     vi.mocked(usePlatosModule.transformPlatosToUI).mockReturnValue([]);
   });
 
-  it("renderiza el héroe con el título 'Nuestra Carta'", () => {
+  it("renderiza el héroe con el título 'Nuestra carta'", () => {
     renderCarta();
-    expect(screen.getByText("Nuestra Carta")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: /nuestra carta/i })).toBeInTheDocument();
   });
 
   it("muestra todas las categorías principales en los tabs", () => {
@@ -447,13 +447,13 @@ describe("Carta — estructura general", () => {
     expect(screen.getByRole("tab", { name: "Champagne" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Cavas" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Cervezas" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Copas de Vino" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Por copas" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Whiskies" })).toBeInTheDocument();
   });
 
   it("pinta TODAS las secciones con su <h2> aunque solo se vea la activa (carta indexable)", () => {
     renderCarta();
-    for (const nombre of ["Cócteles", "Champagne", "Cavas", "Cervezas", "Copas de Vino", "Whiskies"]) {
+    for (const nombre of ["Cócteles", "Champagne", "Cavas", "Cervezas", "Por copas", "Whiskies"]) {
       expect(screen.getByRole("heading", { level: 2, name: nombre, hidden: true })).toBeInTheDocument();
     }
     expect(screen.getByRole("heading", { level: 2, name: "Cócteles" })).toBeVisible();
@@ -467,12 +467,10 @@ describe("Carta — estructura general", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Regresión: antes de este cambio, Carta.tsx solo pedía las categorías de
-// Vinos "CHAMPAGNES" y "CAVAS Y OTROS ESPUMOSOS" (escritas a mano). Cualquier
-// otra categoría —tintos, blancos...— no tenía pestaña donde caer y
-// desaparecía de la carta aunque estuviera marcada touza=true, activado=true.
+// Touza solo tiene espumosos (13/11/2026). Champagne y Cavas salen de las
+// categorías «VINOS ESPUMOSOS — …»; tintos y blancos no tienen pestaña.
 // ---------------------------------------------------------------------------
-describe("Carta — vinos con denominación de origen (Blancos/Tintos)", () => {
+describe("Carta — espumosos", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAllHooksIdle();
@@ -484,6 +482,16 @@ describe("Carta — vinos con denominación de origen (Blancos/Tintos)", () => {
       error: null,
     } as any);
     vi.mocked(usePlatosModule.transformPlatosToUI).mockReturnValue([]);
+    vi.mocked(useVinosModule.transformVinosToUI).mockImplementation(
+      (vinos) =>
+        (vinos ?? []).map((v) => ({
+          id: v.id as string,
+          name: v.nombre as string,
+          price: `${v.precio_eur}€`,
+          featured: false,
+          image: v.imagen_url || undefined,
+        })) as never
+    );
   });
 
   function mockVino(overrides: Record<string, unknown> = {}) {
@@ -492,7 +500,8 @@ describe("Carta — vinos con denominación de origen (Blancos/Tintos)", () => {
       nombre: "Vino de prueba",
       descripcion: null,
       precio_eur: 20,
-      categoria: "VINOS TINTOS — RIBERA DEL DUERO",
+      imagen_url: null,
+      categoria: "VINOS ESPUMOSOS — CHAMPAGNE",
       ubicacion_region: null,
       ubicacion_pais: null,
       denominacion_origen: null,
@@ -502,80 +511,220 @@ describe("Carta — vinos con denominación de origen (Blancos/Tintos)", () => {
     };
   }
 
-  it("no añade pestañas de vino nuevas cuando useVinosRestantes no devuelve datos (mismo comportamiento que antes)", () => {
+  it("no hay pestañas de tintos ni blancos", () => {
     renderCarta();
-    expect(screen.queryByText("Blancos")).not.toBeInTheDocument();
-    expect(screen.queryByText("Tintos")).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "Blancos" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "Tintos" })).not.toBeInTheDocument();
   });
 
-  it("deriva pestañas 'Blancos' y 'Tintos' de categorías reales, y cada una muestra sus propios vinos", () => {
-    vi.mocked(useVinosModule.useVinosRestantes).mockReturnValue({
+  it("reparte los espumosos: champagne a Champagne y el resto a Cavas, con foto si la tienen", () => {
+    vi.mocked(useVinosModule.useEspumosos).mockReturnValue({
       data: [
-        mockVino({ id: "t1", nombre: "Pesus", categoria: "VINOS TINTOS — RIBERA DEL DUERO" }),
-        mockVino({ id: "b1", nombre: "Martín Códax", categoria: "VINOS BLANCOS — ALBARIÑO (RÍAS BAIXAS)" }),
+        mockVino({ id: "c1", nombre: "Krug Grande Cuvée", imagen_url: "https://x/krug.webp" }),
+        mockVino({ id: "v1", nombre: "Gramona Imperial", categoria: "VINOS ESPUMOSOS — CAVA" }),
+        mockVino({ id: "v2", nombre: "Moscato de prueba", categoria: "VINOS ESPUMOSOS — MOSCATO D’ASTI" }),
       ],
       isLoading: false,
     } as any);
-    // agruparVinosPorTipo llama a transformVinosToUI de verdad (no es lo que
-    // se está probando aquí): se reemplaza el mock automático del módulo por
-    // una implementación equivalente para que el nombre llegue a pantalla.
-    vi.mocked(useVinosModule.transformVinosToUI).mockImplementation(
-      (vinos) =>
-        (vinos ?? []).map((v) => ({
-          id: v.id as string,
-          name: v.nombre as string,
-          price: `${v.precio_eur}€`,
-          featured: false,
-        })) as never
-    );
 
     renderCarta();
 
-    expect(screen.getByRole("tab", { name: "Blancos" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Tintos" })).toBeInTheDocument();
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Champagne" }));
+    expect(screen.getByText("Krug Grande Cuvée")).toBeVisible();
+    expect(screen.getByText("Gramona Imperial")).not.toBeVisible();
+    expect(screen.getByRole("img", { name: "Krug Grande Cuvée" })).toHaveAttribute("src", "https://x/krug.webp");
 
-    // "Cócteles" es la pestaña activa por defecto: el tinto está en el HTML
-    // (para buscadores) pero oculto.
-    expect(screen.getByText("Pesus")).not.toBeVisible();
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Cavas" }));
+    expect(screen.getByText("Gramona Imperial")).toBeVisible();
+    expect(screen.getByText("Moscato de prueba")).toBeVisible();
+    expect(screen.getByText("Krug Grande Cuvée")).not.toBeVisible();
+    expect(screen.queryByRole("img", { name: "Gramona Imperial" })).not.toBeInTheDocument();
+  });
+});
 
-    // Radix activa TabsTrigger en onMouseDown (no en onClick), igual que en
-    // el navegador un click real dispara mousedown antes que click.
-    fireEvent.mouseDown(screen.getByRole("tab", { name: "Tintos" }));
-    expect(screen.getByText("Pesus")).toBeVisible();
-    expect(screen.getByText("Martín Códax")).not.toBeVisible();
-
-    fireEvent.mouseDown(screen.getByRole("tab", { name: "Blancos" }));
-    expect(screen.getByText("Martín Códax")).toBeVisible();
-    expect(screen.getByText("Pesus")).not.toBeVisible();
+// ---------------------------------------------------------------------------
+// Pulido de la carta (auditoría del 15/11/2026)
+// ---------------------------------------------------------------------------
+describe("Carta — cócteles con y sin foto, anclas y pie", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAllHooksIdle();
+    vi.mocked(usePlatosModule.usePlatosTouza).mockReturnValue({ data: [], isLoading: false } as never);
+    vi.mocked(usePlatosModule.transformPlatosToUI).mockReturnValue([]);
   });
 
-  it("dentro de una pestaña de vino, filtra por denominación de origen al elegir un filtro", () => {
-    vi.mocked(useVinosModule.useVinosRestantes).mockReturnValue({
-      data: [
-        mockVino({ id: "t1", nombre: "Pesus", categoria: "VINOS TINTOS — RIBERA DEL DUERO" }),
-        mockVino({ id: "t2", nombre: "Muga Reserva", categoria: "VINOS TINTOS — RIOJA" }),
-      ],
-      isLoading: false,
-    } as any);
+  const coctel = (overrides: Partial<CoctelUI>): CoctelUI => ({
+    id: "x",
+    name: "X",
+    category: "clasicos",
+    base: "gin",
+    price: "9,00€",
+    description: "Descripción",
+    ingredients: [],
+    image: "",
+    alergenos: [],
+    alergenosNota: null,
+    ...overrides,
+  });
+
+  function conCocteles(lista: CoctelUI[], crudos: Record<string, unknown>[] = []) {
+    vi.mocked(useCoctelesModule.useCocteles).mockReturnValue({ data: crudos, isLoading: false } as never);
+    vi.mocked(useCoctelesModule.transformCoctelesToUI).mockReturnValue(lista);
+  }
+
+  it("los cócteles con foto propia van en tarjeta y los que no, en fila de texto sin caja «TOUZA»", () => {
+    conCocteles([
+      coctel({ id: "1", name: "Moscow Mule", image: "https://x.supabase.co/storage/mule.webp" }),
+      coctel({ id: "2", name: "Espresso Martini", image: "" }),
+    ]);
+    renderCarta();
+
+    expect(screen.getByRole("img", { name: "Moscow Mule" })).toHaveAttribute("src", "https://x.supabase.co/storage/mule.webp");
+    expect(screen.queryByRole("img", { name: "Espresso Martini" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Espresso Martini" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Más cócteles" })).toBeInTheDocument();
+    expect(screen.queryByText("TOUZA")).not.toBeInTheDocument();
+  });
+
+  it("cada cóctel lleva su ancla (id = slug) para enlazarlo desde otras páginas", () => {
+    conCocteles([
+      coctel({ id: "1", name: "Moscow Mule", image: "https://x/mule.webp" }),
+      coctel({ id: "2", name: "Piña Colada", image: "" }),
+    ]);
+    const { container } = renderCarta();
+    expect(container.querySelector("#moscow-mule")).not.toBeNull();
+    expect(container.querySelector("#pina-colada")).not.toBeNull();
+  });
+
+  it("el precio del cóctel va como texto junto al nombre, no en una píldora sobre la foto", () => {
+    conCocteles([coctel({ id: "1", name: "Mojito", price: "8,50€", image: "https://x/mojito.webp" })]);
+    renderCarta();
+    const precio = screen.getByText("8,50€");
+    expect(precio.className).not.toMatch(/bg-white/);
+    expect(precio.closest("[class*='aspect-']")).toBeNull();
+  });
+
+  it("si la foto de una tarjeta no carga, el cóctel pasa a la lista de texto", () => {
+    conCocteles([coctel({ id: "1", name: "Mojito", image: "https://x/rota.webp" })]);
+    renderCarta();
+    fireEvent.error(screen.getByRole("img", { name: "Mojito" }));
+    expect(screen.queryByRole("img", { name: "Mojito" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Mojito" })).toBeInTheDocument();
+  });
+
+  it("la línea bajo el h1 sale de los datos: cuántos cócteles y el rango de precios", () => {
+    conCocteles(
+      [coctel({ id: "1", name: "A" })],
+      [
+        { nombre: "A", categoria: "autor", precio_eur: 9 },
+        { nombre: "B", categoria: "clasicos", precio_eur: 8.5 },
+        { nombre: "C", categoria: "sin-alcohol", precio_eur: 7 },
+      ]
+    );
+    renderCarta();
+    expect(screen.getByText(/^3 cócteles de autor, clásicos y sin alcohol, de 7 a 9 €\./)).toBeInTheDocument();
+  });
+
+  it("el aviso de alérgenos sale una sola vez y al pie, con el enlace a «Cómo llegar»", () => {
+    renderCarta();
+    expect(screen.getAllByText(AVISO_ALERGENOS_CARTA)).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Cómo llegar" })).toHaveAttribute("href", "/contacto");
+    expect(screen.getByRole("link", { name: /copas después de cenar/i })).toHaveAttribute("href", "/despues-de-cenar");
+  });
+});
+
+describe("Carta — botellas", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAllHooksIdle();
+    vi.mocked(usePlatosModule.usePlatosTouza).mockReturnValue({ data: [], isLoading: false } as never);
+    vi.mocked(usePlatosModule.transformPlatosToUI).mockReturnValue([]);
+    vi.mocked(useBebidasModule.transformBebidasToUI).mockImplementation(
+      (bebidas) =>
+        (bebidas ?? []).map((b) => ({
+          id: b.id,
+          name: b.nombre ?? "",
+          price: `${b.precio_eur}€`,
+          featured: false,
+          description: b.descripcion ?? undefined,
+        })) as never
+    );
     vi.mocked(useVinosModule.transformVinosToUI).mockImplementation(
       (vinos) =>
         (vinos ?? []).map((v) => ({
-          id: v.id as string,
-          name: v.nombre as string,
+          id: v.id,
+          name: v.nombre ?? "",
           price: `${v.precio_eur}€`,
           featured: false,
+          image: v.imagen_url || undefined,
+          description: v.descripcion ?? undefined,
         })) as never
     );
+  });
 
+  const bebida = (id: string, nombre: string) => ({
+    id,
+    nombre,
+    descripcion: null,
+    precio_eur: 3,
+    categoria: "Cervezas",
+    tipo: null,
+    tag: null,
+    featured: false,
+    orden: 1,
+    tamano: null,
+  });
+
+  it("no repite cervezas: Heineken una vez y Cruz Campo / Cruzcampo Gran Reserva una vez", () => {
+    vi.mocked(useBebidasModule.useBebidas).mockImplementation(
+      (categoria: string) =>
+        ({
+          data:
+            categoria === "Cervezas"
+              ? [
+                  bebida("1", "Heineken"),
+                  bebida("2", "Cruz Campo Gran Reserva"),
+                  bebida("3", "Heineken"),
+                  bebida("4", "Cruzcampo Gran Reserva"),
+                ]
+              : [],
+          isLoading: false,
+        }) as never
+    );
     renderCarta();
-    fireEvent.mouseDown(screen.getByRole("tab", { name: "Tintos" }));
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Cervezas" }));
+    expect(screen.getAllByRole("heading", { name: "Heineken" })).toHaveLength(1);
+    expect(screen.getAllByRole("heading", { name: /cruz ?campo gran reserva/i })).toHaveLength(1);
+  });
 
-    // Con "Todos" (estado inicial del filtro) se ven las dos denominaciones.
-    expect(screen.getByText("Pesus")).toBeInTheDocument();
-    expect(screen.getByText("Muga Reserva")).toBeInTheDocument();
+  it("la descripción larga va plegada a una línea en un <details>, con el texto entero en el HTML", () => {
+    const larga =
+      "El ensamblaje de distintas añadas y la larga crianza aportan profundidad a la fruta madura, con recuerdos de bollería.";
+    vi.mocked(useVinosModule.useEspumosos).mockReturnValue({
+      data: [{ id: "c1", nombre: "Grand Siècle", descripcion: larga, precio_eur: 270, imagen_url: null, categoria: "VINOS ESPUMOSOS — CHAMPAGNE" }],
+      isLoading: false,
+    } as never);
+    const { container } = renderCarta();
+    const detalles = container.querySelector("details");
+    expect(detalles).not.toBeNull();
+    expect(detalles?.textContent).toContain(larga);
+  });
 
-    fireEvent.click(screen.getByText("Ribera del Duero"));
-    expect(screen.getByText("Pesus")).toBeInTheDocument();
-    expect(screen.queryByText("Muga Reserva")).not.toBeInTheDocument();
+  it("agrupa el champagne por tipo (brut, rosado, de añada) cuando la lista es larga", () => {
+    const nombres = [
+      "Collet Brut", "Ruinart Brut", "Krug Grande Cuvée", "Piper‑Heidsieck",
+      "Laurent‑Perrier Rosé", "Ruinart Rosé",
+      "Dom Pérignon Vintage 2013", "Laurent‑Perrier Millésimé 2015",
+    ];
+    vi.mocked(useVinosModule.useEspumosos).mockReturnValue({
+      data: nombres.map((nombre, i) => ({ id: `c${i}`, nombre, descripcion: null, precio_eur: 50, imagen_url: null, categoria: "VINOS ESPUMOSOS — CHAMPAGNE" })),
+      isLoading: false,
+    } as never);
+    renderCarta();
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Champagne" }));
+    for (const grupo of ["Brut", "Rosado", "De añada"]) {
+      expect(screen.getByRole("heading", { level: 3, name: grupo })).toBeVisible();
+    }
+    expect(screen.getByRole("heading", { level: 4, name: "Ruinart Rosé" })).toBeVisible();
   });
 });

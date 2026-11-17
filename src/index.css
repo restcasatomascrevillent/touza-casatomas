@@ -52,6 +52,9 @@
     --charcoal: 0 0% 7%;
     --charcoal-light: 0 0% 12%;
     --cream: 42 25% 95%;
+    /* Azul petróleo de las paredes del local (las fotos de la barra tienen
+       ese fondo): segundo tono de la marca junto al dorado. Solo en fondos. */
+    --petroleo: 196 42% 8%;
 
     /* Alto de la barra fija "Cómo llegar" del móvil (BarraAccionesMovil),
        con la zona segura del indicador de inicio del iPhone. La usan el hueco
@@ -145,6 +148,9 @@
     font-family: 'Montserrat', sans-serif;
     font-weight: 400;
     line-height: 1.6;
+    /* Cifras alineadas en toda la web: la Cormorant trae por defecto cifras
+       de estilo antiguo y pintaba «0.0» como «o.o» y los horarios desiguales. */
+    font-variant-numeric: lining-nums;
   }
 
   h1,
@@ -172,6 +178,48 @@
 }
 
 @layer components {
+
+  /* Antetítulo: el único sistema de etiquetas pequeñas sobre un título (antes
+     el pie usaba otro, serif gris). Sirve también para un <h2> discreto: fija
+     familia, tamaño, peso e interlineado para que no herede los de los
+     encabezados. */
+  .antetitulo {
+    @apply font-sans text-[11px] md:text-xs font-medium uppercase leading-normal tracking-[0.3em] text-primary;
+  }
+
+  /* Botones de la portada. El blanco macizo es para la acción principal de
+     cada bloque («Ver la carta» en el hero, «Cómo llegar» en «Visítanos»);
+     lo demás va de contorno. */
+  .boton {
+    @apply inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full px-7 text-[15px] font-medium transition-[background-color,color,border-color,transform] duration-300 active:scale-[0.98] md:h-14 md:px-9 md:text-base;
+  }
+
+  .boton-macizo {
+    @apply bg-white text-black hover:bg-white/90;
+  }
+
+  .boton-contorno {
+    @apply border border-white/30 text-white hover:border-white/60 hover:bg-white/[0.06];
+  }
+
+  /* «Más sobre Touza» (<details> nativo): funciona sin JS y el texto sigue en
+     el HTML para buscadores. Sin el triángulo del navegador; el «+» gira al
+     abrir, que es la respuesta a lo que ha hecho quien lo pulsa. */
+  .desplegable > summary {
+    list-style: none;
+  }
+
+  .desplegable > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .desplegable .icono-mas {
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .desplegable[open] .icono-mas {
+    transform: rotate(45deg);
+  }
 
   /* Container */
   .container-custom {
@@ -320,36 +368,6 @@
     @apply bg-card border border-border/50 rounded-xl overflow-hidden;
     @apply transition-all duration-200 active:scale-[0.98];
   }
-
-  /* Stagger animation for children */
-  .stagger-children>* {
-    @apply opacity-0;
-    animation: stagger-fade-up 0.4s ease-out forwards;
-  }
-
-  .stagger-children>*:nth-child(1) {
-    animation-delay: 0ms;
-  }
-
-  .stagger-children>*:nth-child(2) {
-    animation-delay: 60ms;
-  }
-
-  .stagger-children>*:nth-child(3) {
-    animation-delay: 120ms;
-  }
-
-  .stagger-children>*:nth-child(4) {
-    animation-delay: 180ms;
-  }
-
-  .stagger-children>*:nth-child(5) {
-    animation-delay: 240ms;
-  }
-
-  .stagger-children>*:nth-child(6) {
-    animation-delay: 300ms;
-  }
 }
 
 @layer utilities {
@@ -381,98 +399,6 @@
 
   .text-shadow-lg {
     text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
-  }
-
-  /* Animations - refined timing */
-  @keyframes fade-up {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes stagger-fade-up {
-    from {
-      opacity: 0;
-      transform: translateY(16px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slide-up {
-    from {
-      opacity: 0;
-      transform: translateY(100%);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slide-in-right {
-    from {
-      opacity: 0;
-      transform: translateX(100%);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  .animate-fade-up {
-    animation: fade-up 0.6s ease-out forwards;
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.4s ease-out forwards;
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.5s ease-out forwards;
-  }
-
-  /* Animation delays */
-  .animation-delay-100 {
-    animation-delay: 100ms;
-  }
-
-  .animation-delay-200 {
-    animation-delay: 200ms;
-  }
-
-  .animation-delay-300 {
-    animation-delay: 300ms;
-  }
-
-  .animation-delay-400 {
-    animation-delay: 400ms;
-  }
-
-  .animation-delay-500 {
-    animation-delay: 500ms;
   }
 
   /* Subtle hover utilities */
@@ -565,45 +491,62 @@
       transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s);
   }
 
-  /* Zoom lento de la foto del hero (escritorio). En CSS para que arranque con
-     el HTML del SSG, sin esperar a hidratar. */
-  .ken-burns {
-    animation: ken-burns 30s linear infinite alternate;
+  /* ── Los dos gestos de la portada (auditoría 15/11/2026) ──────────────
+     1. Fotos (`efecto="destapar"`): una máscara que sube las destapa y la
+        foto (`.foto-asienta`) se asienta con un zoom de 1,1 a 1.
+     2. Títulos (`efecto="lineas"`): cada línea (`.linea`) entra desde abajo
+        tras su propia máscara, escalonadas con `--l`.
+     Con un efecto propio, el elemento NO se funde: el estado «pendiente» deja
+     la opacidad y la posición intactas y solo esconde con la máscara. Como el
+     resto de <Reveal>, solo lo pone el JS y solo bajo el pliegue: en el HTML
+     del SSG nada queda tapado. */
+  [data-reveal="pendiente"][data-efecto] {
+    opacity: 1;
+    transform: none;
   }
 
-  @keyframes ken-burns {
-    from {
-      transform: scale(1.05);
-    }
-
-    to {
-      transform: scale(1.15);
-    }
+  [data-reveal="pendiente"][data-efecto="destapar"] {
+    clip-path: inset(100% 0 0 0);
   }
 
-  /* Indicador de "hay más abajo" del hero: aparece tarde y oscila. */
-  .pista-scroll {
-    animation: entrada-hero 1s cubic-bezier(0.25, 0.1, 0.25, 1) 1.6s both;
+  [data-reveal="pendiente"][data-efecto="destapar"] .foto-asienta {
+    transform: scale(1.1);
   }
 
-  .oscilar {
-    animation: oscilar 2s ease-in-out infinite;
+  [data-reveal="visto"][data-efecto="destapar"] {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 1.25s cubic-bezier(0.7, 0, 0.2, 1) var(--reveal-delay, 0s);
   }
 
-  @keyframes oscilar {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-
-    50% {
-      transform: translateY(7px);
-    }
+  [data-reveal="visto"][data-efecto="destapar"] .foto-asienta {
+    transition: transform 1.8s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s);
   }
 
-  /* Filete dorado que se dibuja de izquierda a derecha cuando su <Reveal>
-     aparece ("01 ── Descubre" de las vitrinas). Sin `data-reveal` (HTML del
-     SSG, reduced-motion o ya a la vista al cargar) está entero. */
+  /* El relleno deja sitio dentro de la máscara a las tildes (arriba) y a los
+     rasgos descendentes de la Cormorant (g, p, j; abajo); el margen negativo
+     lo compensa para que no cambie el interlineado. */
+  .linea {
+    display: block;
+    overflow: hidden;
+    padding-block: 0.12em 0.14em;
+    margin-block: -0.12em -0.14em;
+  }
+
+  .linea > span {
+    display: block;
+  }
+
+  [data-reveal="pendiente"][data-efecto="lineas"] .linea > span {
+    transform: translate3d(0, 110%, 0);
+  }
+
+  [data-reveal="visto"][data-efecto="lineas"] .linea > span {
+    transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--reveal-delay, 0s) + var(--l, 0) * 0.09s);
+  }
+
+  /* Filete dorado que se dibuja de izquierda a derecha junto al antetítulo
+     cuando aparece su <Reveal>. Sin `data-reveal` (HTML del SSG,
+     reduced-motion o ya a la vista al cargar) está entero. */
   .trazo {
     transform-origin: left;
   }
@@ -616,7 +559,51 @@
     transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--reveal-delay, 0s) + 0.25s);
   }
 
-  /* ── Animaciones del móvil ──────────────────────────────────────────────
+  /* ── Hero de la portada (components/home/Hero.tsx) ──────────────────────
+     Una foto quieta a pantalla completa: sin tramo fijo, sin zoom y sin velo
+     ligados al scroll (se quitaron con el vídeo el 16/11/2026).
+
+     Lo único que queda aquí es la barra «Cómo llegar» del móvil
+     (`.barra-tras-hero`, solo en la portada), que no compite con los botones
+     del hero: entra desde abajo al empezar a bajar, con CSS ligado al scroll
+     de la página y sin JS. Sin soporte de `animation-timeline`, la barra está
+     siempre y el hero (`.hero-portada`) le deja su hueco en el móvil. */
+  .hero-portada {
+    padding-bottom: calc(var(--barra-movil) + 1.5rem);
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .hero-portada {
+      padding-bottom: 2.25rem;
+    }
+
+    .barra-tras-hero {
+      animation: barra-aparece linear both;
+      animation-timeline: scroll(root);
+      animation-range: 22svh 42svh;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .barra-tras-hero {
+        animation-timing-function: steps(1, end);
+      }
+    }
+  }
+
+  /* Desde md el contenido del hero va centrado: sin hueco abajo. */
+  @media (min-width: 768px) {
+    .hero-portada {
+      padding-bottom: 0;
+    }
+  }
+
+  @keyframes barra-aparece {
+    from {
+      translate: 0 130%;
+    }
+  }
+
+  /* ── Animaciones del móvil (Carta y Contacto) ───────────────────────────
      Todo en CSS y solo con `opacity` y transformaciones (`transform` o las
      propiedades sueltas `scale`/`translate`), que el navegador anima en el
      compositor: sin JS nuevo, sin repintados y sin mover la maquetación (no
@@ -625,31 +612,13 @@
 
      Las ligadas al scroll usan `animation-timeline` (Chrome/Android ≥ 115,
      Safari/iOS ≥ 26): avanzan con la posición del scroll, no con el tiempo, y
-     no escuchan eventos. Sin soporte (`@supports`) no se aplica nada y queda
-     lo de antes (las apariciones de <Reveal>).
+     no escuchan eventos. Sin soporte (`@supports`) no se aplica nada.
 
-     Solo < md y sin `prefers-reduced-motion`: desde md ya están el parallax y
-     el texto de framer-motion (QUERY_EFECTOS_SCROLL) y así no se suman dos
-     efectos sobre el mismo elemento. Ninguna oculta contenido: el punto de
-     partida siempre se ve (foto ampliada, texto atenuado al 20 %…). */
-  @media (max-width: 767.98px) and (prefers-reduced-motion: no-preference) {
-    /* Foto del hero de la portada: al cargar se asienta (zoom 1,08 → 1). En
-       CSS para que arranque con el HTML del SSG; si la animación no avanza
-       (ver M1 en la auditoría), la foto se queda algo ampliada, pero se ve. */
-    .foto-asentar {
-      animation: foto-asentar 2.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-  }
-
-  @keyframes foto-asentar {
-    from {
-      transform: scale(1.08);
-    }
-  }
-
+     Solo < md y sin `prefers-reduced-motion`. Ninguna oculta contenido: el
+     punto de partida siempre se ve (foto ampliada, texto atenuado…). */
   @supports (animation-timeline: view()) {
     @media (max-width: 767.98px) and (prefers-reduced-motion: no-preference) {
-      /* Cabeceras con foto (hero de la portada, Carta, Galería, Contacto):
+      /* Cabeceras con foto (Carta y Contacto):
          mientras salen por arriba, la foto se amplía y baja más despacio que
          la página (parallax) y el texto se desvanece. `exit` va de cuando la
          cabecera empieza a salir (scroll 0) a cuando ha salido entera. */
@@ -672,25 +641,8 @@
         animation-range: exit 15% exit 75%;
       }
 
-      /* Texto de la Filosofía: se enciende palabra a palabra con el scroll,
-         como en escritorio (allí con framer-motion). Cada palabra lleva su
-         índice (`--i`) y el párrafo el total (`--n`); todas acaban encendidas
-         cuando el párrafo llega a media pantalla. Fill `backwards`: antes de
-         su tramo, atenuada; después, sin animación (opacidad normal). */
-      .texto-encendido {
-        view-timeline-name: --texto;
-      }
-
-      .texto-encendido > * {
-        animation: palabra-encendida linear backwards;
-        animation-timeline: --texto;
-        animation-range:
-          cover calc(8% + var(--i, 0) / var(--n, 1) * 24%)
-          cover calc(18% + var(--i, 0) / var(--n, 1) * 24%);
-      }
-
-      /* Fotos que se asientan al entrar en pantalla (vitrinas de la portada,
-         cócteles de la carta, galería): zoom 1,15 → 1 hasta que la foto llega
+      /* Fotos que se asientan al entrar en pantalla (cócteles de la carta):
+         zoom 1,15 → 1 hasta que la foto llega
          a media pantalla. El marco (`overflow-hidden`) recorta el zoom y da la
          línea de tiempo: tiene que ser él, y no un contenedor con scroll
          propio, porque `view()` se mide contra el contenedor con scroll más
@@ -719,12 +671,6 @@
     to {
       opacity: 0;
       translate: 0 3rem;
-    }
-  }
-
-  @keyframes palabra-encendida {
-    from {
-      opacity: 0.2;
     }
   }
 
@@ -765,5 +711,86 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+/* ── Carta: «la vitrina» de botellas (components/carta/FilaBotella.tsx) ──
+   Luz cálida desde abajo en el nicho, como la estantería retroiluminada de la
+   barra; se enciende un poco más al pasar por encima. La entrada se dispara
+   cada vez que la pestaña pasa de `hidden` a visible (una animación CSS se
+   reinicia al salir de display:none), escalonada con --i. */
+@layer components {
+  .luz-nicho {
+    background:
+      radial-gradient(120% 45% at 50% 108%, rgb(216 180 126 / 0.32), transparent 70%),
+      linear-gradient(to bottom, rgb(10 10 10 / 0.25), transparent 30%);
+    mix-blend-mode: soft-light;
+    opacity: 0.85;
+    transition: opacity 0.7s ease;
+  }
+  .group:hover .luz-nicho {
+    opacity: 1;
+    mix-blend-mode: screen;
+  }
+  .fila-botella {
+    animation: entrada-botella 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 45ms);
+  }
+  /* Fondo cálido del nicho mientras llega la foto: nunca un hueco negro. */
+  .nicho-botella {
+    background:
+      radial-gradient(95% 55% at 50% 100%, rgb(216 180 126 / 0.3), transparent 75%),
+      linear-gradient(to bottom, #19120b, #2b1e11);
+  }
+  /* El hueco de la barra fija «Cómo llegar» del móvil, dentro del pie (en su
+     negro) y solo si la barra está en la página (BarraAccionesMovil). */
+  @media (max-width: 1023px) {
+    body:has(.barra-movil) .pie-contenido {
+      padding-bottom: calc(var(--barra-movil) + 1rem);
+    }
+  }
+  /* El mismo fondo cálido, más suave, en las tarjetas de cócteles (carta y
+     /despues-de-cenar) mientras llega la foto: antes, un gris casi blanco. */
+  .fondo-foto {
+    background:
+      radial-gradient(90% 50% at 50% 100%, rgb(216 180 126 / 0.18), transparent 75%),
+      linear-gradient(to bottom, #120d08, #22180e);
+  }
+  /* La foto sube (clip-path) solo cuando ya está cargada; antes la animación
+     arrancaba sin foto y destapaba un hueco negro. `data-foto` lo pone
+     FilaBotella en el navegador: sin él (HTML del SSG, sin JS) la foto se ve
+     tal cual. «lista» = ya estaba al mostrar la fila (entrada escalonada);
+     «llego» = llegó después (sube en cuanto llega, sin retraso). */
+  .nicho-botella[data-foto="esperando"] img {
+    opacity: 0;
+  }
+  .fila-botella .nicho-botella[data-foto="lista"] img {
+    animation: subida-nicho 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 45ms + 60ms);
+  }
+  .fila-botella .nicho-botella[data-foto="llego"] img {
+    animation: subida-nicho 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes entrada-botella {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes subida-nicho {
+    from { clip-path: inset(100% 0 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fila-botella,
+    .fila-botella .nicho-botella img {
+      animation: none !important;
+    }
+  }
+}
+
+/* Entrada de la marca del hero de la portada: solo sube, sin fundido, en
+   todos los tamaños. Con el fundido de `.entrada-hero` (≥ md) TOUZA estaba
+   invisible en el primer pintado y el hero se veía casi negro un segundo. */
+@layer components {
+  .entrada-marca {
+    animation: entrada-hero-movil 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }

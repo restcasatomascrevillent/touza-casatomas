@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement } from "react";
 import { useCocteles, transformCoctelesToUI, type Coctel } from "../useCocteles";
 import { COLUMNAS_COCTELES } from "@/lib/carta-consultas.mjs";
+import { FOTO_COCTEL_SIN_FOTO } from "@/lib/carta";
 
 // ---------------------------------------------------------------------------
 // Mock del cliente Supabase
@@ -183,7 +184,7 @@ describe("transformCoctelesToUI", () => {
     const ui = result[0];
     expect(ui.id).toBe("c-1");
     expect(ui.name).toBe("Negroni Touza");
-    expect(ui.price).toBe("9,50€");
+    expect(ui.price).toBe("9,50\u00A0€");
     expect(ui.ingredients).toEqual(["Ginebra", "Campari", "Vermut rojo"]);
   });
 
@@ -209,5 +210,22 @@ describe("transformCoctelesToUI", () => {
 
   it("retorna [] cuando se pasa undefined", () => {
     expect(transformCoctelesToUI(undefined)).toEqual([]);
+  });
+
+  // Auditoría del 15/11/2026: ninguna foto de banco en la carta. Sin foto
+  // propia, el cóctel lleva la foto de la «T» del local, marcada como genérica.
+  it("descarta las fotos de Unsplash: foto de la «T» en su lugar", () => {
+    const result = transformCoctelesToUI([
+      { ...mockCoctelA, imagen_url: "https://images.unsplash.com/photo-1513558161293?w=500" },
+      mockCoctelB,
+    ]);
+    expect(result[0].image).toBe(FOTO_COCTEL_SIN_FOTO);
+    expect(result[0].fotoGenerica).toBe(true);
+    expect(result[1].image).toBe(FOTO_COCTEL_SIN_FOTO);
+    expect(result[1].fotoGenerica).toBe(true);
+    expect(FOTO_COCTEL_SIN_FOTO).toMatch(/touza-logo-640/);
+    const propia = transformCoctelesToUI([mockCoctelA])[0];
+    expect(propia.image).toBe("https://example.com/negroni.jpg");
+    expect(propia.fotoGenerica).toBe(false);
   });
 });

@@ -46,31 +46,40 @@ export const OptimizedImage = ({
     // descarta con un warning: hay que escribirla en minúsculas.
     const atributosPrioridad = priority ? ({ fetchpriority: "high" } as Record<string, string>) : {};
 
-    // Con `priority` arrancamos visibles: el SSG no ejecuta `onLoad`, así que
-    // un `opacity-0` inicial dejaba el HTML prerenderizado en negro hasta que
-    // React hidrataba — justo lo que el prerenderizado venía a evitar.
-    const [isLoaded, setIsLoaded] = useState(priority);
-    const [hasError, setHasError] = useState(false);
+    // Nada a opacity 0 en el HTML del SSG (mismo criterio que <Reveal>): el
+    // servidor y el primer render del navegador pintan la foto visible, sin
+    // esqueleto. El SSG no ejecuta `onLoad`, así que un `opacity-0` de salida
+    // dejaba en el HTML prerenderizado todas las fotos invisibles hasta que
+    // React hidrataba (o para siempre, si el JS fallaba). El fundido de
+    // entrada es solo cosa del cliente: tras montar, una foto que aún no ha
+    // llegado se oculta y aparece al cargar.
+    const [estado, setEstado] = useState<"visible" | "cargando" | "error">("visible");
 
     const imgRef = useRef<HTMLImageElement>(null);
 
     useEffect(() => {
         // En el HTML del SSG el navegador puede terminar de cargar la foto —o
         // de fallar, como la URL caída del Clover Club— ANTES de que React
-        // hidrate. Esos `load`/`error` ya no se repiten, así que sin mirar
-        // `complete` la tarjeta se quedaba en el skeleton (o en opacity-0)
-        // para siempre. Una imagen diferida (lazy) aún sin pedir da
-        // `complete === false` y sigue el camino normal de los eventos.
+        // hidrate. Esos `load`/`error` ya no se repiten: se mira `complete`.
+        // Una imagen diferida (lazy) aún sin pedir da `complete === false` y
+        // sigue el camino de los eventos.
         const img = imgRef.current;
-        if (img?.complete) {
-            const cargada = img.naturalWidth > 0;
-            setIsLoaded(cargada);
-            setHasError(!cargada);
+        // Sin <img> (sin URL, o en el relleno tras un error con la URL
+        // anterior): se vuelve a «visible» para que una URL nueva se pinte.
+        if (!img) {
+            setEstado("visible");
             return;
         }
-        setIsLoaded(priority);
-        setHasError(false);
+        if (img.complete) {
+            setEstado(img.naturalWidth > 0 ? "visible" : "error");
+            return;
+        }
+        // `priority` (LCP): sin fundido, se pinta según llega.
+        setEstado(priority ? "visible" : "cargando");
     }, [url, priority]);
+
+    const hasError = estado === "error";
+    const isLoaded = estado === "visible";
 
     // Sin URL (p. ej. `imagen_url` a NULL en Supabase) no se pinta un
     // `<img src="">`: va directo al relleno de marca, igual en el SSG y en el
@@ -122,8 +131,8 @@ export const OptimizedImage = ({
                     loading={priority ? "eager" : "lazy"}
                     decoding={priority ? "sync" : "async"}
                     {...atributosPrioridad}
-                    onLoad={() => setIsLoaded(true)}
-                    onError={() => setHasError(true)}
+                    onLoad={() => setEstado("visible")}
+                    onError={() => setEstado("error")}
                     className={cn(
                         "w-full h-full object-cover transition-opacity duration-500 ease-in-out",
                         isLoaded ? "opacity-100" : "opacity-0"
@@ -131,7 +140,7 @@ export const OptimizedImage = ({
                     {...props}
                 />
             </picture>
-            {/* Skeleton loader / Blur effect while loading */}
+            {/* Esqueleto mientras carga (solo en cliente; nunca en el HTML del SSG). */}
             {!isLoaded && (
                 <div className="absolute inset-0 bg-muted animate-pulse" />
             )}

@@ -10,9 +10,11 @@
  * ────────────────────────────────────────────────────────────────────────────
  * PENDIENTE DE CONFIRMAR POR EL DUEÑO — no se inventa nada aquí:
  *
- *  · Teléfono y horarios: son los que ya publica la propia web
- *    (`VisitUs.tsx`, `Contacto.tsx`, `Footer.tsx`), pero nadie los ha
- *    verificado — `PLAN-TESTEO-MASIVO.md:98` los marca como "⚠️ Verificar".
+ *  · Teléfono: el que ya publicaba la web, sin verificar
+ *    (`PLAN-TESTEO-MASIVO.md:98` lo marca como "⚠️ Verificar").
+ *  · Horario: desde el 15/11/2026 es el de la ficha de Google (jueves
+ *    16–01, viernes 15:30–02, sábado 15–02, domingo 15–20), pendiente de
+ *    que el dueño lo confirme.
  *    Google usa el JSON-LD para el "Abierto ahora" de la ficha local, así que
  *    si están mal, están mal en el sitio donde más se nota.
  *  · Redes sociales (`sameAs`): las URLs que ya enlaza el pie. Sin comprobar.
@@ -47,10 +49,12 @@ export const NEGOCIO = {
   /** Ficha de Google Maps "TOUZA CLUB" (por CID, estable aunque cambie el nombre). */
   mapa: "https://maps.google.com/?cid=1982489405729160298",
   redes: ["https://www.instagram.com/touzabar/", "https://www.facebook.com/touzabar/"],
-  /** Mismo horario que muestra la web en VisitUs.tsx y Contacto.tsx. */
+  /** El de la ficha de Google, por indicación del 15/11/2026. Antes: J–S 20:00–02:00 y D 18:00–00:00. */
   horarios: [
-    { dias: ["Thursday", "Friday", "Saturday"], abre: "20:00", cierra: "02:00" },
-    { dias: ["Sunday"], abre: "18:00", cierra: "00:00" },
+    { dias: ["Thursday"], abre: "16:00", cierra: "01:00" },
+    { dias: ["Friday"], abre: "15:30", cierra: "02:00" },
+    { dias: ["Saturday"], abre: "15:00", cierra: "02:00" },
+    { dias: ["Sunday"], abre: "15:00", cierra: "20:00" },
   ],
 } as const;
 
@@ -64,6 +68,9 @@ export const TELEFONO = {
   href: `tel:${NEGOCIO.telefono}`,
 } as const;
 
+/** La calle sin el número: «C/ Santa María de la Cabeza». */
+export const VIA = NEGOCIO.calle.replace(/,\s*\d+\s*$/, "");
+
 /** Dirección para Google Maps, la misma que usa la página de Contacto. */
 export const DIRECCION_MAPS = `${NEGOCIO.calle}, ${NEGOCIO.cp} ${NEGOCIO.localidad}, ${NEGOCIO.region}`;
 
@@ -73,12 +80,73 @@ export const URL_COMO_LLEGAR = `https://www.google.com/maps/dir/?api=1&destinati
 /** `@id` estable para que Menu y Bar queden enlazados en el mismo grafo. */
 export const ID_NEGOCIO = `${SITE_URL}/#bar`;
 
+/**
+ * Restaurante Casa Tomás: Touza forma parte de él y está en la puerta de al
+ * lado (Casa Tomás en el n.º 2, Touza en el n.º 4; dirección confirmada por el
+ * dueño el 21/10/2026). Lo usan el JSON-LD (`parentOrganization`), /llms.txt
+ * y /despues-de-cenar.
+ */
+export const CASA_TOMAS = {
+  nombre: "Restaurante Casa Tomás",
+  calle: "C/ Santa María de la Cabeza, 2",
+  url: "https://restaurantecasatomascrevillente.es/",
+} as const;
+
+const DIA_ES: Record<string, string> = {
+  Monday: "lunes",
+  Tuesday: "martes",
+  Wednesday: "miércoles",
+  Thursday: "jueves",
+  Friday: "viernes",
+  Saturday: "sábado",
+  Sunday: "domingo",
+};
+
+/** ["Thursday","Friday","Saturday"] → «jueves a sábado»; ["Sunday"] → «domingo». */
+const diasLegibles = (dias: readonly string[]): string => {
+  const nombres = dias.map((d) => DIA_ES[d] ?? d);
+  if (nombres.length === 1) return nombres[0];
+  if (nombres.length >= 3) return `${nombres[0]} a ${nombres[nombres.length - 1]}`;
+  return `${nombres.slice(0, -1).join(", ")} y ${nombres[nombres.length - 1]}`;
+};
+
+/**
+ * Horario por tramos, sacado de `NEGOCIO.horarios` (el mismo del JSON-LD):
+ * `[{ dias: "Jueves a sábado", horas: "20:00 – 02:00" }, …]`.
+ */
+export const HORARIO = NEGOCIO.horarios.map((h) => {
+  const dias = diasLegibles(h.dias);
+  return { dias: dias.charAt(0).toUpperCase() + dias.slice(1), horas: `${h.abre} – ${h.cierra}` };
+});
+
+/** «El jueves, de 16:00 a 01:00; el viernes, de 15:30 a 02:00; …» */
+export const HORARIO_EN_FRASE =
+  NEGOCIO.horarios
+    .map((h, i) => {
+      const dias = diasLegibles(h.dias);
+      const tramo = `${h.dias.length > 1 ? "de" : "el"} ${dias}, de ${h.abre} a ${h.cierra}`;
+      return i === 0 ? tramo.charAt(0).toUpperCase() + tramo.slice(1) : tramo;
+    })
+    .join("; ") + ".";
+
+/**
+ * Descripción del bar para el JSON-LD: los hechos que antes vivían en las
+ * preguntas frecuentes de /contacto (sin reservas, hay sin alcohol, relación
+ * con Casa Tomás), en una frase que un asistente pueda citar tal cual.
+ */
+export const DESCRIPCION_NEGOCIO =
+  `Coctelería y bar de copas en Crevillent (Alicante), en la ${NEGOCIO.calle}, ` +
+  `la puerta de al lado del ${CASA_TOMAS.nombre}, del que forma parte: se puede cenar en Casa Tomás y tomar la copa en Touza. ` +
+  "Cócteles de autor y clásicos, cócteles y cervezas sin alcohol, champagne, cava y whisky. " +
+  "No se reserva: se viene directamente.";
+
 export function barSchema(): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "BarOrPub",
     "@id": ID_NEGOCIO,
     name: NEGOCIO.nombre,
+    description: DESCRIPCION_NEGOCIO,
     image: absoluta(IMAGENES.interior.src),
     telephone: NEGOCIO.telefono,
     email: NEGOCIO.email,
@@ -98,8 +166,24 @@ export function barSchema(): Record<string, unknown> {
     // nada de URL de reserva ni de ReserveAction. Se llama o se viene.
     acceptsReservations: false,
     hasMenu: canonical("/carta"),
+    // Une la entidad Touza con Casa Tomás (auditoría SEO/GEO del 15/11/2026,
+    // hallazgo 1): sin esto, para Google y los asistentes son dos negocios
+    // sueltos que comparten calle.
+    parentOrganization: {
+      "@type": "Restaurant",
+      name: CASA_TOMAS.nombre,
+      url: CASA_TOMAS.url,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: CASA_TOMAS.calle,
+        addressLocality: NEGOCIO.localidad,
+        addressRegion: NEGOCIO.region,
+        postalCode: NEGOCIO.cp,
+        addressCountry: NEGOCIO.pais,
+      },
+    },
     // Bar de copas: sin "Tapas" (la carta de Touza no tiene platos).
-    servesCuisine: ["Cócteles", "Coctelería", "Copas", "Champagne", "Vinos"],
+    servesCuisine: ["Cócteles", "Coctelería", "Copas", "Champagne", "Cava"],
     // "€€", nunca "$$": react-helmet pasa el contenido por String.replace() y
     // "$$" es la secuencia de escape de "$" → en dist salía "priceRange":"$".
     priceRange: "€€",
@@ -199,44 +283,19 @@ export function menuSchema(secciones: SeccionCarta[]): Record<string, unknown> {
 }
 
 /**
- * Preguntas frecuentes (visibles en /contacto y como FAQPage en su JSON-LD).
- * Solo con datos ya confirmados: SIN horario (está pendiente del dueño).
+ * `WebPage` de una página temática (p. ej. /despues-de-cenar), con `about`
+ * apuntando al bar (`/#bar`, el `@id` del JSON-LD de la portada).
  */
-export const PREGUNTAS_FRECUENTES: { pregunta: string; respuesta: string; idioma?: "en" }[] = [
-  {
-    pregunta: "¿Hay que reservar para ir a Touza?",
-    respuesta: "No. En Touza no se reserva: ven directamente.",
-  },
-  {
-    pregunta: "¿Dónde está Touza?",
-    respuesta: `En la ${NEGOCIO.calle}, ${NEGOCIO.cp} ${NEGOCIO.localidad} (Crevillent), al lado del Restaurante Casa Tomás.`,
-  },
-  {
-    pregunta: "¿Tenéis cócteles sin alcohol?",
-    respuesta: "Sí. En la carta hay una sección de cócteles sin alcohol, y también cervezas sin alcohol.",
-  },
-  {
-    pregunta: "¿Qué relación tiene Touza con Casa Tomás?",
-    respuesta:
-      "Touza forma parte del grupo de Restaurante Casa Tomás y está en la puerta de al lado: puedes cenar en Casa Tomás y tomar la copa en Touza.",
-  },
-  {
-    pregunta: "Is there a cocktail bar in Crevillent?",
-    respuesta: `Yes. Touza is a cocktail bar at ${NEGOCIO.calle}, Crevillent, next door to Casa Tomás restaurant. No reservations: just walk in.`,
-    idioma: "en",
-  },
-];
-
-export function faqSchema(): Record<string, unknown> {
+export function paginaSchema({ ruta, nombre, descripcion }: { ruta: string; nombre: string; descripcion: string }): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "@id": `${canonical("/contacto")}#faq`,
-    mainEntity: PREGUNTAS_FRECUENTES.map((p) => ({
-      "@type": "Question",
-      name: p.pregunta,
-      ...(p.idioma ? { inLanguage: p.idioma } : {}),
-      acceptedAnswer: { "@type": "Answer", text: p.respuesta },
-    })),
+    "@type": "WebPage",
+    "@id": `${canonical(ruta)}#pagina`,
+    url: canonical(ruta),
+    name: nombre,
+    description: descripcion,
+    inLanguage: "es-ES",
+    about: { "@type": "BarOrPub", "@id": ID_NEGOCIO, name: NEGOCIO.nombre },
+    mentions: { "@type": "Restaurant", name: CASA_TOMAS.nombre, url: CASA_TOMAS.url },
   };
 }

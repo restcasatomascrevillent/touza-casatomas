@@ -1,0 +1,347 @@
+{
+  "touza-2": {
+    "antes": {
+      "luz": 127.4,
+      "negros": 8.8,
+      "rb": 1.841,
+      "ruido": 6.54
+    },
+    "despues": {
+      "luz": 122.0,
+      "negros": 8.5,
+      "rb": 1.648,
+      "ruido": 5.38
+    },
+    "k_balance": 1.17,
+    "ruido_sin_grano": 5.25,
+    "calidad": 90,
+    "kb": 879,
+    "medidas": [
+      2560,
+      1708
+    ],
+    "notas": "interior: -cálida, ruido fuerte en sombras"
+  },
+  "touza-5": {
+    "antes": {
+      "luz": 78.6,
+      "negros": 46.5,
+      "rb": 1.552,
+      "ruido": 2.54
+    },
+    "despues": {
+      "luz": 75.4,
+      "negros": 46.2,
+      "rb": 1.569,
+      "ruido": 2.39
+    },
+    "k_balance": 1.873,
+    "ruido_sin_grano": 2.3,
+    "calidad": 90,
+    "kb": 272,
+    "medidas": [
+      1708,
+      2560
+    ],
+    "notas": "barra"
+  },
+  "touza-7": {
+    "antes": {
+      "luz": 61.0,
+      "negros": 51.7,
+      "rb": 1.763,
+      "ruido": 1.22
+    },
+    "despues": {
+      "luz": 65.6,
+      "negros": 48.6,
+      "rb": 1.616,
+      "ruido": 1.29
+    },
+    "k_balance": 1.681,
+    "ruido_sin_grano": 1.07,
+    "calidad": 90,
+    "kb": 219,
+    "medidas": [
+      1708,
+      2560
+    ],
+    "notas": "mojito: +0,3 EV"
+  },
+  "touza-8-1": {
+    "antes": {
+      "luz": 115.2,
+      "negros": 9.7,
+      "rb": 1.647,
+      "ruido": 3.07
+    },
+    "despues": {
+      "luz": 108.3,
+      "negros": 9.4,
+      "rb": 1.623,
+      "ruido": 2.96
+    },
+    "k_balance": 1.568,
+    "ruido_sin_grano": 2.71,
+    "calidad": 90,
+    "kb": 381,
+    "medidas": [
+      1708,
+      2560
+    ],
+    "notas": "champán"
+  },
+  "touza-10": {
+    "antes": {
+      "luz": 116.5,
+      "negros": 14.3,
+      "rb": 1.664,
+      "ruido": 4.06
+    },
+    "despues": {
+      "luz": 110.7,
+      "negros": 13.7,
+      "rb": 1.614,
+      "ruido": 3.72
+    },
+    "k_balance": 1.39,
+    "ruido_sin_grano": 3.55,
+    "calidad": 90,
+    "kb": 465,
+    "medidas": [
+      1708,
+      2560
+    ],
+    "notas": "botellas"
+  },
+  "touza-coctel-t": {
+    "antes": {
+      "luz": 75.8,
+      "negros": 36.9,
+      "rb": 1.26,
+      "ruido": 15.44
+    },
+    "despues": {
+      "luz": 74.0,
+      "negros": 35.9,
+      "rb": 1.462,
+      "ruido": 13.19
+    },
+    "k_balance": 2.391,
+    "ruido_sin_grano": 13.16,
+    "calidad": 74,
+    "kb": 669,
+    "medidas": [
+      1500,
+      2000
+    ],
+    "notas": "coctel-t: +calidez, ruido fuerte"
+  },
+  "touza-sirviendo": {
+    "antes": {
+      "luz": 119.8,
+      "negros": 11.6,
+      "rb": 1.371,
+      "ruido": 3.75
+    },
+    "despues": {
+      "luz": 114.6,
+      "negros": 11.6,
+      "rb": 1.502,
+      "ruido": 3.29
+    },
+    "k_balance": 1.512,
+    "ruido_sin_grano": 3.17,
+    "calidad": 90,
+    "kb": 669,
+    "medidas": [
+      1920,
+      2560
+    ],
+    "notas": "sirviendo: +calidez"
+  },
+  "touza-copa-roja-2": {
+    "antes": {
+      "luz": 134.2,
+      "negros": 21.7,
+      "rb": 1.128,
+      "ruido": 3.42
+    },
+    "despues": {
+      "luz": 127.4,
+      "negros": 23.0,
+      "rb": 1.499,
+      "ruido": 1.62
+    },
+    "k_balance": 2.435,
+    "ruido_sin_grano": 1.42,
+    "calidad": 90,
+    "kb": 475,
+    "medidas": [
+      1920,
+      2560
+    ],
+    "notas": "copa-roja-2: la más fría, +calidez"
+  },
+  "touza-logo": {
+    "antes": {
+      "luz": 24.4,
+      "negros": 79.1,
+      "rb": 1.219,
+      "ruido": 11.08
+    },
+    "despues": {
+      "luz": 30.4,
+      "negros": 80.8,
+      "rb": 0.922,
+      "ruido": 6.85
+    },
+    "k_balance": 1.981,
+    "ruido_sin_grano": 6.82,
+    "calidad": 86,
+    "kb": 647,
+    "medidas": [
+      1920,
+      2560
+    ],
+    "notas": "logo: +0,8 EV en la «T», ruido fuerte"
+  },
+  "touza-moscow-mule": {
+    "antes": {
+      "luz": 96.9,
+      "negros": 38.6,
+      "rb": 1.413,
+      "ruido": 2.08
+    },
+    "despues": {
+      "luz": 100.4,
+      "negros": 38.3,
+      "rb": 1.499,
+      "ruido": 1.92
+    },
+    "k_balance": 1.882,
+    "ruido_sin_grano": 1.82,
+    "calidad": 90,
+    "kb": 246,
+    "medidas": [
+      1500,
+      2000
+    ],
+    "notas": "moscow mule: +0,3 EV"
+  },
+  "touza-mango": {
+    "antes": {
+      "luz": 168.0,
+      "negros": 3.0,
+      "rb": 1.557,
+      "ruido": 1.04
+    },
+    "despues": {
+      "luz": 137.5,
+      "negros": 3.3,
+      "rb": 1.56,
+      "ruido": 1.47
+    },
+    "k_balance": 1.271,
+    "ruido_sin_grano": 0.74,
+    "calidad": 90,
+    "kb": 293,
+    "medidas": [
+      1500,
+      2000
+    ],
+    "notas": "mango: -0,6 EV, sin viñeta extra"
+  },
+  "touza-pina-botellas": {
+    "antes": {
+      "luz": 119.7,
+      "negros": 10.9,
+      "rb": 2.048,
+      "ruido": 4.04
+    },
+    "despues": {
+      "luz": 115.0,
+      "negros": 10.8,
+      "rb": 1.655,
+      "ruido": 3.72
+    },
+    "k_balance": 0.919,
+    "ruido_sin_grano": 3.54,
+    "calidad": 90,
+    "kb": 349,
+    "medidas": [
+      1500,
+      2000
+    ],
+    "notas": "piña: la más cálida (2,05), se enfría"
+  },
+  "touza-aperol": {
+    "antes": {
+      "luz": 143.8,
+      "negros": 13.5,
+      "rb": 1.739,
+      "ruido": 3.12
+    },
+    "despues": {
+      "luz": 138.2,
+      "negros": 13.5,
+      "rb": 1.657,
+      "ruido": 2.79
+    },
+    "k_balance": 1.197,
+    "ruido_sin_grano": 2.67,
+    "calidad": 90,
+    "kb": 285,
+    "medidas": [
+      1500,
+      2000
+    ],
+    "notas": "aperol"
+  },
+  "touza-mojito-2": {
+    "antes": {
+      "luz": 99.9,
+      "negros": 32.8,
+      "rb": 1.531,
+      "ruido": 2.2
+    },
+    "despues": {
+      "luz": 97.3,
+      "negros": 32.9,
+      "rb": 1.557,
+      "ruido": 2.1
+    },
+    "k_balance": 1.53,
+    "ruido_sin_grano": 2.01,
+    "calidad": 90,
+    "kb": 227,
+    "medidas": [
+      1500,
+      2000
+    ],
+    "notas": "mojito barra"
+  },
+  "touza-estanteria": {
+    "antes": {
+      "luz": 79.7,
+      "negros": 20.6,
+      "rb": 1.24,
+      "ruido": 6.72
+    },
+    "despues": {
+      "luz": 76.8,
+      "negros": 20.6,
+      "rb": 1.487,
+      "ruido": 5.34
+    },
+    "k_balance": 2.435,
+    "ruido_sin_grano": 5.24,
+    "calidad": 90,
+    "kb": 893,
+    "medidas": [
+      2560,
+      1920
+    ],
+    "notas": "estantería: +calidez, ruido fuerte"
+  }
+}

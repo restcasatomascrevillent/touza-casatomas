@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { CARTA_SSG, semilla } from '@/lib/carta-ssg';
 import { COLUMNAS_COCTELES } from '@/lib/carta-consultas.mjs';
 import { datosAlergenos, etiquetasAlergenos } from '@/lib/alergenos';
+import { FOTO_COCTEL_SIN_FOTO, fotoPropia } from '@/lib/carta';
+import { formatearPrecio } from '@/lib/precio';
 
 export interface Coctel {
   id: string;
@@ -26,7 +28,10 @@ export interface CoctelUI {
   price: string;
   description: string;
   ingredients: string[];
+  /** Foto propia del cóctel o, si no la tiene (o es de un banco), la de la «T» del local. */
   image: string;
+  /** true cuando `image` es la foto genérica de la «T», no la del cóctel. */
+  fotoGenerica?: boolean;
   /** Etiquetas legibles ("Gluten", "Sulfitos"...). [] si no consta el dato. */
   alergenos: string[];
   /** Texto libre de `alergenos_notas`, o null si no hay. Nunca certifica. */
@@ -72,15 +77,19 @@ export const transformCoctelesToUI = (cocteles: Coctel[] | undefined): CoctelUI[
     // Mismo vocabulario que `casa-tomas-story` (@/lib/alergenos): "frutos_cascara"
     // del panel y "frutos de cáscara" de la BD son el mismo alérgeno.
     const datos = datosAlergenos(c);
+    const propia = fotoPropia(c.imagen_url);
     return {
       id: c.id,
       name: c.nombre || '',
       category: c.categoria || 'autor',
       base: c.base || 'all',
-      price: c.precio_eur ? `${c.precio_eur.toFixed(2).replace('.', ',')}€` : '',
+      price: formatearPrecio(c.precio_eur),
       description: c.descripcion || '',
       ingredients: c.ingredientes?.split(', ') || [],
-      image: c.imagen_url || '',
+      // Nunca una foto de banco (Unsplash): sin foto propia, el cóctel lleva
+      // la foto de la «T» del local (pedido del 15/11/2026).
+      image: propia || FOTO_COCTEL_SIN_FOTO,
+      fotoGenerica: !propia,
       alergenos: etiquetasAlergenos(datos),
       alergenosNota: datos.notas,
     };

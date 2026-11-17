@@ -3,8 +3,19 @@
   "trailingSlash": false,
   "cleanUrls": true,
   "regions": ["fra1"],
+  "images": {
+    "sizes": [96, 128, 192, 256, 384, 480, 640, 828, 1080],
+    "qualities": [75],
+    "formats": ["image/avif", "image/webp"],
+    "minimumCacheTTL": 2592000,
+    "remotePatterns": [
+      { "protocol": "https", "hostname": "^sfonaclosuafvlhutkon\\.supabase\\.co$", "pathname": "^/storage/v1/object/public/.*$" },
+      { "protocol": "https", "hostname": "^haqmmdfdzzatdnrrcgez\\.supabase\\.co$", "pathname": "^/storage/v1/object/public/.*$" }
+    ]
+  },
   "redirects": [
     { "source": "/reservado", "destination": "/contacto", "statusCode": 301 },
+    { "source": "/galeria", "destination": "/", "statusCode": 301 },
     { "source": "/reserva/respuesta", "destination": "/contacto", "statusCode": 301 },
     { "source": "/reserva/respuesta/:ruta*", "destination": "/contacto", "statusCode": 301 }
   ],
@@ -37,6 +48,12 @@
       "source": "/apple-touch-icon.png",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
+    },
+    {
+      "source": "/mapa-touza.webp",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=2592000" }
       ]
     },
     {

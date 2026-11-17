@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { barSchema, faqSchema, menuSchema, NEGOCIO } from "@/lib/negocio";
+import * as negocio from "@/lib/negocio";
+import { barSchema, menuSchema, paginaSchema, CASA_TOMAS, HORARIO, HORARIO_EN_FRASE, ID_NEGOCIO, NEGOCIO, VIA } from "@/lib/negocio";
 
 describe("JSON-LD de Touza", () => {
   it("BarOrPub con la dirección confirmada, el mapa y sin 'Tapas'", () => {
@@ -7,6 +8,26 @@ describe("JSON-LD de Touza", () => {
     expect(bar.address.streetAddress).toBe("C/ Santa María de la Cabeza, 4");
     expect(bar.hasMap).toBe(NEGOCIO.mapa);
     expect(bar.servesCuisine).not.toContain("Tapas");
+  });
+
+  it("une Touza con Casa Tomás (parentOrganization) y lleva una descripción con los hechos de la antigua FAQ", () => {
+    const bar = JSON.parse(JSON.stringify(barSchema()));
+    expect(bar.parentOrganization).toMatchObject({
+      "@type": "Restaurant",
+      name: "Restaurante Casa Tomás",
+      url: "https://restaurantecasatomascrevillente.es/",
+    });
+    expect(bar.parentOrganization.address.streetAddress).toBe(CASA_TOMAS.calle);
+    expect(bar.description).toMatch(/Casa Tomás/);
+    expect(bar.description).toMatch(/sin alcohol/);
+    expect(bar.description).toMatch(/No se reserva/);
+    // Sin horario en la descripción: el horario va en openingHoursSpecification.
+    expect(bar.description).not.toMatch(/\d{1,2}:\d{2}/);
+  });
+
+  it("ya no hay FAQPage", () => {
+    expect("faqSchema" in negocio).toBe(false);
+    expect("PREGUNTAS_FRECUENTES" in negocio).toBe(false);
   });
 
   it("menuSchema quita fotos de Unsplash y productos repetidos", () => {
@@ -34,9 +55,30 @@ describe("JSON-LD de Touza", () => {
     expect(cocteles.hasMenuItem[1].image).toContain("negroni.jpg");
   });
 
-  it("FAQPage sin horario", () => {
-    const faq = JSON.parse(JSON.stringify(faqSchema()));
-    expect(faq["@type"]).toBe("FAQPage");
-    expect(JSON.stringify(faq)).not.toMatch(/\d{1,2}:\d{2}/);
+  it("WebPage con `about` apuntando al bar (/#bar)", () => {
+    const pagina = JSON.parse(JSON.stringify(paginaSchema({ ruta: "/despues-de-cenar", nombre: "N", descripcion: "D" })));
+    expect(pagina["@type"]).toBe("WebPage");
+    expect(pagina.url).toMatch(/\/despues-de-cenar$/);
+    expect(pagina.about["@id"]).toBe(ID_NEGOCIO);
+    expect(ID_NEGOCIO).toMatch(/\/#bar$/);
+  });
+});
+
+describe("Horario y dirección legibles, sacados de NEGOCIO", () => {
+  it("tramos de horario", () => {
+    expect(HORARIO).toEqual([
+      { dias: "Jueves", horas: "16:00 – 01:00" },
+      { dias: "Viernes", horas: "15:30 – 02:00" },
+      { dias: "Sábado", horas: "15:00 – 02:00" },
+      { dias: "Domingo", horas: "15:00 – 20:00" },
+    ]);
+  });
+
+  it("horario en una frase", () => {
+    expect(HORARIO_EN_FRASE).toBe("El jueves, de 16:00 a 01:00; el viernes, de 15:30 a 02:00; el sábado, de 15:00 a 02:00; el domingo, de 15:00 a 20:00.");
+  });
+
+  it("la calle sin el número", () => {
+    expect(VIA).toBe("C/ Santa María de la Cabeza");
   });
 });

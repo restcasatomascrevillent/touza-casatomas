@@ -7,20 +7,64 @@
     "width": 2560,
     "height": 1708
   },
-  "touza-5": {
-    "width": 1708,
-    "height": 2560
-  },
-  "touza-7": {
-    "width": 1708,
-    "height": 2560
-  },
   "touza-8-1": {
     "width": 1708,
     "height": 2560
   },
+  "touza-botellero": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-copa-espuma": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-copa-roja-2": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-copa-roja": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-copas-cenital": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-estanteria": {
+    "width": 2560,
+    "height": 1920
+  },
+  "touza-green": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-letrero": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-logo": {
+    "width": 1920,
+    "height": 2560
+  },
+  "touza-pina": {
+    "width": 1440,
+    "height": 2560
+  },
+  "touza-sala": {
+    "width": 1708,
+    "height": 2277
+  },
+  "touza-salon-noche": {
+    "width": 2560,
+    "height": 1920
+  },
+  "touza-trio": {
+    "width": 1536,
+    "height": 2048
+  },
   "touza-2-movil": {
-    "width": 1280,
+    "width": 1080,
     "height": 1708
   }
 }

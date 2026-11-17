@@ -23,9 +23,6 @@ import { useMatches } from "react-router-dom";
  * casi siempre buscaba la carta, el horario o la dirección, y "Cómo llegar"
  * es una salida útil, al alcance del pulgar, junto a los enlaces de la
  * propia página.
- *
- * Lo comparten la barra y el aviso de cookies: el aviso se apoya encima de la
- * barra cuando la hay y baja al borde de la pantalla cuando no.
  */
 export interface DatosRutaBarraMovil {
   barraMovil?: boolean;

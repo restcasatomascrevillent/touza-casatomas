@@ -1,123 +1,72 @@
-import { MapPin, Clock, Phone, Mail, Instagram } from "lucide-react";
-import Reveal from "@/components/Reveal";
-import { DIRECCION_MAPS, NEGOCIO } from "@/lib/negocio";
+import { Navigation } from "lucide-react";
+import Encabezado from "@/components/home/Encabezado";
+import { filasHorario } from "@/components/home/hechos";
+import { DIRECCION_MAPS, NEGOCIO, TELEFONO, URL_COMO_LLEGAR } from "@/lib/negocio";
 
-// Cada dato con su enlace: antes eran <p> sueltos y en el móvil no se podía
-// pulsar el teléfono ni abrir la dirección en el mapa desde la portada.
-const contactItems: { icon: typeof MapPin; title: string; lines: { text: string; href?: string; label?: string }[] }[] = [
-  {
-    icon: MapPin,
-    title: "Ubicación",
-    lines: [
-      {
-        text: `${NEGOCIO.calle}\n${NEGOCIO.cp} ${NEGOCIO.localidad}, ${NEGOCIO.region}`,
-        href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DIRECCION_MAPS)}`,
-        label: `Ver ${NEGOCIO.calle}, ${NEGOCIO.localidad}, en Google Maps`,
-      },
-    ],
-  },
-  {
-    icon: Clock,
-    title: "Horario",
-    lines: [{ text: "Jue - Sáb: 20:00 - 02:00" }, { text: "Dom: 18:00 - 00:00" }],
-  },
-  {
-    icon: Phone,
-    title: "Contacto",
-    lines: [
-      { text: "966 782 000", href: "tel:+34966782000", label: "Llamar al 966 782 000" },
-      { text: "info@touzabar.es", href: "mailto:info@touzabar.es" },
-    ],
-  },
-];
+/**
+ * «Visítanos»: el único sitio de la portada con la dirección, el horario, el
+ * teléfono y el correo (antes salían también en el pie, en «Lo que nos
+ * define» y en el hero). El horario sale de `NEGOCIO`, como el del JSON-LD.
+ *
+ * «Cómo llegar» (blanco, a la ruta de Google Maps) solo en escritorio: en el
+ * móvil ya está siempre en la barra fija de abajo y serían dos botones iguales
+ * a la vez. Fondo en el azul petróleo de las paredes del local.
+ */
+const enlace =
+  "rounded underline-offset-4 transition-colors hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
 
-const VisitUs = () => {
-  return (
-    <section className="py-12 md:py-32 bg-black text-white">
-      <div className="max-w-5xl mx-auto px-5 md:px-6">
-        <div className="text-center mb-8 md:mb-20">
-          <Reveal
-            as="span"
-            className="text-primary text-xs tracking-[0.3em] uppercase mb-3 md:mb-4 block font-medium"
-          >
-            Contacto
-          </Reveal>
-          <Reveal
-            as="h2"
-            delay={0.08}
-            className="font-serif text-3xl md:text-6xl text-white mb-3 md:mb-6"
-          >
-            Visítanos
-          </Reveal>
-          <Reveal
-            as="p"
-            delay={0.16}
-            className="text-white/65 text-base md:text-lg max-w-xl mx-auto font-light"
-          >
-            Te esperamos en el corazón de Crevillente.
-          </Reveal>
-        </div>
-
-        {/* En el móvil, lista compacta (icono a la izquierda, texto
-            alineado): antes eran tres bloques centrados y apilados, con mucho
-            aire y los enlaces de 31 px de alto. Desde md, tres columnas. */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-16 relative max-w-sm mx-auto md:max-w-none">
-          {/* Vertical separators desktop */}
-          <div className="hidden md:block absolute top-8 bottom-8 left-1/3 w-px bg-white/5" />
-          <div className="hidden md:block absolute top-8 bottom-8 right-1/3 w-px bg-white/5" />
-
-          {contactItems.map((item, index) => (
-            <Reveal key={item.title} delay={index * 0.08} className="flex items-start gap-4 text-left md:block md:text-center">
-              <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 md:mx-auto md:mb-6 rounded-full bg-white/5 flex items-center justify-center">
-                <item.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 pt-0.5 md:pt-0">
-              <h3 className="font-serif text-lg md:text-xl text-white md:mb-3">{item.title}</h3>
-              {item.lines.map((line) =>
-                line.href ? (
-                  <a
-                    key={line.text}
-                    href={line.href}
-                    aria-label={line.label}
-                    target={line.href.startsWith("http") ? "_blank" : undefined}
-                    rel={line.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                    className="flex min-h-11 items-center md:block md:min-h-0 py-1 whitespace-pre-line text-white/75 hover:text-primary text-[15px] md:text-base font-light leading-relaxed underline-offset-4 hover:underline transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  >
-                    {line.text}
-                  </a>
-                ) : (
-                  <p key={line.text} className="text-white/75 text-[15px] md:text-base font-light leading-relaxed">{line.text}</p>
-                )
-              )}
-              </div>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal
-          delay={0.2}
-          className="flex justify-center gap-3 md:gap-4 mt-8 md:mt-16"
+const VisitUs = () => (
+  <section id="visitanos" aria-labelledby="visitanos-titulo" className="bg-petroleo text-white">
+    <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 md:px-8 md:py-28 lg:grid-cols-12 lg:items-end lg:gap-x-12 lg:px-10 lg:py-32">
+      <div className="lg:col-span-5">
+        <Encabezado id="visitanos-titulo" lineas={["Visítanos"]} tituloClassName="text-[3.25rem] leading-none md:text-7xl lg:text-8xl" />
+        <a
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DIRECCION_MAPS)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Ver ${NEGOCIO.calle}, ${NEGOCIO.localidad}, en Google Maps`}
+          className={`mt-6 inline-block text-lg leading-relaxed text-white/80 md:mt-8 md:text-xl ${enlace}`}
         >
-          <a
-            href="mailto:info@touzabar.es"
-            className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            aria-label="Escribir un email a info@touzabar.es"
-          >
-            <Mail className="w-[18px] h-[18px] md:w-5 md:h-5 text-white/70" aria-hidden="true" />
-          </a>
-          <a
-            href="https://www.instagram.com/touzabar/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            aria-label="Instagram de Touza (se abre en otra pestaña)"
-          >
-            <Instagram className="w-[18px] h-[18px] md:w-5 md:h-5 text-white/70" aria-hidden="true" />
-          </a>
-        </Reveal>
+          {NEGOCIO.calle}
+          <br />
+          {NEGOCIO.cp} {NEGOCIO.localidad}, {NEGOCIO.region}
+        </a>
       </div>
-    </section>
-  );
-};
+
+      <div className="lg:col-span-4">
+        <h3 className="antetitulo mb-4">Horario</h3>
+        <dl className="divide-y divide-white/10 border-y border-white/10">
+          {filasHorario().map((fila) => (
+            <div key={fila.dias} className="flex items-baseline justify-between gap-6 py-3.5">
+              <dt className="text-base text-white/80">{fila.dias}</dt>
+              <dd className="font-serif text-2xl font-medium tabular-nums text-cream">{fila.horas}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div className="flex flex-col items-start gap-6 lg:col-span-3 lg:items-end">
+        <a
+          href={URL_COMO_LLEGAR}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Cómo llegar a Touza (abre Google Maps)"
+          className="boton boton-macizo hidden lg:inline-flex"
+        >
+          <Navigation className="h-4 w-4" aria-hidden="true" />
+          Cómo llegar
+        </a>
+        <div className="flex flex-col gap-1 text-base text-white/80 lg:items-end">
+          <a href={TELEFONO.href} aria-label={`Llamar al ${TELEFONO.texto}`} className={`inline-flex min-h-11 items-center ${enlace}`}>
+            {TELEFONO.texto}
+          </a>
+          <a href={`mailto:${NEGOCIO.email}`} className={`inline-flex min-h-11 items-center break-all ${enlace}`}>
+            {NEGOCIO.email}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+);
 
 export default VisitUs;

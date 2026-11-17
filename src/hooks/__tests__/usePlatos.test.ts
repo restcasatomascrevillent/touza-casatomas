@@ -223,7 +223,7 @@ describe("transformPlatosToUI", () => {
     expect(ui.id).toBe("abc-1");
     expect(ui.name).toBe("Croquetas de jamón");
     expect(ui.description).toBe("Suaves croquetas caseras");
-    expect(ui.price).toBe("7,50€");
+    expect(ui.price).toBe("7,50\u00A0€");
     expect(ui.image).toBe("https://example.com/croquetas.jpg");
     expect(ui.categoria).toBe("tapas");
   });
@@ -244,7 +244,7 @@ describe("transformPlatosToUI", () => {
     expect(result.map((p) => p.image)).toEqual([null, null]);
     // El resto del plato no cambia.
     expect(result[0].name).toBe("Croquetas de jamón");
-    expect(result[0].price).toBe("7,50€");
+    expect(result[0].price).toBe("7,50\u00A0€");
   });
 
   it("usa string vacío para nombre y descripción null", () => {

@@ -26,10 +26,13 @@ const PageTransition = ({ children }: PageTransitionProps) => {
             // el bloque contenedor de sus descendientes `fixed`, y la cabecera
             // dejaba de estar fija: se iba con el scroll y el menú quedaba
             // inaccesible fuera de la parte alta de la página.
-            initial={animarEntrada ? { opacity: 0, y: 16 } : false}
-            animate={{ opacity: 1, y: 0 }}
+            // Solo opacidad y 0,3 s (auditoría del 15/11/2026): con el
+            // desplazamiento de 16 px la página nueva daba un salto al
+            // coincidir con el scroll de Lenis, y 0,45 s se hacía lento.
+            initial={animarEntrada ? { opacity: 0 } : false}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
             className="w-full"
         >
             {children}

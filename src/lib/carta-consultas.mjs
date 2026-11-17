@@ -23,9 +23,9 @@ export const COLUMNAS_COCTELES =
   "id,nombre,descripcion,precio_eur,imagen_url,categoria,base,ingredientes,orden,alergenos_oficiales,alergenos_notas";
 
 export const COLUMNAS_VINOS =
-  "id,nombre,descripcion,precio_eur,categoria,orden,featured,ubicacion_region,ubicacion_pais,denominacion_origen";
+  "id,nombre,descripcion,precio_eur,imagen_url,categoria,orden,featured,ubicacion_region,ubicacion_pais,denominacion_origen";
 
-export const COLUMNAS_BEBIDAS = "id,nombre,descripcion,precio_eur,categoria,tipo,tag,featured,orden,tamano";
+export const COLUMNAS_BEBIDAS = "id,nombre,descripcion,precio_eur,imagen_url,categoria,tipo,tag,featured,orden,tamano";
 
 /**
  * `Vinos.orden` es TEXTO y hoy vale "0" (o null) en todas las filas, así que
