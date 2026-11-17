@@ -794,3 +794,28 @@
     animation: entrada-hero-movil 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
+
+/* Fundido de entrada de cada página al navegar (components/PageTransition.tsx).
+   REGLA: que una página se vea no puede depender de que termine una animación
+   de JavaScript. Esto es CSS: en reposo el contenedor tiene opacidad 1, así
+   que si la animación no arranca la página se ve igual. Solo opacidad (un
+   `transform` o un `filter` aquí soltarían la cabecera `fixed`), sin
+   animación de salida, y con «reducir movimiento» ni se aplica. La primera
+   página (el HTML del SSG) no lleva la clase. */
+@layer components {
+  @media (prefers-reduced-motion: no-preference) {
+    .entrada-pagina {
+      animation: entrada-pagina 0.25s ease-out both;
+    }
+  }
+}
+
+@keyframes entrada-pagina {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

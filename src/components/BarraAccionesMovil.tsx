@@ -43,7 +43,7 @@ function useHayQueApartarse(activo: boolean, ruta: string): boolean {
       }
       setApartada(visibles.size > 0);
     });
-    // La página nueva entra con la transición: se busca cuando ya está.
+    // Se busca con la página nueva ya pintada y colocada arriba.
     const temporizador = window.setTimeout(() => {
       document.querySelectorAll(SELECTOR_OCULTA_BARRA).forEach((el) => observador.observe(el));
     }, 400);

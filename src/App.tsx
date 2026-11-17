@@ -1,11 +1,11 @@
-import { Suspense, type ComponentType } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Suspense, useEffect, useLayoutEffect, useRef, type ComponentType } from "react";
+import { Outlet, useLocation, type Location } from "react-router-dom";
 import type { RouteRecord } from "vite-react-ssg";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AnimatePresence, MotionConfig } from "framer-motion";
+import { MotionConfig } from "framer-motion";
 import { Analytics } from "@vercel/analytics/react";
 import ErrorBoundary from "./components/ui/error-boundary";
 import PageTransition from "./components/PageTransition";
@@ -29,10 +29,55 @@ const PageLoader = () => (
   </div>
 );
 
-// Layout raíz: providers globales + transición de página alrededor del <Outlet />.
+// En el navegador, `useLayoutEffect` (antes de pintar); en el SSG, `useEffect`,
+// que en Node ni corre ni avisa.
+const useEfectoAntesDePintar = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+/**
+ * Vuelve arriba en cada navegación: si no, la página nueva se abría a la
+ * altura de scroll de la anterior (a media página o en el pie).
+ *
+ * - Va ligado a la ruta y a nada más: no espera a ninguna animación (antes
+ *   colgaba del `onExitComplete` de la transición y, si la salida no acababa,
+ *   tampoco se subía). También con el botón atrás/adelante del navegador, y
+ *   al pulsar el enlace de la página en la que ya se está («Inicio» en el pie
+ *   de la portada).
+ * - Antes de pintar: la página nueva no llega a verse a media altura, y los
+ *   <Reveal> y el ancla de la carta (efectos normales, que corren después) ya
+ *   miden con el scroll arriba.
+ * - No se toca la carga inicial (llegar con ancla) ni un cambio de ancla
+ *   dentro de la misma página. Un enlace a un cóctel desde otra página
+ *   (`/carta#moscow-mule`) sube aquí y la carta lo lleva luego a su ficha
+ *   (ver el efecto de `hash` en pages/Carta.tsx).
+ * - `scrollRestoration = "manual"`: con atrás/adelante el navegador repone
+ *   por su cuenta el scroll que tenía esa entrada, y si la página que se deja
+ *   es más corta lo hace DESPUÉS de pintarse la nueva: unas veces se volvía
+ *   arriba y otras a media página (y en Contacto, con el título ya
+ *   desvanecido por su escena de scroll). Así es siempre arriba; a cambio,
+ *   recargar a media página también empieza arriba.
+ */
+function useArribaAlNavegar({ key, pathname, hash }: Location) {
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
+  }, []);
+
+  const anterior = useRef({ key, pathname });
+  useEfectoAntesDePintar(() => {
+    const { key: claveAnterior, pathname: rutaAnterior } = anterior.current;
+    if (claveAnterior === key) return;
+    anterior.current = { key, pathname };
+    if (rutaAnterior === pathname && hash) return;
+    irArriba();
+    // `key` cambia en cada navegación; `pathname` y `hash` van con ella.
+  }, [key, pathname, hash]);
+}
+
+// Layout raíz: providers globales + contenedor de página alrededor del <Outlet />.
 // vite-react-ssg construye el router internamente a partir de `routes`.
 const RootLayout = () => {
   const location = useLocation();
+  const { pathname } = location;
+  useArribaAlNavegar(location);
   return (
     <div className="min-h-screen bg-background font-sans antialiased">
       <ErrorBoundary>
@@ -46,18 +91,18 @@ const RootLayout = () => {
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              {/* Al terminar de salir la página anterior (y antes de que entre la
-                  nueva) se vuelve arriba: si no, la página nueva se abría a la
-                  altura de scroll de la anterior. */}
-              <AnimatePresence mode="wait" onExitComplete={irArriba}>
-                <PageTransition key={location.pathname}>
-                  <Suspense fallback={<PageLoader />}>
-                    <Outlet />
-                  </Suspense>
-                </PageTransition>
-              </AnimatePresence>
-              {/* Fuera de <PageTransition>: su transform de framer-motion crearía
-                  un containing block y la barra `fixed` dejaría de anclarse al viewport. */}
+              {/* Sin <AnimatePresence> ni animación de salida: con `key`, al
+                  cambiar de ruta nace un contenedor nuevo con la página nueva
+                  ya dentro y visible; el fundido de entrada es CSS (ver
+                  PageTransition.tsx). Que una página se vea no depende de que
+                  termine ninguna animación de JavaScript. */}
+              <PageTransition key={pathname}>
+                <Suspense fallback={<PageLoader />}>
+                  <Outlet />
+                </Suspense>
+              </PageTransition>
+              {/* Fuera de <PageTransition>: no es parte de la página y no debe
+                  fundirse ni volver a montarse con cada navegación. */}
               <BarraAccionesMovil />
               {/* Vercel Web Analytics (sin cookies). Renderiza `null` y solo inyecta
                   el script en un useEffect → no afecta al HTML del SSG. El script
