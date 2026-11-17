@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { IMAGENES, type ImagenResponsive } from "@/assets/imagenes";
 import { NEGOCIO } from "@/lib/negocio";
 import FotoPortada from "./FotoPortada";
+import { LOCALIDAD } from "./hechos";
 import VideoAmbiente from "./VideoAmbiente";
 import { CLIP_EL_LOCAL, MEDIA_CLIP_HORIZONTAL, POSTER_HORIZONTAL, POSTER_VERTICAL, hayVideo } from "./medios";
 
@@ -60,6 +61,10 @@ const ElLocal = () => (
       </h2>
       <p className="text-balance font-serif text-[2rem] font-medium leading-[1.12] text-cream md:text-5xl md:leading-[1.08]">
         Sofá corrido, mármol y la barra a la vista, en la puerta de al lado de Casa Tomás.
+      </p>
+      {/* Estaba en el hero, bajo TOUZA (17/11/2026: el hero, sin texto). */}
+      <p className="mt-4 text-base leading-relaxed text-white/70 md:mt-6 md:text-[17px]">
+        Coctelería y bar de copas en {LOCALIDAD}, junto a Casa Tomás.
       </p>
     </div>
 

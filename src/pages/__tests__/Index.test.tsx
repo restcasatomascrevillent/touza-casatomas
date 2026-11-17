@@ -67,17 +67,21 @@ describe("Portada", () => {
     );
   });
 
-  it("hero: TOUZA en el h1, los hechos con Crevillent en un h2 y los dos botones", () => {
-    pintar();
+  it("hero sin texto: el rótulo, TOUZA en el único h1 (con su parte para buscadores) y los dos botones", () => {
+    const { container } = pintar();
     const h1 = screen.getAllByRole("heading", { level: 1 });
     expect(h1).toHaveLength(1);
     expect(h1[0]).toHaveTextContent("TOUZA · Coctelería y bar de copas en Crevillent");
-    expect(
-      screen.getByRole("heading", { level: 2, name: "Coctelería y bar de copas en Crevillent, junto a Casa Tomás." })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Abrimos el jueves hasta la 1:00, el viernes y sábado hasta las 2:00 y el domingo hasta las 20:00. Sin reservas: ven directamente.")
-    ).toBeInTheDocument();
+    // Lo que se ve del h1 es solo «TOUZA».
+    expect(h1[0].querySelector(".sr-only")).toHaveTextContent("· Coctelería y bar de copas en Crevillent");
+
+    const hero = container.querySelector(".hero-portada") as HTMLElement;
+    expect(within(hero).getByText("Cocktail bar · Crevillent")).toBeInTheDocument();
+    // Ni la frase de qué es Touza ni la del horario: han bajado de sitio.
+    expect(within(hero).queryAllByRole("heading", { level: 2 })).toHaveLength(0);
+    expect(hero.querySelectorAll("p")).toHaveLength(1);
+    expect(hero.textContent).not.toMatch(/junto a Casa Tomás|Abrimos|Sin reservas/);
+    expect(within(hero).getAllByRole("link").map((enlace) => enlace.textContent)).toEqual(["Ver la carta", "Cómo llegar"]);
 
     expect(screen.getByRole("link", { name: "Ver la carta" })).toHaveAttribute("href", "/carta");
     expect(screen.getByRole("link", { name: "Cómo llegar" })).toHaveAttribute("href", "/contacto");
@@ -88,6 +92,18 @@ describe("Portada", () => {
     for (const enlace of llegar) {
       expect(enlace.getAttribute("href")).toMatch(/^https:\/\/www\.google\.com\/maps\/dir\//);
     }
+  });
+
+  it("el texto que salía del hero sigue en la portada: una línea en «El local» y otra en «Visítanos»", () => {
+    const { container } = pintar();
+    const elLocal = screen.getByRole("heading", { level: 2, name: "El local" }).closest("section") as HTMLElement;
+    expect(within(elLocal).getByText("Coctelería y bar de copas en Crevillent, junto a Casa Tomás.").tagName).toBe("P");
+
+    const visitanos = container.querySelector("#visitanos") as HTMLElement;
+    expect(within(visitanos).getByText("Sin reservas: ven directamente.").tagName).toBe("P");
+    // El horario, solo en su tabla: la frase «Abrimos el jueves…» ya no sale.
+    expect(within(visitanos).getByText("Horario")).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/Abrimos el jueves/);
   });
 
   it("el hero es la foto del salón, con el recorte vertical para el móvil y variantes hasta 2560 px", () => {

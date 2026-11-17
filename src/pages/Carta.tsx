@@ -222,8 +222,9 @@ const Carta = () => {
 
   // Enlaces a un cóctel desde otras páginas (`/carta#moscow-mule`): abre la
   // pestaña de cócteles sin filtros y lleva la tarjeta justo bajo la barra de
-  // pestañas. Espera a que acabe la transición de página (0,3 s), que antes
-  // sube la página al principio.
+  // pestañas. Espera un momento (0,35 s): al cambiar de ruta el layout sube
+  // antes la página al principio (App.tsx) y la pestaña de cócteles tiene que
+  // estar ya pintada para medir dónde cae la tarjeta.
   const { hash } = useLocation();
   const hayCocteles = cocktailsData.length > 0;
   useEffect(() => {
