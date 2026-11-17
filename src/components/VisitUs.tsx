@@ -6,7 +6,8 @@ import { DIRECCION_MAPS, NEGOCIO, TELEFONO, URL_COMO_LLEGAR } from "@/lib/negoci
 /**
  * «Visítanos»: el único sitio de la portada con la dirección, el horario, el
  * teléfono y el correo (antes salían también en el pie, en «Lo que nos
- * define» y en el hero). El horario sale de `NEGOCIO`, como el del JSON-LD.
+ * define» y en el hero). El horario sale de `NEGOCIO`, como el del JSON-LD,
+ * y debajo va «Sin reservas: ven directamente.».
  *
  * «Cómo llegar» (blanco, a la ruta de Google Maps) solo en escritorio: en el
  * móvil ya está siempre en la barra fija de abajo y serían dos botones iguales
@@ -43,6 +44,8 @@ const VisitUs = () => (
             </div>
           ))}
         </dl>
+        {/* Estaba en el hero, tras la frase del horario (17/11/2026). */}
+        <p className="mt-4 text-[15px] leading-relaxed text-white/75">Sin reservas: ven directamente.</p>
       </div>
 
       <div className="flex flex-col items-start gap-6 lg:col-span-3 lg:items-end">

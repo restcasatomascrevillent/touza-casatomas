@@ -51,7 +51,9 @@ export function hastaLaHora(hora: string): string {
 
 /**
  * "Abrimos el jueves hasta la 1:00, el viernes y sábado hasta las 2:00 y el domingo hasta las 20:00."
- * Solo días y cierre: es lo que decide si aún da tiempo a ir.
+ * Solo días y cierre: es lo que decide si aún da tiempo a ir. Iba bajo el
+ * hero; desde el 17/11/2026 el hero no lleva texto y la portada da el
+ * horario solo en la tabla de «Visítanos» (`filasHorario`).
  */
 export function fraseHorario(horarios = NEGOCIO.horarios): string {
   // Solo cuenta el cierre: tramos seguidos que cierran a la misma hora van
@@ -69,11 +71,6 @@ export function fraseHorario(horarios = NEGOCIO.horarios): string {
   });
   const lista = tramos.length > 1 ? `${tramos.slice(0, -1).join(", ")} y ${tramos[tramos.length - 1]}` : tramos[0];
   return `Abrimos ${lista}.`;
-}
-
-/** Línea de hechos bajo el hero: horario y que no se reserva. */
-export function lineaDeHechos(horarios = NEGOCIO.horarios): string {
-  return `${fraseHorario(horarios)} Sin reservas: ven directamente.`;
 }
 
 /** Filas para una tabla de horario: [{ dias: "Jueves a sábado", horas: "20:00 – 02:00" }, …]. */

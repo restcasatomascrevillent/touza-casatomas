@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { HERO_VARIANTE_MOVIL, IMAGENES } from "@/assets/imagenes";
-import { LOCALIDAD, lineaDeHechos } from "./hechos";
+import { LOCALIDAD } from "./hechos";
 
 // React 18 aún no conoce `fetchPriority` en camelCase: se escribe en minúsculas.
 const PRIORIDAD_ALTA = { fetchpriority: "high" } as Record<string, string>;
@@ -9,6 +9,14 @@ const PRIORIDAD_ALTA = { fetchpriority: "high" } as Record<string, string>;
  * Hero de la portada: el de la web de antes (v0.0), que es el que quiere el
  * dueño (16/11/2026). La foto del salón (`touza-2`: el sofá mostaza visto
  * desde arriba) a pantalla completa, TOUZA centrado y dos botones.
+ *
+ * Sin texto (17/11/2026, el dueño: «una cosa es el SEO, pero es más
+ * importante que se vea bien»): solo el rótulo pequeño, TOUZA y los dos
+ * botones. Lo que había debajo de TOUZA ha bajado de sitio: «Coctelería y bar
+ * de copas en Crevillent, junto a Casa Tomás.» está en «El local» y «Sin
+ * reservas: ven directamente.», en «Visítanos», junto al horario. Para
+ * buscadores y lectores de pantalla, el <h1> sigue diciendo «Coctelería y
+ * bar de copas en Crevillent» (la parte que no se ve).
  *
  * - Móvil: el texto abajo, al alcance del pulgar, sobre un degradado que lo
  *   hace legible; los dos botones en una fila. El alto es `100svh` (no salta
@@ -27,11 +35,6 @@ const PRIORIDAD_ALTA = { fetchpriority: "high" } as Record<string, string>;
  *   maestro). `sizes` es el mayor de 100vw y 150vh: en una pantalla más
  *   cuadrada que 3:2, `object-cover` la pinta más ancha que la ventana.
  * Es el LCP: `fetchpriority="high"`, sin carga diferida y sin fundido.
- *
- * Bajo TOUZA van los hechos (qué es, dónde y cuándo abre), no un eslogan: la
- * primera frase es un <h2> con «Crevillent» aunque se vea como texto
- * (auditoría SEO del 15/11/2026, hallazgos 3 y 9) y el horario sale de
- * `NEGOCIO`, como el del JSON-LD.
  */
 const Hero = () => (
   <section className="hero-portada alto-pantalla relative flex items-end justify-center overflow-hidden px-5 pt-28 md:h-[100svh] md:min-h-[36rem] md:items-center md:px-6 md:pt-0 apaisado:h-auto apaisado:min-h-[100svh] apaisado:pt-[4.5rem] apaisado:pb-[calc(var(--barra-movil)+1.5rem)]">
@@ -67,14 +70,14 @@ const Hero = () => (
           los bordes y la letra pequeña se lee encima del sofá y del mármol. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(ellipse_42%_46%_at_50%_56%,rgb(0_0_0/0.5),transparent_78%)] md:block"
+        className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(ellipse_42%_46%_at_50%_46%,rgb(0_0_0/0.5),transparent_78%)] md:block"
       />
 
       {/* En el móvil el texto va abajo: la foto se ve viva arriba y se
           oscurece donde está el texto. Desde md, un velo parejo. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgb(0_0_0/0.5)_0%,rgb(0_0_0/0.05)_20%,rgb(0_0_0/0.3)_42%,rgb(0_0_0/0.86)_66%,hsl(var(--background))_100%)] md:bg-none md:bg-gradient-to-b md:from-black/65 md:via-black/35 md:to-black/85"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgb(0_0_0/0.5)_0%,rgb(0_0_0/0.05)_20%,rgb(0_0_0/0.3)_48%,rgb(0_0_0/0.86)_72%,hsl(var(--background))_100%)] md:bg-none md:bg-gradient-to-b md:from-black/65 md:via-black/35 md:to-black/85"
       />
     </div>
 
@@ -89,32 +92,23 @@ const Hero = () => (
           de pantalla; esta línea es solo visual. */}
       <p
         aria-hidden="true"
-        className="entrada-hero mb-3 text-xs font-medium uppercase tracking-[0.32em] text-primary md:mb-8 md:font-light md:tracking-[0.5em] md:text-white/80 md:[text-shadow:0_1px_14px_rgb(0_0_0/0.7)] apaisado:mb-3"
+        className="entrada-hero mb-4 text-xs font-medium uppercase tracking-[0.32em] text-primary md:mb-10 md:font-light md:tracking-[0.5em] md:text-white/80 md:[text-shadow:0_1px_14px_rgb(0_0_0/0.7)] apaisado:mb-3"
         style={{ animationDelay: "0.05s" }}
       >
         Cocktail bar · {LOCALIDAD}
       </p>
 
       <h1
-        className="entrada-marca mb-4 font-serif text-[4.25rem] font-bold leading-[0.85] tracking-tighter text-white [text-shadow:0_4px_30px_rgb(0_0_0/0.45)] min-[400px]:text-[5rem] min-[420px]:text-[5.5rem] sm:text-[7rem] md:mb-8 md:text-[8.5rem] md:[text-shadow:0_6px_50px_rgb(0_0_0/0.4)] lg:text-[10rem] xl:text-[12rem] apaisado:mb-3 apaisado:text-[4.5rem]"
+        className="entrada-marca mb-9 font-serif text-[4.25rem] font-bold leading-[0.85] tracking-tighter text-white [text-shadow:0_4px_30px_rgb(0_0_0/0.45)] min-[400px]:text-[5rem] min-[420px]:text-[5.5rem] sm:text-[7rem] md:mb-16 md:text-[8.5rem] md:[text-shadow:0_6px_50px_rgb(0_0_0/0.4)] lg:text-[10rem] xl:text-[12rem] apaisado:mb-6 apaisado:text-[4.5rem]"
         style={{ animationDelay: "0.15s" }}
       >
         TOUZA
         <span className="sr-only"> · Coctelería y bar de copas en {LOCALIDAD}</span>
       </h1>
 
-      <div className="entrada-hero mx-auto mb-7 max-w-[21rem] [text-shadow:0_1px_14px_rgb(0_0_0/0.65)] md:mb-12 md:max-w-xl apaisado:mb-5" style={{ animationDelay: "0.3s" }}>
-        <h2 className="text-balance font-sans text-base font-light leading-relaxed tracking-normal text-white/90 md:text-xl md:text-white/90 apaisado:text-base">
-          Coctelería y bar de copas en {LOCALIDAD}, junto a Casa Tomás.
-        </h2>
-        <p className="mt-2 text-balance text-[13px] leading-relaxed text-white/80 [font-variant-numeric:lining-nums] md:mt-3 md:text-[15px] md:text-white/85">
-          {lineaDeHechos()}
-        </p>
-      </div>
-
       <div
         className="entrada-hero mx-auto grid w-full max-w-sm grid-cols-2 gap-3 md:flex md:w-auto md:max-w-none md:justify-center md:gap-5"
-        style={{ animationDelay: "0.45s" }}
+        style={{ animationDelay: "0.3s" }}
       >
         <Link to="/carta" className="boton boton-macizo px-3 md:px-10">
           Ver la carta

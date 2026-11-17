@@ -4,7 +4,7 @@
  * cócteles salen en «La carta» (`elegirCoctelesPortada`, lib/carta.ts).
  */
 import { describe, it, expect } from "vitest";
-import { fraseHorario, filasHorario, hastaLaHora, lineaDeHechos, nombreDias } from "@/components/home/hechos";
+import { fraseHorario, filasHorario, hastaLaHora, nombreDias } from "@/components/home/hechos";
 import { CLIP_EL_LOCAL } from "@/components/home/medios";
 import { cuantosCaben, elegirCoctelesPortada as elegirCocteles } from "@/lib/carta";
 import type { CoctelUI } from "@/hooks/useCocteles";
@@ -12,9 +12,6 @@ import type { CoctelUI } from "@/hooks/useCocteles";
 describe("hechos de la portada", () => {
   it("frase de horario desde NEGOCIO: días y hora de cierre", () => {
     expect(fraseHorario()).toBe("Abrimos el jueves hasta la 1:00, el viernes y sábado hasta las 2:00 y el domingo hasta las 20:00.");
-    expect(lineaDeHechos()).toBe(
-      "Abrimos el jueves hasta la 1:00, el viernes y sábado hasta las 2:00 y el domingo hasta las 20:00. Sin reservas: ven directamente."
-    );
   });
 
   it("filas de la tabla de horario", () => {
