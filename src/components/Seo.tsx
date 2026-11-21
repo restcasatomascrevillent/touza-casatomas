@@ -8,6 +8,8 @@ interface SeoProps {
     ogImage?: string;
     /** Texto alternativo de la imagen social (og:image:alt y twitter:image:alt). */
     ogImageAlt?: string;
+    /** Medidas de una og:image propia (la de por defecto ya las lleva: 1200×630). */
+    ogImageSize?: { width: number; height: number };
     ogType?: 'website' | 'article' | 'profile';
     twitterCard?: 'summary' | 'summary_large_image';
     keywords?: string[];
@@ -31,6 +33,7 @@ const Seo = ({
     canonical,
     ogImage = OG_IMAGE_POR_DEFECTO,
     ogImageAlt,
+    ogImageSize,
     ogType = 'website',
     twitterCard = 'summary_large_image',
     keywords = [],
@@ -59,8 +62,12 @@ const Seo = ({
             <meta property="og:title" content={fullTitle} />
             <meta property="og:description" content={description} />
             <meta property="og:image" content={absoluta(ogImage)} />
-            {esImagenPorDefecto && <meta property="og:image:width" content="1200" />}
-            {esImagenPorDefecto && <meta property="og:image:height" content="630" />}
+            {(esImagenPorDefecto || ogImageSize) && (
+                <meta property="og:image:width" content={String(ogImageSize?.width ?? 1200)} />
+            )}
+            {(esImagenPorDefecto || ogImageSize) && (
+                <meta property="og:image:height" content={String(ogImageSize?.height ?? 630)} />
+            )}
             {altImagen && <meta property="og:image:alt" content={altImagen} />}
             <meta property="og:site_name" content="Touza Cocktail Bar" />
             <meta property="og:locale" content="es_ES" />

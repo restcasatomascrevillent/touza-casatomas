@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FOTO_BOTELLA, fotoResponsive, volverAFotoOriginal } from "@/lib/foto";
 
@@ -7,17 +8,20 @@ import { FOTO_BOTELLA, fotoResponsive, volverAFotoOriginal } from "@/lib/foto";
  *
  * La foto va en un nicho estrecho 3:5 con luz cálida desde abajo, como la
  * estantería retroiluminada de la barra; al lado, nombre y precio unidos por
- * una línea de puntos (el gesto de las cartas de bar) y debajo una sola línea
- * de descripción con «más» para leerla entera.
+ * una línea de puntos (el gesto de las cartas de bar). La descripción no se
+ * ve de primeras: junto al nombre va una «i» (como la de los platos en la web
+ * de Casa Tomás) que la despliega entera debajo; sin descripción, no hay «i»
+ * (petición del dueño, 21/11/2026: antes salía cortada con «…» y un «más»).
  *
  * Mismo alto de fila con foto o sin ella: si alguna fila de la lista tiene
  * foto (`conHueco`), las que no la tienen guardan el hueco del nicho y todos
  * los nombres arrancan en la misma columna. En listas sin ninguna foto
  * (cervezas) no hay hueco.
  *
- * La descripción larga va en un `<details>` nativo: funciona sin JS y el
- * texto entero está en el HTML (lo leen Google y los asistentes), solo que
- * plegado a una línea.
+ * La descripción desplegable va en el HTML del SSG aunque esté plegada
+ * (`hidden`): la leen Google y los asistentes. La «i» es un botón con
+ * `aria-expanded` y `aria-controls`; su zona táctil es de 44 px aunque el
+ * círculo que se ve sea más pequeño.
  *
  * La entrada (`.fila-botella` en index.css) es una animación CSS que se
  * dispara cada vez que la pestaña pasa de oculta a visible, escalonada con
@@ -36,6 +40,8 @@ interface Props {
   precio: string;
   descripcion?: string;
   tipo?: string;
+  /** Precio por copa («13,50 €») de una botella que también se sirve por copa: va en la «i». */
+  porCopa?: string;
   imagen?: string;
   indice: number;
   /** Reserva el hueco del nicho aunque esta fila no tenga foto. */
@@ -125,40 +131,53 @@ const SiluetaBotella = () => (
   </div>
 );
 
-/** Por debajo de esto la descripción cabe en una línea y no hace falta «más». */
-const LARGO_UNA_LINEA = 64;
-
 const NUMEROS = "[font-variant-numeric:lining-nums]";
 
-const Descripcion = ({ texto, plegable }: { texto: string; plegable: boolean }) => {
-  const clases = "text-[14px] leading-[1.65] text-white/70";
-  if (!plegable || texto.length <= LARGO_UNA_LINEA) {
-    return <p className={cn("mt-1 max-w-[56ch] line-clamp-2", clases, NUMEROS)}>{texto}</p>;
-  }
-  return (
-    <details className="group/desc mt-1 max-w-[56ch]">
-      <summary
-        className={cn(
-          "flex cursor-pointer list-none items-baseline gap-2 rounded-sm [&::-webkit-details-marker]:hidden",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-          clases,
-          NUMEROS
-        )}
-      >
-        <span className="min-w-0 flex-1 truncate group-open/desc:whitespace-normal">{texto}</span>
-        <span aria-hidden="true" className="shrink-0 text-[13px] text-[#D8B47E] group-open/desc:hidden">
-          más
-        </span>
-      </summary>
-    </details>
-  );
-};
+const TEXTO_DESCRIPCION = "text-[14px] leading-[1.65] text-white/70";
+
+/** La «i» de la fila: despliega la descripción entera debajo del nombre. */
+const BotonInfo = ({
+  nombre,
+  abierta,
+  controla,
+  alPulsar,
+}: {
+  nombre: string;
+  abierta: boolean;
+  controla: string;
+  alPulsar: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={alPulsar}
+    aria-expanded={abierta}
+    aria-controls={controla}
+    aria-label={`Más información de ${nombre}`}
+    // Alineada con la primera línea del nombre (no a media altura cuando el
+    // nombre ocupa dos): 44 px de zona táctil centrados en esa línea.
+    className="group/info relative -my-2.5 -ml-2 -mr-1.5 inline-flex h-11 w-11 shrink-0 items-center justify-center self-start rounded-full focus-visible:outline-none md:-my-[7px]"
+  >
+    <span
+      aria-hidden="true"
+      className={cn(
+        "flex h-7 w-7 items-center justify-center rounded-full ring-1 ring-inset transition-colors duration-300",
+        "group-focus-visible/info:ring-2 group-focus-visible/info:ring-primary",
+        abierta
+          ? "bg-[#D8B47E] text-black ring-[#D8B47E]"
+          : "text-[#D8B47E] ring-[#D8B47E]/55 group-hover/info:bg-[#D8B47E]/15 group-hover/info:ring-[#D8B47E]"
+      )}
+    >
+      {abierta ? <X className="h-4 w-4" strokeWidth={2} /> : <Info className="h-[18px] w-[18px]" strokeWidth={1.75} />}
+    </span>
+  </button>
+);
 
 const FilaBotella = ({
   nombre,
   precio,
   descripcion,
   tipo,
+  porCopa,
   imagen,
   indice,
   conHueco = false,
@@ -170,6 +189,13 @@ const FilaBotella = ({
   prioritaria = false,
 }: Props) => {
   const Titulo = nivel === 4 ? "h4" : "h3";
+  // Con la fila entera pulsable (cócteles sin foto) no cabe otro botón: la
+  // descripción va a la vista en dos líneas y el resto, en el detalle.
+  // En la «i» va todo lo que no es nombre y precio: tipo, descripción y
+  // precio por copa. Así todas las pestañas de bebidas tienen la misma fila.
+  const conInfo = !alPulsar && !!(descripcion || tipo || porCopa);
+  const [abierta, setAbierta] = useState(false);
+  const idDescripcion = useId();
   return (
     <li
       id={id}
@@ -202,6 +228,14 @@ const FilaBotella = ({
           >
             {nombre}
           </Titulo>
+          {conInfo && (
+            <BotonInfo
+              nombre={nombre}
+              abierta={abierta}
+              controla={idDescripcion}
+              alPulsar={() => setAbierta((previa) => !previa)}
+            />
+          )}
           <span aria-hidden="true" className="min-w-4 flex-1 -translate-y-[0.3em] border-b border-dotted border-white/20" />
           {precio && (
             <span className="shrink-0 whitespace-nowrap font-serif text-[1.15rem] text-primary [font-variant-numeric:lining-nums_tabular-nums] md:text-[1.35rem]">
@@ -209,10 +243,28 @@ const FilaBotella = ({
             </span>
           )}
         </div>
-        {tipo && <p className={cn("mt-0.5 text-[13px] text-white/60", NUMEROS)}>{tipo}</p>}
-        {/* Con la fila entera pulsable, un <details> dentro no se podría abrir:
-            la descripción va en dos líneas y el resto en el detalle. */}
-        {descripcion && <Descripcion texto={descripcion} plegable={!alPulsar} />}
+        {conInfo ? (
+          <div
+            id={idDescripcion}
+            hidden={!abierta}
+            className={cn("descripcion-botella mt-1.5 max-w-[56ch] space-y-1", TEXTO_DESCRIPCION, NUMEROS)}
+          >
+            {tipo && <p className="text-[13px] text-white/60">{tipo}</p>}
+            {descripcion && <p>{descripcion}</p>}
+            {porCopa && (
+              <p className="text-[#D8B47E]">
+                Por copa: <span className="[font-variant-numeric:lining-nums_tabular-nums]">{porCopa}</span>
+              </p>
+            )}
+          </div>
+        ) : (
+          <>
+            {tipo && <p className={cn("mt-0.5 text-[13px] text-white/60", NUMEROS)}>{tipo}</p>}
+            {descripcion && (
+              <p className={cn("mt-1 max-w-[56ch] line-clamp-2", TEXTO_DESCRIPCION, NUMEROS)}>{descripcion}</p>
+            )}
+          </>
+        )}
         {children}
       </div>
     </li>

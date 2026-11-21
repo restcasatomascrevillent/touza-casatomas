@@ -24,6 +24,7 @@ import { NEGOCIO, menuSchema, sinDuplicados } from "@/lib/negocio";
 import { agruparChampagne, descripcionCarta, nombreBase, resumenCocteles, slugCarta } from "@/lib/carta";
 import { CARTA_SSG, platosParaJsonLd } from "@/lib/carta-ssg";
 import FilaBotella from "@/components/carta/FilaBotella";
+import { copasPorBotella } from "@/lib/copas";
 import TarjetaCoctel from "@/components/carta/TarjetaCoctel";
 import HeroCopa from "@/components/carta/HeroCopa";
 import { LiquidLoaderSVG } from "@/components/ui/svg/LiquidLoaderSVG";
@@ -44,15 +45,15 @@ interface GenericDrink {
 // Champagne y Cavas (cava, crémant, moscato…) salen de las categorías
 // «VINOS ESPUMOSOS — …» de Vinos. Tintos, blancos y rosados no tienen
 // pestaña aunque alguno siga marcado touza=true en el panel.
-// En «Por copas» solo champagne y cava: las copas de tinto, blanco, rosado o
-// dulce no salen aunque sigan marcadas para Touza en el panel.
+// Copas de champagne y cava: ya no tienen pestaña (el dueño, 21/11/2026); su
+// precio va en la «i» de la botella (ver src/lib/copas.ts). Las de tinto,
+// blanco, rosado o dulce no salen aunque sigan marcadas para Touza en el panel.
 const esCopaEspumosa = (copa: { tipo?: string | null }) => /^(champagne|cava)$/i.test(copa.tipo ?? "");
 
 // Una línea bajo el título de cada pestaña de bebidas: cómo se sirve.
 const INTRO_PESTANA: Record<string, string> = {
   champagne: "Por botella.",
   cavas: "Cava y otros espumosos, por botella.",
-  copas: "Champagne y cava, por copa.",
   whiskies: "Por copa: solo, con hielo o con agua.",
 };
 
@@ -61,7 +62,6 @@ const tabsCarta = [
   { id: "champagne", name: "Champagne" },
   { id: "cavas", name: "Cavas" },
   { id: "cervezas", name: "Cervezas" },
-  { id: "copas", name: "Por copas" },
   { id: "whiskies", name: "Whiskies" },
 ];
 
@@ -185,11 +185,17 @@ const Carta = () => {
     [espumososUnicos]
   );
   const { data: cervezasRaw, isLoading: loadingCervezas } = useBebidas('Cervezas');
-  const { data: copasRaw, isLoading: loadingCopas } = useBebidas('Copas');
+  const { data: copasRaw } = useBebidas('Copas');
   const { data: whiskiesRaw, isLoading: loadingWhiskies } = useBebidas('Whiskies');
   const cervezasData = useMemo(() => transformBebidasToUI(sinDuplicados(cervezasRaw ?? [])), [cervezasRaw]);
   const copasData = useMemo(() => transformBebidasToUI(sinDuplicados((copasRaw ?? []).filter(esCopaEspumosa))), [copasRaw]);
   const whiskiesData = useMemo(() => transformBebidasToUI(sinDuplicados(whiskiesRaw ?? [])), [whiskiesRaw]);
+  // Precio por copa de cada botella de champagne o cava que también se sirve
+  // por copa. Las copas sin botella en la carta no se pintan.
+  const { precioPorBotella: precioCopa } = useMemo(
+    () => copasPorBotella(copasData.map((c) => ({ nombre: c.name, precio: c.price })), [...champagneData, ...cavasData]),
+    [copasData, champagneData, cavasData]
+  );
 
   const { data: platosRaw, isLoading: loadingPlatos } = usePlatosTouza();
   // Interruptor «Fotos de platos en Touza» del panel. Falla abierto: solo un
@@ -213,7 +219,6 @@ const Carta = () => {
       { nombre: "Champagnes", items: espumosos.filter((vino) => esChampagne(vino.categoria)) },
       { nombre: "Cavas y otros espumosos", items: espumosos.filter((vino) => !esChampagne(vino.categoria)) },
       { nombre: "Cervezas", items: CARTA_SSG.bebidas["Cervezas"] ?? [] },
-      { nombre: "Champagne y cava por copas", items: (CARTA_SSG.bebidas["Copas"] ?? []).filter(esCopaEspumosa) },
       { nombre: "Whiskies", items: CARTA_SSG.bebidas["Whiskies"] ?? [] },
       // Sin fotos si el panel las apagó al construir (ver `platosParaJsonLd`).
       { nombre: "Tapas", items: platosParaJsonLd(CARTA_SSG.platos) },
@@ -266,7 +271,6 @@ const Carta = () => {
       case "champagne": return champagneData;
       case "cavas": return cavasData;
       case "cervezas": return cervezasData;
-      case "copas": return copasData;
       case "whiskies": return whiskiesData;
       default: return [];
     }
@@ -291,7 +295,6 @@ const Carta = () => {
       case "champagne":
       case "cavas": return loadingEspumosos;
       case "cervezas": return loadingCervezas;
-      case "copas": return loadingCopas;
       case "whiskies": return loadingWhiskies;
       default: return false;
     }
@@ -306,6 +309,11 @@ const Carta = () => {
         title="Cócteles en Crevillent: carta y precios · Touza"
         description={descripcionSeo}
         canonical={canonical("/carta")}
+        // Imagen propia para compartir la carta: tres cócteles de la casa
+        // sobre la barra de mármol (revisión SEO del 21/11/2026).
+        ogImage="/og-carta.jpg"
+        ogImageAlt="Tres cócteles de Touza sobre la barra de mármol, vistos desde arriba"
+        ogImageSize={{ width: 1200, height: 630 }}
         keywords={['carta touza', 'cócteles crevillent', 'cócteles crevillente', 'coctelería crevillente', 'champagne', 'precios']}
         schema={schemaCarta}
       />
@@ -443,7 +451,12 @@ const Carta = () => {
               const coctelesPanel = activa ? filteredCocktails : cocktailsData;
               // Los que tienen foto propia, en tarjetas; los que no, al final
               // en filas de texto como las botellas (antes, una caja «TOUZA»).
-              const conFoto = coctelesPanel.filter(tieneFoto);
+              // Los de la «T» genérica (aún sin foto propia), detrás de los que
+              // sí la tienen: no en la primera fila (revisión del 21/11/2026).
+              // El resto, en el orden del panel (sort es estable).
+              const conFoto = coctelesPanel
+                .filter(tieneFoto)
+                .sort((a, b) => Number(!!a.fotoGenerica) - Number(!!b.fotoGenerica));
               const sinFoto = coctelesPanel.filter((c) => !tieneFoto(c));
               return (
                 <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
@@ -506,9 +519,10 @@ const Carta = () => {
               pestana.id === "champagne" && !(activa && busqueda)
                 ? agruparChampagne(filasPanel)
                 : [{ titulo: null, items: filasPanel }];
-            // Mismo alto de fila: si alguna botella de la pestaña tiene foto,
-            // las que no la tienen guardan su hueco.
-            const conHueco = filasPanel.some((fila) => !!fila.image);
+            // Misma fila en todas las pestañas de bebidas (el dueño,
+            // 21/11/2026): foto o, sin ella, la silueta de la botella; también
+            // en las cervezas, que no tienen ninguna foto.
+            const conHueco = true;
             return (
               <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
                 <header className="mb-2 md:mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
@@ -539,6 +553,7 @@ const Carta = () => {
                           precio={drink.price}
                           descripcion={drink.description}
                           tipo={(drink as GenericDrink).type}
+                          porCopa={precioCopa.get(drink.id)}
                           imagen={drink.image}
                           // Solo las primeras filas de la pestaña VISIBLE, sin `lazy`
                           // y con prioridad alta. Las ocultas, `lazy`: no se piden

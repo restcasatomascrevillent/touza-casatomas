@@ -76,7 +76,7 @@ describe("Portada", () => {
     expect(h1[0].querySelector(".sr-only")).toHaveTextContent("· Coctelería y bar de copas en Crevillent");
 
     const hero = container.querySelector(".hero-portada") as HTMLElement;
-    expect(within(hero).getByText("Cocktail bar · Crevillent")).toBeInTheDocument();
+    expect(within(hero).getByText("Coctelería · Crevillent")).toBeInTheDocument();
     // Ni la frase de qué es Touza ni la del horario: han bajado de sitio.
     expect(within(hero).queryAllByRole("heading", { level: 2 })).toHaveLength(0);
     expect(hero.querySelectorAll("p")).toHaveLength(1);

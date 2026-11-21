@@ -14,9 +14,12 @@ describe("JSON-LD de Touza", () => {
     const bar = JSON.parse(JSON.stringify(barSchema()));
     expect(bar.parentOrganization).toMatchObject({
       "@type": "Restaurant",
-      name: "Restaurante Casa Tomás",
+      // Mismo @id y nombre que el Restaurant de la web de Casa Tomás.
+      "@id": "https://restaurantecasatomascrevillente.es/#restaurante",
+      name: "Casa Tomás Restaurante",
       url: "https://restaurantecasatomascrevillente.es/",
     });
+    expect(bar.logo).toMatch(/\/logo-touza\.png$/);
     expect(bar.parentOrganization.address.streetAddress).toBe(CASA_TOMAS.calle);
     expect(bar.description).toMatch(/Casa Tomás/);
     expect(bar.description).toMatch(/sin alcohol/);

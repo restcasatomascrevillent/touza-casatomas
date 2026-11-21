@@ -184,7 +184,7 @@ const Contacto = () => {
     <Layout>
       <Seo
         title="Cómo llegar a Touza · Bar de copas en Crevillent"
-        description="Cómo llegar a Touza, bar de copas y coctelería en Crevillent: C/ Santa María de la Cabeza, 4, la puerta de al lado de Casa Tomás. Horario, teléfono y mapa. Sin reservas."
+        description="Cómo llegar a Touza, coctelería en Crevillent: C/ Santa María de la Cabeza, 4, junto a Casa Tomás. Horario, teléfono y mapa. Sin reservas."
         canonical={canonical("/contacto")}
         keywords={['cómo llegar touza', 'touza crevillente dirección', 'bar de copas crevillente', 'copas junto a casa tomás']}
         schema={barSchema()}

@@ -447,13 +447,14 @@ describe("Carta — estructura general", () => {
     expect(screen.getByRole("tab", { name: "Champagne" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Cavas" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Cervezas" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Por copas" })).toBeInTheDocument();
+    // «Por copas» ya no es pestaña: el precio por copa va en la «i» de la botella.
+    expect(screen.queryByRole("tab", { name: "Por copas" })).not.toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Whiskies" })).toBeInTheDocument();
   });
 
   it("pinta TODAS las secciones con su <h2> aunque solo se vea la activa (carta indexable)", () => {
     renderCarta();
-    for (const nombre of ["Cócteles", "Champagne", "Cavas", "Cervezas", "Por copas", "Whiskies"]) {
+    for (const nombre of ["Cócteles", "Champagne", "Cavas", "Cervezas", "Whiskies"]) {
       expect(screen.getByRole("heading", { level: 2, name: nombre, hidden: true })).toBeInTheDocument();
     }
     expect(screen.getByRole("heading", { level: 2, name: "Cócteles" })).toBeVisible();
@@ -697,17 +698,20 @@ describe("Carta — botellas", () => {
     expect(screen.getAllByRole("heading", { name: /cruz ?campo gran reserva/i })).toHaveLength(1);
   });
 
-  it("la descripción larga va plegada a una línea en un <details>, con el texto entero en el HTML", () => {
+  it("la descripción va plegada tras la «i» de la botella, con el texto entero en el HTML", () => {
     const larga =
       "El ensamblaje de distintas añadas y la larga crianza aportan profundidad a la fruta madura, con recuerdos de bollería.";
     vi.mocked(useVinosModule.useEspumosos).mockReturnValue({
       data: [{ id: "c1", nombre: "Grand Siècle", descripcion: larga, precio_eur: 270, imagen_url: null, categoria: "VINOS ESPUMOSOS — CHAMPAGNE" }],
       isLoading: false,
     } as never);
-    const { container } = renderCarta();
-    const detalles = container.querySelector("details");
-    expect(detalles).not.toBeNull();
-    expect(detalles?.textContent).toContain(larga);
+    renderCarta();
+    const boton = screen.getByRole("button", { name: "Más información de Grand Siècle", hidden: true });
+    const parrafo = document.getElementById(boton.getAttribute("aria-controls") ?? "");
+    expect(parrafo?.textContent).toBe(larga);
+    expect(parrafo).toHaveAttribute("hidden");
+    fireEvent.click(boton);
+    expect(parrafo).not.toHaveAttribute("hidden");
   });
 
   it("agrupa el champagne por tipo (brut, rosado, de añada) cuando la lista es larga", () => {
