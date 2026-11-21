@@ -819,3 +819,16 @@
     opacity: 1;
   }
 }
+
+/* Descripción de una botella al pulsar su «i» (FilaBotella): aparece sin salto. */
+@media (prefers-reduced-motion: no-preference) {
+  .descripcion-botella:not([hidden]) {
+    animation: descripcion-botella-entra 0.25s ease-out;
+  }
+}
+@keyframes descripcion-botella-entra {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}

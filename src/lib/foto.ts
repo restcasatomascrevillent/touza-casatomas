@@ -117,6 +117,9 @@ export const FOTO_PORTADA = {
   sizes: "(min-width: 1280px) 300px, (min-width: 768px) 33vw, 50vw",
 } as const;
 
+/** Tira «De la casa» de la portada: 150 px en el móvil, 230 px desde md. */
+export const FOTO_TIRA = { anchos: [256, 384, 480, 640], sizes: "(min-width: 768px) 230px, 150px" } as const;
+
 /** Tarjeta de «Para la sobremesa» (/despues-de-cenar): 64vw en el móvil, 3 columnas desde md. */
 export const FOTO_SOBREMESA = { anchos: [256, 384, 480, 640, 828], sizes: "(min-width: 768px) 360px, 64vw" } as const;
 

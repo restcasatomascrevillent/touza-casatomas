@@ -191,3 +191,41 @@ export function agruparChampagne<T extends { name: string }>(items: T[]): GrupoC
   if (grupos.length < 2 || items.length < 8) return [{ titulo: null, items }];
   return grupos;
 }
+
+/* ── Puertas de la portada (rediseño A, 21/11/2026) ─────────────────────────
+ * El dato pequeño de cada foto grande, sacado de la carta (nunca a mano):
+ * dos líneas cortas, o `null` si no hay datos (la puerta sale sin dato).
+ */
+
+const desde = (precios: ReadonlyArray<number | null | undefined>): string | null => {
+  const validos = precios.filter((p): p is number => typeof p === "number" && p > 0);
+  return validos.length > 0 ? `desde ${importe(Math.min(...validos))}${ESPACIO_PRECIO}€` : null;
+};
+
+/** «18 en carta» / «de 7 a 10 €». */
+export function datoPuertaCocteles(cocteles: ReadonlyArray<ConPrecio>): string[] | null {
+  if (cocteles.length === 0) return null;
+  const rango = rangoPrecios(cocteles);
+  return [`${cocteles.length} en carta`, ...(rango ? [rango] : [])];
+}
+
+/**
+ * «por copa» / «desde 13,50 €» si se sirve champagne por copa; si no, el
+ * precio de la botella más barata: «desde 51 €».
+ */
+export function datoPuertaChampagne(copas: ReadonlyArray<ConPrecio>, botellas: ReadonlyArray<ConPrecio>): string[] | null {
+  const porCopa = desde(copas.map((c) => c.precio_eur));
+  if (porCopa) return ["por copa", porCopa];
+  const porBotella = desde(botellas.map((b) => b.precio_eur));
+  return porBotella ? [porBotella] : null;
+}
+
+/** «Whisky, ginebra y ron» / «desde 7 €». */
+export function datoPuertaDestilados(
+  familias: string | null,
+  destilados: ReadonlyArray<ConPrecio>,
+): string[] | null {
+  const precio = desde(destilados.map((d) => d.precio_eur));
+  const lineas = [familias, precio].filter((l): l is string => !!l);
+  return lineas.length > 0 ? lineas : null;
+}

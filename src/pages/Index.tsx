@@ -3,31 +3,28 @@ import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
 import VisitUs from "@/components/VisitUs";
 import Hero from "@/components/home/Hero";
-import CoctelesDeLaCarta from "@/components/home/CoctelesDeLaCarta";
-import ElLocal from "@/components/home/ElLocal";
+import TresPuertas from "@/components/home/TresPuertas";
+import DeLaCasa from "@/components/home/DeLaCasa";
+import SobreTouza from "@/components/home/SobreTouza";
 import { canonical } from "@/lib/site";
 import { barSchema, sinDuplicados } from "@/lib/negocio";
 import { descripcionPortada } from "@/lib/carta";
 import { useCocteles } from "@/hooks/useCocteles";
 
 /**
- * Portada sencilla, con la carta primero (16/11/2026: al dueño no le gustó
- * la demo del rediseño y pidió el hero de antes y una web fácil de usar).
+ * Portada «Tres puertas» (rediseño A, 21/11/2026). Lo importante es la carta:
  *
- * 1. Hero: la foto del salón a pantalla completa, TOUZA y dos botones.
- * 2. La carta: ocho cócteles con foto, nombre y precio, y «Ver la carta
- *    completa».
- * 3. El local: tres fotos, un clip de la trasbarra y dos líneas, con «Más
- *    sobre Touza» plegado.
+ * 1. Hero: la foto del salón a pantalla completa, TOUZA y dos botones (no se
+ *    toca: regla del dueño, 16/11/2026).
+ * 2. Tres puertas, montadas un poco sobre el hero: Cócteles, Champagne y
+ *    Destilados, cada una a su pestaña de /carta con un dato de la carta.
+ * 3. «De la casa»: tira de ocho cócteles con foto, nombre y precio.
  * 4. Visítanos: horario, dirección y «Cómo llegar».
+ * 5. Sobre Touza: el texto para buscadores, discreto y plegado.
  *
- * Fuera el vídeo del hero, la vitrina con la foto del camarero y la franja de
- * clips «En la barra». En la web no sale gente.
- *
- * Todo el texto útil para buscadores sigue en el HTML (el de «coctelería y
- * bar de copas en Crevillente», dentro del desplegable de «El local»). Un
- * solo árbol responsive: cada sección decide su composición con clases
- * `md:`/`lg:` desde el primer pintado, y nada depende del JS para verse.
+ * Fuera «El local» (fotos del sitio y clip) y la rejilla de cócteles: las
+ * puertas y la tira ya enseñan el local y la carta. En la web no sale gente.
+ * Un solo árbol responsive; nada depende del JS para verse.
  */
 const Index = () => {
   // El rango de precios de la descripción sale de la carta (misma consulta que
@@ -46,9 +43,10 @@ const Index = () => {
       />
 
       <Hero />
-      <CoctelesDeLaCarta />
-      <ElLocal />
+      <TresPuertas />
+      <DeLaCasa />
       <VisitUs />
+      <SobreTouza />
     </Layout>
   );
 };

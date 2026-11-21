@@ -93,7 +93,9 @@ const Header = () => {
         <nav className="flex items-center justify-between">
           {/* Logo, también en lo alto de la portada, como en la web de antes. */}
           <Link to="/" className="relative z-10 inline-flex items-center min-h-11" aria-label="Touza, ir al inicio">
-            <span className="font-serif text-xl lg:text-2xl font-bold tracking-wider text-primary">
+            {/* Sombra para que se lea sobre la foto o el vídeo de los heros
+                (en /carta caía encima del borde brillante de la copa). */}
+            <span className="font-serif text-xl lg:text-2xl font-bold tracking-wider text-primary [text-shadow:0_1px_3px_rgb(0_0_0/0.8),0_0_16px_rgb(0_0_0/0.6)]">
               TOUZA
             </span>
           </Link>

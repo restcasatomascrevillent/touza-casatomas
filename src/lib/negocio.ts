@@ -88,6 +88,13 @@ export const ID_NEGOCIO = `${SITE_URL}/#bar`;
  */
 export const CASA_TOMAS = {
   nombre: "Restaurante Casa Tomás",
+  /**
+   * Nombre y `@id` del nodo `Restaurant` de la web de Casa Tomás
+   * (web-casatomas/src/lib/negocio.ts): con los mismos, Google une el
+   * `parentOrganization` de Touza a esa entidad (revisión SEO del 21/11/2026).
+   */
+  nombreSchema: "Casa Tomás Restaurante",
+  id: "https://restaurantecasatomascrevillente.es/#restaurante",
   calle: "C/ Santa María de la Cabeza, 2",
   url: "https://restaurantecasatomascrevillente.es/",
 } as const;
@@ -148,6 +155,8 @@ export function barSchema(): Record<string, unknown> {
     name: NEGOCIO.nombre,
     description: DESCRIPCION_NEGOCIO,
     image: absoluta(IMAGENES.interior.src),
+    // Cuadrado, en public/ (URL estable, sin hash): la «T» retroiluminada.
+    logo: absoluta("/logo-touza.png"),
     telephone: NEGOCIO.telefono,
     email: NEGOCIO.email,
     address: {
@@ -171,7 +180,9 @@ export function barSchema(): Record<string, unknown> {
     // sueltos que comparten calle.
     parentOrganization: {
       "@type": "Restaurant",
-      name: CASA_TOMAS.nombre,
+      "@id": CASA_TOMAS.id,
+      name: CASA_TOMAS.nombreSchema,
+      alternateName: CASA_TOMAS.nombre,
       url: CASA_TOMAS.url,
       address: {
         "@type": "PostalAddress",

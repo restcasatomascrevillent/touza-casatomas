@@ -92,10 +92,10 @@ const Hero = () => (
           de pantalla; esta línea es solo visual. */}
       <p
         aria-hidden="true"
-        className="entrada-hero mb-4 text-xs font-medium uppercase tracking-[0.32em] text-primary md:mb-10 md:font-light md:tracking-[0.5em] md:text-white/80 md:[text-shadow:0_1px_14px_rgb(0_0_0/0.7)] apaisado:mb-3"
+        className="entrada-hero mb-4 text-xs font-medium uppercase tracking-[0.32em] text-primary md:mb-10 md:text-sm md:tracking-[0.45em] md:text-white md:[text-shadow:0_1px_3px_rgb(0_0_0/0.9),0_2px_18px_rgb(0_0_0/0.85)] apaisado:mb-3"
         style={{ animationDelay: "0.05s" }}
       >
-        Cocktail bar · {LOCALIDAD}
+        Coctelería · {LOCALIDAD}
       </p>
 
       <h1
@@ -113,7 +113,7 @@ const Hero = () => (
         <Link to="/carta" className="boton boton-macizo px-3 md:px-10">
           Ver la carta
         </Link>
-        <Link to="/contacto" className="boton boton-contorno bg-black/20 px-3 font-normal backdrop-blur-sm md:bg-transparent md:px-10 md:font-light">
+        <Link to="/contacto" className="boton boton-contorno border-white/60 bg-black/40 px-3 font-normal backdrop-blur-md hover:bg-black/55 md:px-10 md:font-medium">
           Cómo llegar
         </Link>
       </div>
