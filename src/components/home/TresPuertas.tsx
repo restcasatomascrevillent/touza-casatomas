@@ -70,7 +70,7 @@ const TresPuertas = () => {
   }, [cocteles, espumosos, bebidas]);
 
   return (
-    <section aria-labelledby="puertas-titulo" className="relative z-20 -mt-6 md:-mt-24">
+    <section aria-labelledby="puertas-titulo" className="relative z-20 pt-10 md:pt-20">
       <h2 id="puertas-titulo" className="sr-only">
         La carta de Touza
       </h2>
