@@ -77,3 +77,17 @@ describe("FilaBotella — la «i» de la descripción", () => {
     expect(screen.getByText(texto)).toBeVisible();
   });
 });
+
+describe("FilaBotella — ampliar la foto", () => {
+  it("al pulsar la foto se abre en grande con el nombre de la botella", () => {
+    render(fila());
+    fireEvent.click(screen.getByRole("button", { name: "Ampliar la foto de Krug Grande Cuvée" }));
+    const visor = screen.getByRole("dialog", { name: "Krug Grande Cuvée" });
+    expect(visor.querySelector("img")).toHaveAttribute("src", expect.stringContaining("krug.webp"));
+  });
+
+  it("sin foto no hay botón de ampliar", () => {
+    render(fila({ imagen: undefined }));
+    expect(screen.queryByRole("button", { name: /ampliar la foto/i })).not.toBeInTheDocument();
+  });
+});

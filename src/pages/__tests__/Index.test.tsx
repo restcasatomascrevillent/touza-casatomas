@@ -208,14 +208,11 @@ describe("Portada", () => {
     }
   });
 
-  it("tres puertas a su pestaña de /carta, con el dato sacado de la carta", () => {
+  it("tres puertas a su pestaña de /carta, solo con su palabra y sin precios", () => {
     pintar();
     const puertas = within(screen.getByRole("heading", { level: 2, name: "La carta de Touza" }).closest("section") as HTMLElement).getAllByRole("link");
     expect(puertas.map((p) => p.getAttribute("href"))).toEqual(["/carta#cocteles", "/carta#champagne", "/carta#destilados"]);
-    expect(puertas[0]).toHaveTextContent(/Cócteles.*10 en carta.*de 9 a 10\s€/);
-    expect(puertas[1]).toHaveTextContent(/Champagne.*por copa.*desde 13,50\s€/);
-    // Tercera puerta: todos los destilados (cambio del dueño), no solo whisky.
-    expect(puertas[2]).toHaveTextContent(/Destilados.*Whisky y ginebra.*desde 8\s€/);
+    expect(puertas.map((p) => p.textContent?.trim())).toEqual(["Cócteles", "Champagne", "Destilados"]);
     expect(screen.getByRole("img", { name: /botellero de Touza/ })).toHaveAttribute("loading", "lazy");
   });
 

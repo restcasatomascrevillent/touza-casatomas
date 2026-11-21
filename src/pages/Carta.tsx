@@ -62,8 +62,6 @@ interface PestanaCarta {
   name: string;
   /** Miniatura redonda del chip (28 px). Sin ella, chip de solo texto. */
   foto?: ImagenResponsive;
-  /** Banda de foto ancha con el título encima (Champagne y Destilados). */
-  banda?: { imagen: ImagenResponsive; alt: string };
 }
 
 /**
@@ -78,15 +76,11 @@ const PESTANAS_FIJAS: PestanaCarta[] = [
     id: "champagne",
     name: "Champagne",
     foto: IMAGENES.champanMesa,
-    banda: { imagen: IMAGENES.champanMesa, alt: "Botellas de champagne Laurent-Perrier y una copa servida sobre el mármol de Touza" },
   },
   {
     id: "destilados",
     name: "Destilados",
     foto: IMAGENES.botellero,
-    // El botellero y no la estantería apaisada: esa foto tiene a la derecha
-    // un tercio de pared oscura que en la banda ancha parecía un hueco.
-    banda: { imagen: IMAGENES.botellero, alt: "El botellero de Touza iluminado en dorado, con whiskies, tequilas y copas" },
   },
   { id: "cavas", name: "Cavas" },
   { id: "cervezas", name: "Cervezas" },
@@ -114,20 +108,6 @@ const MiniaturaChip = ({ imagen }: { imagen: ImagenResponsive }) => (
   <span aria-hidden="true" className="block h-7 w-7 shrink-0 overflow-hidden rounded-full bg-white/10">
     <FotoPortada imagen={imagen} alt="" sizes="28px" />
   </span>
-);
-
-/**
- * Banda de foto ancha con el título de la sección encima (Champagne y
- * Destilados): 200 px en el móvil, 340 px desde md.
- */
-const BandaSeccion = ({ id, titulo, imagen, alt }: { id: string; titulo: string; imagen: ImagenResponsive; alt: string }) => (
-  <div className="fondo-foto relative mb-5 h-[200px] overflow-hidden rounded-2xl md:mb-8 md:h-[340px]">
-    <FotoPortada imagen={imagen} alt={alt} sizes="(min-width: 1152px) 1104px, calc(100vw - 2.5rem)" />
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgb(0_0_0/0.65),transparent_70%)]" />
-    <h2 id={id} className="absolute bottom-4 left-5 font-serif text-[2.5rem] font-medium leading-none text-white md:bottom-8 md:left-10 md:text-[4rem]">
-      {titulo}
-    </h2>
-  </div>
 );
 
 const SinResultados = ({ termino, onLimpiar }: { termino: string; onLimpiar: () => void }) => (
@@ -619,21 +599,12 @@ const Carta = () => {
             const conHueco = true;
             return (
               <section key={pestana.id} id={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
-                {pestana.banda ? (
-                  <>
-                    <BandaSeccion id={idTitulo} titulo={pestana.name} imagen={pestana.banda.imagen} alt={pestana.banda.alt} />
-                    {INTRO_PESTANA[pestana.id] && (
-                      <p className="mb-2 text-sm text-white/70 md:mb-4">{INTRO_PESTANA[pestana.id]}</p>
-                    )}
-                  </>
-                ) : (
-                  <header className="mb-2 md:mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-                    <h2 id={idTitulo} className="font-serif text-4xl md:text-6xl leading-none text-[#F3EEE4]">{pestana.name}</h2>
-                    {INTRO_PESTANA[pestana.id] && (
-                      <p className="text-sm text-white/70 md:text-right">{INTRO_PESTANA[pestana.id]}</p>
-                    )}
-                  </header>
-                )}
+                <header className="mb-2 md:mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                  <h2 id={idTitulo} className="font-serif text-4xl md:text-6xl leading-none text-[#F3EEE4]">{pestana.name}</h2>
+                  {INTRO_PESTANA[pestana.id] && (
+                    <p className="text-sm text-white/70 md:text-right">{INTRO_PESTANA[pestana.id]}</p>
+                  )}
+                </header>
                 {activa && (cargando ? <DrinksSkeleton /> : filasPanel.length === 0 ? (
                   <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />
                 ) : null)}

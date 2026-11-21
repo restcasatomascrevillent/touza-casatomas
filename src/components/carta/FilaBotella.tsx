@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FOTO_BOTELLA, fotoResponsive, volverAFotoOriginal } from "@/lib/foto";
+import { FOTO_BOTELLA, FOTO_DETALLE, fotoResponsive, volverAFotoOriginal } from "@/lib/foto";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 /**
  * Una fila de la carta: botella, copa o cóctel sin foto propia («la vitrina»).
@@ -119,6 +120,43 @@ const FotoNicho = ({ src, alt, prioritaria }: { src: string; alt: string; priori
 };
 
 /**
+ * La foto del nicho es un botón que la amplía (pedido del dueño, 21/11/2026):
+ * la botella entera, con su fondo de pared trenzada, y el nombre debajo.
+ */
+const FotoAmpliable = ({ src, nombre, prioritaria }: { src: string; nombre: string; prioritaria: boolean }) => {
+  const [abierta, setAbierta] = useState(false);
+  const grande = fotoResponsive(src, FOTO_DETALLE.anchos, "(min-width: 768px) 420px, 80vw");
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setAbierta(true)}
+        aria-label={`Ampliar la foto de ${nombre}`}
+        className="relative z-20 shrink-0 cursor-zoom-in rounded-[4px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        <FotoNicho src={src} alt={nombre} prioritaria={prioritaria} />
+      </button>
+      <Dialog open={abierta} onOpenChange={setAbierta}>
+        <DialogContent className="w-auto max-w-[min(92vw,440px)] gap-3 border-white/10 bg-[#0b0b0a] p-3 md:p-4">
+          <img
+            src={grande.src}
+            srcSet={grande.srcSet}
+            sizes={grande.sizes}
+            alt={nombre}
+            width={900}
+            height={1500}
+            onError={(evento) => volverAFotoOriginal(evento.currentTarget, src)}
+            className="max-h-[78vh] w-auto rounded-xl object-contain"
+          />
+          <DialogTitle className="px-1 pb-1 text-center font-serif text-xl font-medium text-[#F3EEE4]">{nombre}</DialogTitle>
+          <DialogDescription className="sr-only">Foto de la botella de {nombre}</DialogDescription>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
+/**
  * Hueco del nicho en las filas sin foto de una lista con fotos: la silueta de
  * una botella al 8 %, para que se lea como intencionado y no como una foto
  * que no ha cargado.
@@ -216,7 +254,11 @@ const FilaBotella = ({
         />
       )}
       {imagen ? (
-        <FotoNicho src={imagen} alt={nombre} prioritaria={prioritaria} />
+        alPulsar ? (
+          <FotoNicho src={imagen} alt={nombre} prioritaria={prioritaria} />
+        ) : (
+          <FotoAmpliable src={imagen} nombre={nombre} prioritaria={prioritaria} />
+        )
       ) : (
         conHueco && <SiluetaBotella />
       )}
