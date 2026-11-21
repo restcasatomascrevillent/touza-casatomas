@@ -750,6 +750,7 @@ describe("Carta — botellas", () => {
       bebida("c1", "Mahou", "Cervezas"),
       bebida("k1", "Copa Champagne Moët", "Copas"),
       bebida("f1", "Coca-Cola", "Refrescos"),
+      bebida("z1", "Zumo de naranja", "Zumos"),
     ];
 
     beforeEach(() => {
@@ -769,11 +770,12 @@ describe("Carta — botellas", () => {
       expect(within(panel).queryByText("Copa Champagne Moët")).not.toBeInTheDocument();
     });
 
-    it("las categorías que no son destilados ni cervezas tienen su propio chip", () => {
+    it("las categorías que no son destilados ni cervezas tienen su propio chip; refrescos, aguas y tónicas no salen", () => {
       renderCarta();
-      expect(screen.getByRole("tab", { name: "Refrescos" })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: "Zumos" })).toBeInTheDocument();
       expect(screen.queryByRole("tab", { name: "Copas" })).not.toBeInTheDocument();
-      expect(screen.getByRole("heading", { level: 2, name: "Refrescos", hidden: true })).toBeInTheDocument();
+      expect(screen.queryByRole("tab", { name: "Refrescos" })).not.toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 2, name: "Zumos", hidden: true })).toBeInTheDocument();
     });
 
     it("el ancla antigua /carta#whiskies abre Destilados", () => {

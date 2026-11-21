@@ -115,7 +115,7 @@ describe("agruparDestilados", () => {
 });
 
 describe("repartirBebidas", () => {
-  it("cervezas, copas, destilados y una pestaña por cada otra categoría; los vinos no salen", () => {
+  it("cervezas, copas, destilados y una pestaña por cada otra categoría; vinos, aguas, refrescos y tónicas no salen", () => {
     const r = repartirBebidas([
       { nombre: "Mahou", categoria: "Cervezas" },
       { nombre: "Copa Moët", categoria: "Copas" },
@@ -123,14 +123,15 @@ describe("repartirBebidas", () => {
       { nombre: "Coca-Cola", categoria: "Refrescos" },
       { nombre: "Fanta", categoria: "refrescos" },
       { nombre: "Font Vella", categoria: "Aguas" },
+      { nombre: "Schweppes", categoria: "Tónicas" },
+      { nombre: "Zumo de naranja", categoria: "Zumos" },
       { nombre: "Rioja", categoria: "Tintos" },
     ]);
     expect(r.cervezas.map((x) => x.nombre)).toEqual(["Mahou"]);
     expect(r.copas.map((x) => x.nombre)).toEqual(["Copa Moët"]);
     expect(r.destilados.map((g) => g.id)).toEqual(["whiskies"]);
     expect(r.otras.map((p) => [p.id, p.titulo, p.items.length])).toEqual([
-      ["refrescos", "Refrescos", 2],
-      ["aguas", "Aguas", 1],
+      ["zumos", "Zumos", 1],
     ]);
   });
 });

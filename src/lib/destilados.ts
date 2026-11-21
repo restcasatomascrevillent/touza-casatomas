@@ -150,8 +150,11 @@ export interface BebidasRepartidas<T> {
 
 const ES_CERVEZA = /^cervezas?$/;
 const ES_COPA = /^copas?$/;
-/** Lo que nunca sale en Touza aunque esté marcado (13/11/2026: los vinos, fuera). */
-const NO_SALE = /^(tinto|tintos|vino|vinos|blanco|blancos|rosado|rosados|cava|cavas|champagne|champagnes|espumoso|espumosos)$/;
+/**
+ * Lo que nunca sale en Touza aunque esté marcado (13/11/2026: los vinos,
+ * fuera; 21/11/2026: aguas, refrescos y tónicas, pedido del dueño).
+ */
+const NO_SALE = /^(tinto|tintos|vino|vinos|blanco|blancos|rosado|rosados|cava|cavas|champagne|champagnes|espumoso|espumosos|aguas?|refrescos?|tonicas?)$/;
 
 /**
  * Reparte TODAS las bebidas de Touza (una sola consulta) en lo que pinta
