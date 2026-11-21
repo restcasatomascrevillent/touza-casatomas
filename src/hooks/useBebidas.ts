@@ -30,6 +30,8 @@ export interface BebidaUI {
   /** Foto de la botella (Storage, 3:5). Sin foto, la fila va sin imagen. */
   image?: string;
   description?: string;
+  /** Categoría del panel («Whiskies», «Ginebras»…): para agrupar los destilados. */
+  categoria?: string;
 }
 
 export const useBebidas = (categoria: string, soloTouza: boolean = true) => {
@@ -41,7 +43,8 @@ export const useBebidas = (categoria: string, soloTouza: boolean = true) => {
         .select(COLUMNAS_BEBIDAS)
         .eq('categoria', categoria)
         .eq('activado', true)
-        .order('orden', { ascending: true });
+        .order('orden', { ascending: true })
+        .order('id', { ascending: true });
 
       if (soloTouza) {
         query = query.eq('touza', true);
@@ -59,8 +62,45 @@ export const useBebidas = (categoria: string, soloTouza: boolean = true) => {
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 5 * 60 * 1000, // 5 minutos
-    // Solo hay instantánea de las categorías que pinta /carta.
-    ...semilla(soloTouza ? CARTA_SSG?.bebidas[categoria] : undefined),
+    // La instantánea trae todas las bebidas de Touza en el mismo orden que
+    // esta consulta: filtrar conserva el orden y el HTML no salta al hidratar.
+    ...semilla(soloTouza ? bebidasTouzaSSG()?.filter((b) => b.categoria === categoria) : undefined),
+  });
+};
+
+/** Bebidas de Touza de la instantánea del build (`undefined` fuera del build). */
+const bebidasTouzaSSG = (): Bebida[] | undefined => CARTA_SSG?.bebidasTouza;
+
+/**
+ * TODAS las bebidas de Touza (activado y touza) en una sola consulta: /carta
+ * y la portada reparten en el navegador cervezas, copas y destilados (ver
+ * src/lib/destilados.ts). Así una categoría nueva del panel («Ginebras»,
+ * «Rones»…) aparece sin tocar la web. Mismo filtro y orden que el build
+ * (scripts/carta-ssg-plugin.mjs).
+ */
+export const useBebidasTouza = () => {
+  return useQuery({
+    queryKey: ['bebidas', 'touza'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Bebidas')
+        .select(COLUMNAS_BEBIDAS)
+        .eq('activado', true)
+        .eq('touza', true)
+        .order('orden', { ascending: true })
+        .order('id', { ascending: true });
+
+      if (error) {
+        console.error('Error loading drinks:', error);
+        throw new Error('No se pudieron cargar las bebidas. Por favor, intenta de nuevo.');
+      }
+
+      return data as unknown as Bebida[];
+    },
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 5 * 60 * 1000,
+    ...semilla(bebidasTouzaSSG()),
   });
 };
 
@@ -76,5 +116,6 @@ export const transformBebidasToUI = (bebidas: Bebida[] | undefined): BebidaUI[] 
     size: bebida.tamano || undefined,
     image: fotoPropia(bebida.imagen_url) || undefined,
     description: bebida.descripcion || undefined,
+    categoria: bebida.categoria || undefined,
   }));
 };

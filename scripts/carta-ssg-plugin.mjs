@@ -29,8 +29,6 @@ import {
 const VIRTUAL_ID = "virtual:touza/carta";
 const RESOLVED_ID = `\0${VIRTUAL_ID}`;
 
-const CATEGORIAS_BEBIDAS = ["Cervezas", "Copas", "Whiskies"];
-
 /** `vite-react-ssg build` lanza dos builds (cliente + SSR): una sola consulta. */
 let cache = null;
 
@@ -105,7 +103,10 @@ async function traerCarta(base, key) {
       base,
       key,
       "Bebidas",
-      `select=${COLUMNAS_BEBIDAS}&activado=eq.true&touza=eq.true&categoria=in.(${CATEGORIAS_BEBIDAS.map((c) => `"${c}"`).join(",")})&order=orden.asc`,
+      // Todas las categorías (rediseño A, 21/11/2026): los destilados
+      // (whisky, ginebra, ron…) se reconocen por el nombre de la categoría en
+      // src/lib/destilados.ts. Mismo filtro y orden que useBebidasTouza.
+      `select=${COLUMNAS_BEBIDAS}&activado=eq.true&touza=eq.true&order=orden.asc,id.asc`,
     ),
     consultar(
       base,
@@ -116,10 +117,7 @@ async function traerCarta(base, key) {
     leerMostrarFotosPlatos(base, key),
   ]);
 
-  const porCategoria = (filas, categorias) =>
-    Object.fromEntries(categorias.map((c) => [c, filas.filter((f) => f.categoria === c)]));
-
-  // A diferencia de bebidas (lista fija), los vinos se agrupan por el valor
+  // Como las bebidas (todas las categorías), los vinos se agrupan por el valor
   // real de `categoria` de cada fila, no por una lista escrita a mano —igual
   // que useVinosRestantes en el navegador—, para que una denominación nueva
   // en el admin tenga dónde caer sin tocar este script. Esto solo guarda la
@@ -152,7 +150,7 @@ async function traerCarta(base, key) {
     generadoEn: new Date().toISOString(),
     cocteles,
     vinos: porCategoriaReal(vinos),
-    bebidas: porCategoria(bebidas, CATEGORIAS_BEBIDAS),
+    bebidasTouza: bebidas,
     // `Platos.touza` es false en las 128 filas de la tabla → esto viene vacío
     // a propósito. Ver el comentario de src/hooks/usePlatos.ts.
     // `imagen_url` se conserva aunque las fotos estén apagadas: el navegador
@@ -206,7 +204,7 @@ export function cartaSSG() {
         const n = (o) => Object.values(o).reduce((t, v) => t + v.length, 0);
         this.info?.(
           `[carta-ssg] ${cache.cocteles.length} cócteles · ${n(cache.vinos)} vinos · ` +
-            `${n(cache.bebidas)} bebidas · ${cache.platos.length} tapas`,
+            `${cache.bebidasTouza.length} bebidas · ${cache.platos.length} tapas`,
         );
       }
 

@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Search, X, Info } from "lucide-react";
-import { motion } from "framer-motion";
 import Reveal from "@/components/Reveal";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -14,7 +13,7 @@ import { precargarImagenes } from "@/lib/precarga";
 import { FOTO_BOTELLA, FOTO_DETALLE, fotoResponsive, volverAFotoOriginal } from "@/lib/foto";
 import { useCocteles, transformCoctelesToUI, type CoctelUI } from "@/hooks/useCocteles";
 import { useEspumosos, esChampagne, PREFIJO_ESPUMOSOS, transformVinosToUI, type Vino, type VinoUI } from "@/hooks/useVinos";
-import { useBebidas, transformBebidasToUI, type BebidaUI } from "@/hooks/useBebidas";
+import { useBebidasTouza, transformBebidasToUI, type Bebida, type BebidaUI } from "@/hooks/useBebidas";
 import { usePlatosTouza, transformPlatosToUI, useMostrarFotosPlatosTouza } from "@/hooks/usePlatos";
 import { AVISO_ALERGENOS_CARTA, AVISO_SIN_ALERGENOS } from "@/lib/alergenos";
 import Seo from "@/components/Seo";
@@ -28,8 +27,9 @@ import { copasPorBotella } from "@/lib/copas";
 import TarjetaCoctel from "@/components/carta/TarjetaCoctel";
 import HeroCopa from "@/components/carta/HeroCopa";
 import { LiquidLoaderSVG } from "@/components/ui/svg/LiquidLoaderSVG";
-
-const appleEase = [0.25, 0.1, 0.25, 1] as const;
+import { IMAGENES, type ImagenResponsive } from "@/assets/imagenes";
+import FotoPortada from "@/components/home/FotoPortada";
+import { esAnclaDestilados, repartirBebidas } from "@/lib/destilados";
 
 interface GenericDrink {
   id: number | string;
@@ -54,15 +54,42 @@ const esCopaEspumosa = (copa: { tipo?: string | null }) => /^(champagne|cava)$/i
 const INTRO_PESTANA: Record<string, string> = {
   champagne: "Por botella.",
   cavas: "Cava y otros espumosos, por botella.",
-  whiskies: "Por copa: solo, con hielo o con agua.",
+  destilados: "Por copa: solo, con hielo o con su refresco.",
 };
 
-const tabsCarta = [
-  { id: "cocteles", name: "Cócteles" },
-  { id: "champagne", name: "Champagne" },
+interface PestanaCarta {
+  id: string;
+  name: string;
+  /** Miniatura redonda del chip (28 px). Sin ella, chip de solo texto. */
+  foto?: ImagenResponsive;
+  /** Banda de foto ancha con el título encima (Champagne y Destilados). */
+  banda?: { imagen: ImagenResponsive; alt: string };
+}
+
+/**
+ * Pestañas fijas (rediseño A, 21/11/2026). Las categorías de Bebidas que no
+ * son destilados ni cervezas («Refrescos», «Aguas»…) se añaden detrás, una
+ * pestaña cada una, si tienen productos. «Por copas» ya no existe: la copa va
+ * en la «i» de su botella.
+ */
+const PESTANAS_FIJAS: PestanaCarta[] = [
+  { id: "cocteles", name: "Cócteles", foto: IMAGENES.copaRoja },
+  {
+    id: "champagne",
+    name: "Champagne",
+    foto: IMAGENES.champanMesa,
+    banda: { imagen: IMAGENES.champanMesa, alt: "Botellas de champagne Laurent-Perrier y una copa servida sobre el mármol de Touza" },
+  },
+  {
+    id: "destilados",
+    name: "Destilados",
+    foto: IMAGENES.botellero,
+    // El botellero y no la estantería apaisada: esa foto tiene a la derecha
+    // un tercio de pared oscura que en la banda ancha parecía un hueco.
+    banda: { imagen: IMAGENES.botellero, alt: "El botellero de Touza iluminado en dorado, con whiskies, tequilas y copas" },
+  },
   { id: "cavas", name: "Cavas" },
   { id: "cervezas", name: "Cervezas" },
-  { id: "whiskies", name: "Whiskies" },
 ];
 
 const cocktailCategories = [
@@ -78,6 +105,30 @@ const MARGEN_ANCLA = 140;
 /** Minúsculas y sin diacríticos, para comparar búsquedas. */
 const normalizarBusqueda = (texto: string) =>
   texto.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+
+/** Bebidas del panel → filas de la carta, sin nombres repetidos. */
+const aUI = (filas: Bebida[]) => transformBebidasToUI(sinDuplicados(filas));
+
+/** Miniatura redonda de 28 px del chip de una pestaña. */
+const MiniaturaChip = ({ imagen }: { imagen: ImagenResponsive }) => (
+  <span aria-hidden="true" className="block h-7 w-7 shrink-0 overflow-hidden rounded-full bg-white/10">
+    <FotoPortada imagen={imagen} alt="" sizes="28px" />
+  </span>
+);
+
+/**
+ * Banda de foto ancha con el título de la sección encima (Champagne y
+ * Destilados): 200 px en el móvil, 340 px desde md.
+ */
+const BandaSeccion = ({ id, titulo, imagen, alt }: { id: string; titulo: string; imagen: ImagenResponsive; alt: string }) => (
+  <div className="fondo-foto relative mb-5 h-[200px] overflow-hidden rounded-2xl md:mb-8 md:h-[340px]">
+    <FotoPortada imagen={imagen} alt={alt} sizes="(min-width: 1152px) 1104px, calc(100vw - 2.5rem)" />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgb(0_0_0/0.65),transparent_70%)]" />
+    <h2 id={id} className="absolute bottom-4 left-5 font-serif text-[2.5rem] font-medium leading-none text-white md:bottom-8 md:left-10 md:text-[4rem]">
+      {titulo}
+    </h2>
+  </div>
+);
 
 const SinResultados = ({ termino, onLimpiar }: { termino: string; onLimpiar: () => void }) => (
   <div className="col-span-full py-16 text-center" role="status">
@@ -184,12 +235,26 @@ const Carta = () => {
     () => transformVinosToUI(espumososUnicos.filter((vino) => !esChampagne(vino.categoria))),
     [espumososUnicos]
   );
-  const { data: cervezasRaw, isLoading: loadingCervezas } = useBebidas('Cervezas');
-  const { data: copasRaw } = useBebidas('Copas');
-  const { data: whiskiesRaw, isLoading: loadingWhiskies } = useBebidas('Whiskies');
-  const cervezasData = useMemo(() => transformBebidasToUI(sinDuplicados(cervezasRaw ?? [])), [cervezasRaw]);
-  const copasData = useMemo(() => transformBebidasToUI(sinDuplicados((copasRaw ?? []).filter(esCopaEspumosa))), [copasRaw]);
-  const whiskiesData = useMemo(() => transformBebidasToUI(sinDuplicados(whiskiesRaw ?? [])), [whiskiesRaw]);
+  // Todas las bebidas de Touza en una consulta; se reparten aquí en
+  // cervezas, copas, grupos de destilados (whisky, ginebra, ron…) y una
+  // pestaña por cada otra categoría (ver src/lib/destilados.ts).
+  const { data: bebidasRaw, isLoading: loadingBebidas } = useBebidasTouza();
+  const reparto = useMemo(() => repartirBebidas(bebidasRaw ?? []), [bebidasRaw]);
+  const cervezasData = useMemo(() => aUI(reparto.cervezas), [reparto]);
+  const copasData = useMemo(() => aUI(reparto.copas.filter(esCopaEspumosa)), [reparto]);
+  const gruposDestilados = useMemo(
+    () => reparto.destilados.map((grupo) => ({ id: grupo.id, titulo: grupo.titulo, items: aUI(grupo.items) })),
+    [reparto]
+  );
+  const destiladosData = useMemo(() => gruposDestilados.flatMap((g) => g.items), [gruposDestilados]);
+  const pestanasOtras = useMemo(
+    () => reparto.otras.map((pestana) => ({ id: pestana.id, name: pestana.titulo, items: aUI(pestana.items) })),
+    [reparto]
+  );
+  const tabsCarta = useMemo<PestanaCarta[]>(
+    () => [...PESTANAS_FIJAS, ...pestanasOtras.map(({ id, name }) => ({ id, name }))],
+    [pestanasOtras]
+  );
   // Precio por copa de cada botella de champagne o cava que también se sirve
   // por copa. Las copas sin botella en la carta no se pintan.
   const { precioPorBotella: precioCopa } = useMemo(
@@ -214,12 +279,15 @@ const Carta = () => {
     const espumosos = Object.entries(CARTA_SSG.vinos)
       .filter(([categoria]) => categoria.startsWith(PREFIJO_ESPUMOSOS))
       .flatMap(([, vinos]) => vinos as Vino[]);
+    const bebidas = repartirBebidas(CARTA_SSG.bebidasTouza ?? []);
     return menuSchema([
       { nombre: "Cócteles", items: CARTA_SSG.cocteles },
       { nombre: "Champagnes", items: espumosos.filter((vino) => esChampagne(vino.categoria)) },
       { nombre: "Cavas y otros espumosos", items: espumosos.filter((vino) => !esChampagne(vino.categoria)) },
-      { nombre: "Cervezas", items: CARTA_SSG.bebidas["Cervezas"] ?? [] },
-      { nombre: "Whiskies", items: CARTA_SSG.bebidas["Whiskies"] ?? [] },
+      { nombre: "Cervezas", items: bebidas.cervezas },
+      // Destilados: una sección por familia (Whiskies, Ginebras, Rones…).
+      ...bebidas.destilados.map((grupo) => ({ nombre: grupo.titulo, items: grupo.items })),
+      ...bebidas.otras.map((pestana) => ({ nombre: pestana.titulo, items: pestana.items })),
       // Sin fotos si el panel las apagó al construir (ver `platosParaJsonLd`).
       { nombre: "Tapas", items: platosParaJsonLd(CARTA_SSG.platos) },
     ]);
@@ -232,6 +300,32 @@ const Carta = () => {
   // estar ya pintada para medir dónde cae la tarjeta.
   const { hash } = useLocation();
   const hayCocteles = cocktailsData.length > 0;
+  // Enlaces a una pestaña (`/carta#champagne`, las puertas de la portada):
+  // la abre y deja la barra de pestañas arriba. `#destilados`, el antiguo
+  // `#whiskies` y las familias (`#ginebras`) abren Destilados; una familia,
+  // además, baja hasta su subtítulo cuando ya está pintada.
+  const idsPestanas = tabsCarta.map((p) => p.id).join(",");
+  useEffect(() => {
+    const ancla = decodeURIComponent(hash.replace(/^#/, "")).toLowerCase();
+    if (!ancla) return;
+    if (cocktailsData.some((c) => slugCarta(c.name) === ancla)) return; // lo lleva el efecto de abajo
+    const destilados = esAnclaDestilados(ancla);
+    const pestana = destilados ? "destilados" : tabsCarta.find((p) => p.id === ancla)?.id;
+    if (!pestana) return;
+    setActiveMainCategory(pestana);
+    setSearchTerm("");
+    const temporizador = window.setTimeout(() => {
+      const grupo = destilados && ancla !== "destilados" ? document.getElementById(`grupo-${ancla}`) : null;
+      const destino = grupo ?? inicioListaRef.current;
+      if (!destino) return;
+      const margen = grupo ? MARGEN_ANCLA : (barraPestanasRef.current?.offsetHeight ?? 0) + 72;
+      irA(Math.max(0, destino.getBoundingClientRect().top + window.scrollY - margen));
+    }, 350);
+    return () => window.clearTimeout(temporizador);
+    // Solo cuando cambia el ancla o llegan los datos que dicen qué pestañas hay.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hash, hayCocteles, idsPestanas]);
+
   useEffect(() => {
     const slug = decodeURIComponent(hash.replace(/^#/, ""));
     if (!slug || !hayCocteles) return;
@@ -271,8 +365,8 @@ const Carta = () => {
       case "champagne": return champagneData;
       case "cavas": return cavasData;
       case "cervezas": return cervezasData;
-      case "whiskies": return whiskiesData;
-      default: return [];
+      case "destilados": return destiladosData;
+      default: return pestanasOtras.find((p) => p.id === id)?.items ?? [];
     }
   };
   // Fotos de una pestaña en el orden en que se ven (el champagne, agrupado),
@@ -294,9 +388,8 @@ const Carta = () => {
     switch (id) {
       case "champagne":
       case "cavas": return loadingEspumosos;
-      case "cervezas": return loadingCervezas;
-      case "whiskies": return loadingWhiskies;
-      default: return false;
+      case "cocteles": return false;
+      default: return loadingBebidas;
     }
   };
 
@@ -341,17 +434,18 @@ const Carta = () => {
         </div>
       </HeroCopa>
 
-      {/* Tabs */}
-      <div ref={barraPestanasRef} className={cn(BARRA_BAJO_CABECERA, "bg-black/85 backdrop-blur-2xl border-y border-white/5 py-2.5")}>
+      {/* Pestañas en chips (rediseño A): Cócteles, Champagne y Destilados con
+          su miniatura redonda; las demás, solo texto. */}
+      <div ref={barraPestanasRef} className={cn(BARRA_BAJO_CABECERA, "bg-black/90 backdrop-blur-2xl border-y border-white/5 py-3")}>
         {/* En el móvil la fila no cabe: el borde derecho se desvanece para que
-            se vea que sigue (antes se cortaba «Cer…» sin más). */}
+            se vea que sigue. */}
         <div
           ref={filaPestanasRef}
           className="relative max-w-6xl mx-auto overflow-x-auto scrollbar-hide px-4 [mask-image:linear-gradient(to_right,#000_calc(100%-28px),transparent)] md:[mask-image:none]"
         >
           <div className="flex justify-start md:justify-center min-w-max">
             <Tabs value={activeMainCategory} onValueChange={cambiarPestana}>
-              <TabsList className="bg-transparent p-0 gap-1">
+              <TabsList className="h-auto bg-transparent p-0 gap-2">
                 {tabsCarta.map((cat) => (
                   <TabsTrigger
                     key={cat.id}
@@ -360,22 +454,15 @@ const Carta = () => {
                     onFocus={() => precargarPestana(cat.id)}
                     onTouchStart={() => precargarPestana(cat.id)}
                     className={cn(
-                      "relative rounded-none px-4 md:px-5 min-h-11 text-[15px] md:text-sm tracking-wide transition-colors duration-300",
-                      "data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#D8B47E]",
-                      "data-[state=inactive]:text-white/70 data-[state=inactive]:hover:text-white",
+                      "min-h-11 gap-2 rounded-full border text-[14px] tracking-wide transition-colors duration-300",
+                      cat.foto ? "py-1.5 pl-1.5 pr-4" : "px-4 py-2",
+                      "data-[state=active]:border-[#D8B47E] data-[state=active]:bg-[#D8B47E] data-[state=active]:text-black data-[state=active]:shadow-none",
+                      "data-[state=inactive]:border-white/15 data-[state=inactive]:text-white/75 data-[state=inactive]:hover:border-white/30 data-[state=inactive]:hover:text-white",
                       "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-0"
                     )}
                   >
+                    {cat.foto && <MiniaturaChip imagen={cat.foto} />}
                     {cat.name}
-                    {/* Subrayado dorado que se desliza a la pestaña elegida. */}
-                    {cat.id === activeMainCategory && (
-                      <motion.span
-                        layoutId="subrayado-pestana"
-                        aria-hidden="true"
-                        className="absolute inset-x-4 md:inset-x-5 bottom-1.5 h-px bg-[#D8B47E]"
-                        transition={{ duration: 0.45, ease: appleEase }}
-                      />
-                    )}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -459,7 +546,7 @@ const Carta = () => {
                 .sort((a, b) => Number(!!a.fotoGenerica) - Number(!!b.fotoGenerica));
               const sinFoto = coctelesPanel.filter((c) => !tieneFoto(c));
               return (
-                <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
+                <section key={pestana.id} id={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
                   <h2 id={idTitulo} className="sr-only">{pestana.name}</h2>
                   {loadingCocteles ? (activa ? <DrinksSkeleton /> : null) : coctelesPanel.length === 0 ? (
                     activa ? <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} /> : null
@@ -514,28 +601,48 @@ const Carta = () => {
 
             const filasPanel = activa ? filterBySearch(bebidasDePestana(pestana.id)) : bebidasDePestana(pestana.id);
             const cargando = cargandoPestana(pestana.id);
-            // Champagne por tipo (brut, rosado, añada) cuando no se busca nada.
-            const grupos =
-              pestana.id === "champagne" && !(activa && busqueda)
-                ? agruparChampagne(filasPanel)
-                : [{ titulo: null, items: filasPanel }];
+            const buscando = activa && !!busqueda;
+            // Champagne por tipo (brut, rosado, añada) y destilados por familia
+            // (Whiskies, Ginebras, Rones…), siempre con su subtítulo; la
+            // búsqueda filtra dentro de cada familia.
+            const grupos: { id?: string; titulo: string | null; items: (VinoUI | BebidaUI)[] }[] =
+              pestana.id === "destilados"
+                ? gruposDestilados
+                    .map((grupo) => ({ ...grupo, items: buscando ? filterBySearch(grupo.items) : grupo.items }))
+                    .filter((grupo) => grupo.items.length > 0)
+                : pestana.id === "champagne" && !buscando
+                  ? agruparChampagne(filasPanel)
+                  : [{ titulo: null, items: filasPanel }];
             // Misma fila en todas las pestañas de bebidas (el dueño,
             // 21/11/2026): foto o, sin ella, la silueta de la botella; también
             // en las cervezas, que no tienen ninguna foto.
             const conHueco = true;
             return (
-              <section key={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
-                <header className="mb-2 md:mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-                  <h2 id={idTitulo} className="font-serif text-4xl md:text-6xl leading-none text-[#F3EEE4]">{pestana.name}</h2>
-                  {INTRO_PESTANA[pestana.id] && (
-                    <p className="text-sm text-white/70 md:text-right">{INTRO_PESTANA[pestana.id]}</p>
-                  )}
-                </header>
+              <section key={pestana.id} id={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
+                {pestana.banda ? (
+                  <>
+                    <BandaSeccion id={idTitulo} titulo={pestana.name} imagen={pestana.banda.imagen} alt={pestana.banda.alt} />
+                    {INTRO_PESTANA[pestana.id] && (
+                      <p className="mb-2 text-sm text-white/70 md:mb-4">{INTRO_PESTANA[pestana.id]}</p>
+                    )}
+                  </>
+                ) : (
+                  <header className="mb-2 md:mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <h2 id={idTitulo} className="font-serif text-4xl md:text-6xl leading-none text-[#F3EEE4]">{pestana.name}</h2>
+                    {INTRO_PESTANA[pestana.id] && (
+                      <p className="text-sm text-white/70 md:text-right">{INTRO_PESTANA[pestana.id]}</p>
+                    )}
+                  </header>
+                )}
                 {activa && (cargando ? <DrinksSkeleton /> : filasPanel.length === 0 ? (
                   <SinResultados termino={searchTerm.trim()} onLimpiar={() => setSearchTerm("")} />
                 ) : null)}
                 {grupos.map((grupo, numeroGrupo) => (
-                  <div key={grupo.titulo ?? "todo"} className={grupo.titulo ? "mt-10 first-of-type:mt-6 md:mt-14" : undefined}>
+                  <div
+                    key={grupo.id ?? grupo.titulo ?? "todo"}
+                    id={grupo.id ? `grupo-${grupo.id}` : undefined}
+                    className={grupo.titulo ? "mt-10 first-of-type:mt-6 md:mt-14" : undefined}
+                  >
                     {grupo.titulo && (
                       <h3 className="mb-1 font-serif text-2xl text-[#D8B47E] md:mb-2 md:text-3xl">{grupo.titulo}</h3>
                     )}

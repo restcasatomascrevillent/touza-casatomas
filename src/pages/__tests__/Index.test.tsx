@@ -1,6 +1,7 @@
 /**
- * Portada (16/11/2026: el hero de antes y la carta primero): los cuatro
- * bloques, SEO de la portada y limpieza de textos. Se pinta con el Layout real
+ * Portada «Tres puertas» (rediseño A, 21/11/2026): el hero de siempre, las
+ * tres puertas, «De la casa», Visítanos y el texto para buscadores; SEO de la
+ * portada y limpieza de textos. Se pinta con el Layout real
  * (cabecera y pie).
  */
 import { describe, it, expect, vi } from "vitest";
@@ -40,6 +41,33 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: vi.fn() } }
 vi.mock("@/hooks/useCocteles", async (original) => ({
   ...(await original<typeof import("@/hooks/useCocteles")>()),
   useCocteles: () => ({ data: filas, isLoading: false }),
+}));
+
+// Champagne: dos botellas y una copa; bebidas: whisky, ginebra, una cerveza.
+vi.mock("@/hooks/useVinos", async (original) => ({
+  ...(await original<typeof import("@/hooks/useVinos")>()),
+  useEspumosos: () => ({
+    data: [
+      { id: "v1", nombre: "Collet Brut", precio_eur: 51, categoria: "VINOS ESPUMOSOS — CHAMPAGNE" },
+      { id: "v2", nombre: "Ruinart Brut", precio_eur: 90, categoria: "VINOS ESPUMOSOS — CHAMPAGNE" },
+      { id: "v3", nombre: "Cava Juvé", precio_eur: 30, categoria: "VINOS ESPUMOSOS — CAVA" },
+    ],
+    isLoading: false,
+  }),
+}));
+
+vi.mock("@/hooks/useBebidas", async (original) => ({
+  ...(await original<typeof import("@/hooks/useBebidas")>()),
+  useBebidasTouza: () => ({
+    data: [
+      { id: "b1", nombre: "Copa Champagne Laurent-Perrier", precio_eur: 13.5, categoria: "Copas", tipo: "champagne" },
+      { id: "b2", nombre: "Lagavulin 8", precio_eur: 10, categoria: "Whiskies", tipo: null },
+      { id: "b3", nombre: "Monkey Shoulder", precio_eur: 8, categoria: "Whiskies", tipo: null },
+      { id: "b4", nombre: "Hendrick's", precio_eur: 11, categoria: "Ginebras", tipo: null },
+      { id: "b5", nombre: "Mahou", precio_eur: 3, categoria: "Cervezas", tipo: null },
+    ],
+    isLoading: false,
+  }),
 }));
 
 vi.mock("@/components/Seo", () => ({
@@ -94,10 +122,10 @@ describe("Portada", () => {
     }
   });
 
-  it("el texto que salía del hero sigue en la portada: una línea en «El local» y otra en «Visítanos»", () => {
+  it("el texto que salía del hero sigue en la portada: una línea en «Sobre Touza» y otra en «Visítanos»", () => {
     const { container } = pintar();
-    const elLocal = screen.getByRole("heading", { level: 2, name: "El local" }).closest("section") as HTMLElement;
-    expect(within(elLocal).getByText("Coctelería y bar de copas en Crevillent, junto a Casa Tomás.").tagName).toBe("P");
+    const sobre = screen.getByRole("heading", { level: 2, name: "Sobre Touza" }).closest("section") as HTMLElement;
+    expect(sobre.textContent).toMatch(/Coctelería y bar de copas en Crevillent, junto a Casa Tomás\./);
 
     const visitanos = container.querySelector("#visitanos") as HTMLElement;
     expect(within(visitanos).getByText("Sin reservas: ven directamente.").tagName).toBe("P");
@@ -169,18 +197,29 @@ describe("Portada", () => {
     expect(container.querySelectorAll("[data-reveal]")).toHaveLength(0);
   });
 
-  it("los bloques, en orden: la carta, el local y visítanos; fuera la vitrina y «En la barra»", () => {
+  it("los bloques, en orden: puertas, «De la casa», Visítanos y «Sobre Touza»; fuera «El local» y la rejilla", () => {
     pintar();
     const titulos = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent?.trim());
-    const orden = ["Cócteles de autor", "El local", "Visítanos"].map((t) => titulos.indexOf(t));
+    const orden = ["La carta de Touza", "De la casa", "Visítanos", "Sobre Touza"].map((t) => titulos.indexOf(t));
     expect(orden.every((i) => i >= 0)).toBe(true);
     expect(orden).toEqual([...orden].sort((a, b) => a - b));
-    expect(screen.queryByRole("heading", { name: "En la barra" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Se sirve" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Y a disfrutarla" })).not.toBeInTheDocument();
+    for (const fuera of ["El local", "Cócteles de autor", "En la barra", "Se sirve", "Y a disfrutarla"]) {
+      expect(screen.queryByRole("heading", { name: fuera })).not.toBeInTheDocument();
+    }
   });
 
-  it("«La carta»: ocho cócteles con foto propia, nombre y precio, cada uno a su ficha, y «Ver la carta completa»", () => {
+  it("tres puertas a su pestaña de /carta, con el dato sacado de la carta", () => {
+    pintar();
+    const puertas = within(screen.getByRole("heading", { level: 2, name: "La carta de Touza" }).closest("section") as HTMLElement).getAllByRole("link");
+    expect(puertas.map((p) => p.getAttribute("href"))).toEqual(["/carta#cocteles", "/carta#champagne", "/carta#destilados"]);
+    expect(puertas[0]).toHaveTextContent(/Cócteles.*10 en carta.*de 9 a 10\s€/);
+    expect(puertas[1]).toHaveTextContent(/Champagne.*por copa.*desde 13,50\s€/);
+    // Tercera puerta: todos los destilados (cambio del dueño), no solo whisky.
+    expect(puertas[2]).toHaveTextContent(/Destilados.*Whisky y ginebra.*desde 8\s€/);
+    expect(screen.getByRole("img", { name: /botellero de Touza/ })).toHaveAttribute("loading", "lazy");
+  });
+
+  it("«De la casa»: ocho cócteles con foto propia, nombre y precio, cada uno a su ficha, y «Carta completa»", () => {
     pintar();
     const lista = screen.getByRole("list", { name: "Algunos cócteles de la carta" });
     const tarjetas = within(lista).getAllByRole("listitem");
@@ -195,15 +234,12 @@ describe("Portada", () => {
     expect(primera.getByRole("img", { name: "Clover Club, cóctel de la carta de Touza" })).toHaveAttribute("loading", "lazy");
     expect(within(tarjetas[6]).getByRole("link")).toHaveAttribute("href", "/carta#pina-colada");
 
-    expect(screen.getByRole("link", { name: "Ver la carta completa" })).toHaveAttribute("href", "/carta");
+    expect(screen.getByRole("link", { name: "Carta completa" })).toHaveAttribute("href", "/carta");
+    expect(screen.getByRole("link", { name: "copas después de cenar" })).toHaveAttribute("href", "/despues-de-cenar");
   });
 
-  it("«El local»: tres fotos del local y el póster del clip, sin gente y sin <video> en el HTML", () => {
+  it("sin gente en las fotos", () => {
     const { container } = pintar();
-    for (const alt of [/salón de Touza de noche/, /botellero de Touza/, /T de Touza retroiluminada/, /trasbarra de Touza/]) {
-      expect(screen.getByRole("img", { name: alt })).toHaveAttribute("loading", "lazy");
-    }
-    expect(screen.getByRole("link", { name: "copas después de cenar" })).toHaveAttribute("href", "/despues-de-cenar");
     for (const img of container.querySelectorAll("img")) {
       expect(img.getAttribute("alt") ?? "").not.toMatch(/bartender|camarero|barman/i);
     }

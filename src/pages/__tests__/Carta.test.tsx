@@ -111,11 +111,22 @@ function mockAllHooksIdle() {
     /CHAMPAGNE\s*$/i.test(categoria ?? "")
   );
 
-  vi.mocked(useBebidasModule.useBebidas).mockReturnValue({
+  vi.mocked(useBebidasModule.useBebidasTouza).mockReturnValue({
     data: undefined,
     isLoading: false,
   } as any);
   vi.mocked(useBebidasModule.transformBebidasToUI).mockReturnValue([]);
+}
+
+function renderCartaEn(ruta: string) {
+  const qc = buildQC();
+  return render(
+    React.createElement(
+      QueryClientProvider,
+      { client: qc },
+      React.createElement(MemoryRouter, { initialEntries: [ruta] }, React.createElement(Carta))
+    )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -449,16 +460,18 @@ describe("Carta — estructura general", () => {
     expect(screen.getByRole("tab", { name: "Cervezas" })).toBeInTheDocument();
     // «Por copas» ya no es pestaña: el precio por copa va en la «i» de la botella.
     expect(screen.queryByRole("tab", { name: "Por copas" })).not.toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Whiskies" })).toBeInTheDocument();
+    // Rediseño A: «Whiskies» pasa a «Destilados» (whisky, ginebra, ron…).
+    expect(screen.getByRole("tab", { name: "Destilados" })).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "Whiskies" })).not.toBeInTheDocument();
   });
 
   it("pinta TODAS las secciones con su <h2> aunque solo se vea la activa (carta indexable)", () => {
     renderCarta();
-    for (const nombre of ["Cócteles", "Champagne", "Cavas", "Cervezas", "Whiskies"]) {
+    for (const nombre of ["Cócteles", "Champagne", "Cavas", "Cervezas", "Destilados"]) {
       expect(screen.getByRole("heading", { level: 2, name: nombre, hidden: true })).toBeInTheDocument();
     }
     expect(screen.getByRole("heading", { level: 2, name: "Cócteles" })).toBeVisible();
-    expect(screen.getByRole("heading", { level: 2, name: "Whiskies", hidden: true })).not.toBeVisible();
+    expect(screen.getByRole("heading", { level: 2, name: "Destilados", hidden: true })).not.toBeVisible();
   });
 
   it("renderiza el campo de búsqueda", () => {
@@ -648,6 +661,7 @@ describe("Carta — botellas", () => {
           price: `${b.precio_eur}€`,
           featured: false,
           description: b.descripcion ?? undefined,
+          categoria: b.categoria ?? undefined,
         })) as never
     );
     vi.mocked(useVinosModule.transformVinosToUI).mockImplementation(
@@ -663,12 +677,12 @@ describe("Carta — botellas", () => {
     );
   });
 
-  const bebida = (id: string, nombre: string) => ({
+  const bebida = (id: string, nombre: string, categoria = "Cervezas") => ({
     id,
     nombre,
     descripcion: null,
     precio_eur: 3,
-    categoria: "Cervezas",
+    categoria,
     tipo: null,
     tag: null,
     featured: false,
@@ -677,21 +691,15 @@ describe("Carta — botellas", () => {
   });
 
   it("no repite cervezas: Heineken una vez y Cruz Campo / Cruzcampo Gran Reserva una vez", () => {
-    vi.mocked(useBebidasModule.useBebidas).mockImplementation(
-      (categoria: string) =>
-        ({
-          data:
-            categoria === "Cervezas"
-              ? [
-                  bebida("1", "Heineken"),
-                  bebida("2", "Cruz Campo Gran Reserva"),
-                  bebida("3", "Heineken"),
-                  bebida("4", "Cruzcampo Gran Reserva"),
-                ]
-              : [],
-          isLoading: false,
-        }) as never
-    );
+    vi.mocked(useBebidasModule.useBebidasTouza).mockReturnValue({
+      data: [
+        bebida("1", "Heineken"),
+        bebida("2", "Cruz Campo Gran Reserva"),
+        bebida("3", "Heineken"),
+        bebida("4", "Cruzcampo Gran Reserva"),
+      ],
+      isLoading: false,
+    } as never);
     renderCarta();
     fireEvent.mouseDown(screen.getByRole("tab", { name: "Cervezas" }));
     expect(screen.getAllByRole("heading", { name: "Heineken" })).toHaveLength(1);
@@ -730,5 +738,53 @@ describe("Carta — botellas", () => {
       expect(screen.getByRole("heading", { level: 3, name: grupo })).toBeVisible();
     }
     expect(screen.getByRole("heading", { level: 4, name: "Ruinart Rosé" })).toBeVisible();
+  });
+
+  describe("Destilados", () => {
+    const todas = () => [
+      bebida("w1", "Lagavulin 8", "Whiskies"),
+      bebida("r1", "Zacapa 23", "Rones"),
+      bebida("g1", "Hendrick's", "Ginebra"),
+      bebida("x1", "Absenta Xenta", "Absenta"),
+      bebida("w2", "Monkey Shoulder", "Whisky"),
+      bebida("c1", "Mahou", "Cervezas"),
+      bebida("k1", "Copa Champagne Moët", "Copas"),
+      bebida("f1", "Coca-Cola", "Refrescos"),
+    ];
+
+    beforeEach(() => {
+      vi.mocked(useBebidasModule.useBebidasTouza).mockReturnValue({ data: todas(), isLoading: false } as never);
+    });
+
+    it("una pestaña con todas las familias, cada una con su subtítulo y en orden; lo desconocido, en «Otros destilados»", () => {
+      renderCarta();
+      fireEvent.mouseDown(screen.getByRole("tab", { name: "Destilados" }));
+      const panel = screen.getByRole("heading", { level: 2, name: "Destilados" }).closest("section") as HTMLElement;
+      const familias = within(panel).getAllByRole("heading", { level: 3 }).map((h) => h.textContent);
+      expect(familias).toEqual(["Whiskies", "Ginebras", "Rones", "Otros destilados"]);
+      // «Whiskies» y «Whisky» van juntos; cervezas, copas y refrescos, fuera.
+      expect(within(panel).getByRole("heading", { level: 4, name: "Monkey Shoulder" })).toBeVisible();
+      expect(within(panel).queryByText("Mahou")).not.toBeInTheDocument();
+      expect(within(panel).queryByText("Coca-Cola")).not.toBeInTheDocument();
+      expect(within(panel).queryByText("Copa Champagne Moët")).not.toBeInTheDocument();
+    });
+
+    it("las categorías que no son destilados ni cervezas tienen su propio chip", () => {
+      renderCarta();
+      expect(screen.getByRole("tab", { name: "Refrescos" })).toBeInTheDocument();
+      expect(screen.queryByRole("tab", { name: "Copas" })).not.toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 2, name: "Refrescos", hidden: true })).toBeInTheDocument();
+    });
+
+    it("el ancla antigua /carta#whiskies abre Destilados", () => {
+      renderCartaEn("/carta#whiskies");
+      expect(screen.getByRole("tab", { name: "Destilados" })).toHaveAttribute("data-state", "active");
+      expect(screen.getByRole("heading", { level: 2, name: "Destilados" })).toBeVisible();
+    });
+
+    it("/carta#champagne abre Champagne (las puertas de la portada)", () => {
+      renderCartaEn("/carta#champagne");
+      expect(screen.getByRole("tab", { name: "Champagne" })).toHaveAttribute("data-state", "active");
+    });
   });
 });

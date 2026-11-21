@@ -22,7 +22,12 @@ export interface CartaSSG {
   generadoEn: string;
   cocteles: Coctel[];
   vinos: Record<string, Vino[]>;
-  bebidas: Record<string, Bebida[]>;
+  /**
+   * Todas las bebidas de Touza (activado y touza), en el orden de la consulta
+   * (`orden`, `id`). Las categorías se reparten en el navegador (cervezas,
+   * copas, destilados: ver src/lib/destilados.ts).
+   */
+  bebidasTouza: Bebida[];
   platos: PlatoTouza[];
   /**
    * Ajustes del panel leídos en build (`configuracion_web`). Opcional: una
