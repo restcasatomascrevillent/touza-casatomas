@@ -160,14 +160,16 @@ const BotonInfo = ({
     <span
       aria-hidden="true"
       className={cn(
-        "flex h-7 w-7 items-center justify-center rounded-full ring-1 ring-inset transition-colors duration-300",
+        // Sin aro propio: el icono «Info» ya es un círculo con la «i» y el
+        // aro dibujaba un doble círculo (pedido del dueño, 21/11/2026).
+        "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-300",
         "group-focus-visible/info:ring-2 group-focus-visible/info:ring-primary",
         abierta
-          ? "bg-[#D8B47E] text-black ring-[#D8B47E]"
-          : "text-[#D8B47E] ring-[#D8B47E]/55 group-hover/info:bg-[#D8B47E]/15 group-hover/info:ring-[#D8B47E]"
+          ? "bg-[#D8B47E] text-black"
+          : "text-[#D8B47E]/85 group-hover/info:text-[#D8B47E]"
       )}
     >
-      {abierta ? <X className="h-4 w-4" strokeWidth={2} /> : <Info className="h-[18px] w-[18px]" strokeWidth={1.75} />}
+      {abierta ? <X className="h-4 w-4" strokeWidth={2} /> : <Info className="h-[22px] w-[22px]" strokeWidth={1.6} />}
     </span>
   </button>
 );
