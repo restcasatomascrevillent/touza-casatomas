@@ -79,9 +79,10 @@ const TarjetaCoctel = ({ coctel, id, alAbrir, alFallar, prioritaria = false }: P
           </span>
         )}
       </div>
-      {coctel.description && (
-        <p className="mt-1 line-clamp-2 text-sm text-white/70">{coctel.description}</p>
-      )}
+      {/* Rediseño A (21/11/2026): en la rejilla, nombre y precio, poca letra.
+          La descripción sigue en el HTML para buscadores y lectores de
+          pantalla, y entera en el detalle al pulsar la tarjeta. */}
+      {coctel.description && <p className="sr-only">{coctel.description}</p>}
       {coctel.alergenos.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {coctel.alergenos.map((alergeno) => (

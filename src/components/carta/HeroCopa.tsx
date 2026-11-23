@@ -248,7 +248,7 @@ const HeroCopa = ({ alt, children }: Props) => {
             oscuro donde va el texto. */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(0_0_0/0.55)_0%,transparent_30%,transparent_42%,rgb(11_8_6/0.78)_74%,#0b0806_100%)] md:bg-[linear-gradient(to_bottom,rgb(0_0_0/0.55)_0%,transparent_32%,transparent_48%,rgb(11_8_6/0.72)_78%,#0b0806_100%)]"
+          className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(0_0_0/0.8)_0%,rgb(0_0_0/0.45)_13%,transparent_30%,transparent_42%,rgb(11_8_6/0.78)_74%,#0b0806_100%)] md:bg-[linear-gradient(to_bottom,rgb(0_0_0/0.55)_0%,transparent_32%,transparent_48%,rgb(11_8_6/0.72)_78%,#0b0806_100%)]"
         />
       </div>
 
