@@ -17,7 +17,7 @@
  *    que el dueño lo confirme.
  *    Google usa el JSON-LD para el "Abierto ahora" de la ficha local, así que
  *    si están mal, están mal en el sitio donde más se nota.
- *  · Redes sociales (`sameAs`): las URLs que ya enlaza el pie. Sin comprobar.
+ *  · Redes sociales: ninguna propia de Touza (24/11/2026), sin `sameAs`.
  *
  * Dirección confirmada por el dueño el 21/10/2026: C/ Santa María de la
  * Cabeza, 4 (Casa Tomás está en el n.º 2). La web decía "C/ San Vicente, 14",
@@ -48,7 +48,9 @@ export const NEGOCIO = {
   lng: -0.8103167,
   /** Ficha de Google Maps "TOUZA CLUB" (por CID, estable aunque cambie el nombre). */
   mapa: "https://maps.google.com/?cid=1982489405729160298",
-  redes: ["https://www.instagram.com/touzabar/", "https://www.facebook.com/touzabar/"],
+  // Sin redes propias de Touza (24/11/2026: el dueño quitó @touzabar y el
+  // Facebook de la web). En el pie y en Contacto va el Instagram de Casa Tomás.
+  redes: [] as string[],
   /** El de la ficha de Google, por indicación del 15/11/2026. Antes: J–S 20:00–02:00 y D 18:00–00:00. */
   horarios: [
     { dias: ["Thursday"], abre: "16:00", cierra: "01:00" },
@@ -170,7 +172,6 @@ export function barSchema(): Record<string, unknown> {
     geo: { "@type": "GeoCoordinates", latitude: NEGOCIO.lat, longitude: NEGOCIO.lng },
     hasMap: NEGOCIO.mapa,
     url: canonical("/"),
-    sameAs: [...NEGOCIO.redes],
     // Touza no acepta reservas por la web (decisión del dueño, 01/10/2026):
     // nada de URL de reserva ni de ReserveAction. Se llama o se viene.
     acceptsReservations: false,
@@ -310,3 +311,6 @@ export function paginaSchema({ ruta, nombre, descripcion }: { ruta: string; nomb
     mentions: { "@type": "Restaurant", name: CASA_TOMAS.nombre, url: CASA_TOMAS.url },
   };
 }
+
+/** Instagram de Casa Tomás: el único que enlaza la web de Touza (24/11/2026). */
+export const INSTAGRAM_CASA_TOMAS = "https://www.instagram.com/casatomascrevillent/";

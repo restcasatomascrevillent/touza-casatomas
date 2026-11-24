@@ -593,10 +593,12 @@ const Carta = () => {
                 : pestana.id === "champagne" && !buscando
                   ? agruparChampagne(filasPanel)
                   : [{ titulo: null, items: filasPanel }];
-            // Misma fila en todas las pestañas de bebidas (el dueño,
-            // 21/11/2026): foto o, sin ella, la silueta de la botella; también
-            // en las cervezas, que no tienen ninguna foto.
-            const conHueco = true;
+            // Si alguna botella de la pestaña tiene foto, las que no la tienen
+            // guardan su hueco con la silueta (todos los nombres en la misma
+            // columna). Con el nicho grande (24/11/2026), en pestañas sin
+            // ninguna foto (cervezas, destilados) no hay hueco: una columna
+            // de siluetas grandes parecía una carta rota.
+            const conHueco = bebidasDePestana(pestana.id).some((bebida) => !!bebida.image);
             return (
               <section key={pestana.id} id={pestana.id} hidden={!activa} aria-labelledby={idTitulo}>
                 <header className="mb-2 md:mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
@@ -620,7 +622,7 @@ const Carta = () => {
                     {/* `grid-cols-1` (= minmax(0, 1fr)): sin columna fija, la
                         columna implícita crecía hasta la fila más ancha y en el
                         móvil el «€» de los champagnes se salía de la pantalla. */}
-                    <ul className="grid grid-cols-1 md:grid-cols-2 md:gap-x-14">
+                    <ul className="grid grid-cols-1 lg:grid-cols-2 lg:gap-x-14">
                       {grupo.items.map((drink, indice) => (
                         <FilaBotella
                           key={drink.id}

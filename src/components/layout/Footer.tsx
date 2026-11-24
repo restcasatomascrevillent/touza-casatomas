@@ -1,8 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { Instagram, Facebook, Navigation } from "lucide-react";
+import { Instagram, Navigation } from "lucide-react";
 import Reveal from "@/components/Reveal";
 import { RUTAS_LEGALES } from "@/lib/legal";
-import { NEGOCIO, URL_COMO_LLEGAR } from "@/lib/negocio";
+import { INSTAGRAM_CASA_TOMAS, NEGOCIO, URL_COMO_LLEGAR } from "@/lib/negocio";
 
 /**
  * Pie mínimo (auditoría del 15/11/2026): enlaces, redes y legales. La
@@ -27,9 +27,10 @@ const legalLinks = [
   { name: "Cookies", path: RUTAS_LEGALES.cookies },
 ];
 
+// En el pie, solo el Instagram de Casa Tomás (pedido del dueño, 24/11/2026):
+// fuera Facebook y el Instagram de Touza.
 const redes = [
-  { nombre: "Instagram", url: NEGOCIO.redes.find((r) => r.includes("instagram")), Icono: Instagram },
-  { nombre: "Facebook", url: NEGOCIO.redes.find((r) => r.includes("facebook")), Icono: Facebook },
+  { nombre: "Instagram", url: INSTAGRAM_CASA_TOMAS, Icono: Instagram, de: "Casa Tomás" },
 ];
 
 const enlace =
@@ -95,14 +96,14 @@ const Footer = () => {
             </nav>
 
             <div className="flex gap-3">
-              {redes.map(({ nombre, url, Icono }) =>
+              {redes.map(({ nombre, url, Icono, de }) =>
                 url ? (
                   <a
                     key={nombre}
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`${nombre} de Touza (se abre en otra pestaña)`}
+                    aria-label={`${nombre} de ${de} (se abre en otra pestaña)`}
                     className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-white/75 transition-colors duration-200 hover:border-white/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     <Icono className="h-[18px] w-[18px]" aria-hidden="true" />

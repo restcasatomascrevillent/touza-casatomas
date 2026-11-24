@@ -820,15 +820,18 @@
   }
 }
 
-/* Descripción de una botella al pulsar su «i» (FilaBotella): aparece sin salto. */
-@media (prefers-reduced-motion: no-preference) {
-  .descripcion-botella:not([hidden]) {
-    animation: descripcion-botella-entra 0.25s ease-out;
-  }
+/* Visor de la foto de una botella (FilaBotella, FotoVisor): la grande entra
+   con un fundido sobre la miniatura desenfocada en cuanto llega; si ya estaba
+   en caché («ya»), sin fundido. Con reduced-motion, sin transición. */
+.visor-botella .visor-grande {
+  opacity: 0;
 }
-@keyframes descripcion-botella-entra {
-  from {
-    opacity: 0;
-    transform: translateY(-3px);
+.visor-botella[data-grande="ya"] .visor-grande,
+.visor-botella[data-grande="llego"] .visor-grande {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .visor-botella[data-grande="llego"] .visor-grande {
+    transition: opacity 0.45s ease-out;
   }
 }
