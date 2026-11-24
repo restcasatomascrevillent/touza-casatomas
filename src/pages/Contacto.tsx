@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Phone, MapPin, Clock, Mail, Instagram, Facebook, ExternalLink, Navigation } from "lucide-react";
+import { Phone, MapPin, Clock, Mail, Instagram, ExternalLink, Navigation } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import Seo from "@/components/Seo";
 import { canonical } from "@/lib/site";
@@ -8,7 +8,7 @@ import { guardarConsentimiento, useConsentimiento } from "@/lib/consentimiento";
 import Reveal from "@/components/Reveal";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { IMAGENES } from "@/assets/imagenes";
-import { DIRECCION_MAPS, HORARIO, NEGOCIO, TELEFONO, URL_COMO_LLEGAR, barSchema } from "@/lib/negocio";
+import { DIRECCION_MAPS, HORARIO, INSTAGRAM_CASA_TOMAS, NEGOCIO, TELEFONO, URL_COMO_LLEGAR, barSchema } from "@/lib/negocio";
 
 const URL_MAPS = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(DIRECCION_MAPS)}`;
 // Embed clásico por dirección.
@@ -291,16 +291,12 @@ const Contacto = () => {
               })}
             </div>
 
+            {/* Solo el Instagram de Casa Tomás (pedido del dueño, 24/11/2026). */}
             <div className="flex gap-3">
-              <a href={NEGOCIO.redes[0]} target="_blank" rel="noopener noreferrer"
+              <a href={INSTAGRAM_CASA_TOMAS} target="_blank" rel="noopener noreferrer"
                 className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all duration-300"
-                aria-label="Instagram de Touza (se abre en otra pestaña)">
+                aria-label="Instagram de Casa Tomás (se abre en otra pestaña)">
                 <Instagram className="w-5 h-5" aria-hidden="true" />
-              </a>
-              <a href={NEGOCIO.redes[1]} target="_blank" rel="noopener noreferrer"
-                className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all duration-300"
-                aria-label="Facebook de Touza (se abre en otra pestaña)">
-                <Facebook className="w-5 h-5" aria-hidden="true" />
               </a>
             </div>
           </div>

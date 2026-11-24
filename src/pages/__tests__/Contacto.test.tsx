@@ -100,16 +100,12 @@ describe("Contacto — renderizado", () => {
     expect(mailLink.getAttribute("href")).toBe("mailto:info@touzabar.es");
   });
 
-  it("el enlace de Instagram apunta a la cuenta correcta", () => {
+  it("solo enlaza el Instagram de Casa Tomás: nada de redes de Touza ni Facebook", () => {
     renderContacto();
-    const igLink = screen.getByRole("link", { name: /instagram/i });
-    expect(igLink.getAttribute("href")).toContain("instagram.com/touzabar");
-  });
-
-  it("el enlace de Facebook apunta a la cuenta correcta", () => {
-    renderContacto();
-    const fbLink = screen.getByRole("link", { name: /facebook/i });
-    expect(fbLink.getAttribute("href")).toContain("facebook.com/touzabar");
+    const igLink = screen.getByRole("link", { name: /instagram de casa tomás/i });
+    expect(igLink.getAttribute("href")).toContain("instagram.com/casatomascrevillent");
+    expect(screen.queryByRole("link", { name: /facebook/i })).not.toBeInTheDocument();
+    expect(document.querySelector('a[href*="touzabar"]:not([href^="mailto:"])')).toBeNull();
   });
 
   it("botón 'Cómo llegar' a Google Maps en todos los tamaños (sin clases que lo oculten)", () => {
