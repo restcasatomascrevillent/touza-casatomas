@@ -458,7 +458,7 @@ describe("Carta — estructura general", () => {
     expect(screen.getByRole("tab", { name: "Champagne" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Cavas" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Cervezas" })).toBeInTheDocument();
-    // «Por copas» ya no es pestaña: el precio por copa va en la «i» de la botella.
+    // «Por copas» ya no es pestaña: el precio por copa va en la fila de la botella.
     expect(screen.queryByRole("tab", { name: "Por copas" })).not.toBeInTheDocument();
     // Rediseño A: «Whiskies» pasa a «Destilados» (whisky, ginebra, ron…).
     expect(screen.getByRole("tab", { name: "Destilados" })).toBeInTheDocument();
@@ -706,7 +706,7 @@ describe("Carta — botellas", () => {
     expect(screen.getAllByRole("heading", { name: /cruz ?campo gran reserva/i })).toHaveLength(1);
   });
 
-  it("la descripción va plegada tras la «i» de la botella, con el texto entero en el HTML", () => {
+  it("la descripción de la botella va entera y a la vista, sin «i»", () => {
     const larga =
       "El ensamblaje de distintas añadas y la larga crianza aportan profundidad a la fruta madura, con recuerdos de bollería.";
     vi.mocked(useVinosModule.useEspumosos).mockReturnValue({
@@ -714,12 +714,10 @@ describe("Carta — botellas", () => {
       isLoading: false,
     } as never);
     renderCarta();
-    const boton = screen.getByRole("button", { name: "Más información de Grand Siècle", hidden: true });
-    const parrafo = document.getElementById(boton.getAttribute("aria-controls") ?? "");
-    expect(parrafo?.textContent).toBe(larga);
-    expect(parrafo).toHaveAttribute("hidden");
-    fireEvent.click(boton);
-    expect(parrafo).not.toHaveAttribute("hidden");
+    expect(screen.queryByRole("button", { name: /más información/i, hidden: true })).not.toBeInTheDocument();
+    const parrafo = screen.getByText(larga);
+    expect(parrafo.textContent).toBe(larga);
+    expect(parrafo.className).not.toMatch(/line-clamp/);
   });
 
   it("agrupa el champagne por tipo (brut, rosado, de añada) cuando la lista es larga", () => {

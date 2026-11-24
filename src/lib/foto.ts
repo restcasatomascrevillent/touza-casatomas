@@ -2,7 +2,7 @@
  * Fotos de producto (Supabase Storage) servidas por Vercel Image Optimization.
  *
  * Las fotos que se suben desde el panel pesan lo que pesen (botellas de
- * 900×1500 y ~550 KB, cócteles de 900×1200 y ~185 KB) y se pintan a 60–270 px.
+ * 900×1500 y ~550 KB, cócteles de 900×1200 y ~185 KB) y se pintan a 96–420 px.
  * Por `/_vercel/image` Vercel las recorta al ancho pedido, las pasa a AVIF o
  * WebP según el navegador y las guarda en su CDN (auditoría de carga v0.10,
  * opción A: decisión del 15/11/2026). Cualquier foto nueva del panel se
@@ -98,8 +98,11 @@ export function fotoResponsive(
   };
 }
 
-/** Botella en su nicho: 60 px en el móvil, 68 px desde md (FilaBotella). */
-export const FOTO_BOTELLA = { anchos: [96, 128, 192, 256], sizes: "(min-width: 768px) 68px, 60px" } as const;
+/**
+ * Botella en su nicho: 96 px en el móvil, 120 px desde md (FilaBotella). Con
+ * densidad 2 y 3 en el móvil pide 192 y 288 (→ 384); en escritorio, 128 o 256.
+ */
+export const FOTO_BOTELLA = { anchos: [128, 192, 256, 384], sizes: "(min-width: 768px) 120px, 96px" } as const;
 
 /** Tarjeta de cóctel de /carta: 2 columnas en el móvil, 3 en md, 4 en lg (máx. ~270 px). */
 export const FOTO_TARJETA = {
